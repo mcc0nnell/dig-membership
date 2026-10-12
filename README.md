@@ -30,6 +30,12 @@ On its first run, the workflow uses its Pages write permission to enable the Pag
 
 Do **not** use this GitHub Pages address as the live DIG enrollment endpoint. Production registration remains the WordPress plugin at deafingov.org after a Salesforce sandbox and policy review.
 
+## WordPress member portal shell
+
+Add `[dig_membership_portal]` to a WordPress page (for example, `/members`). This new shortcode renders responsive membership, profile/preferences and renewal sections **without showing real records or claiming a member is signed in**. It is a privacy-safe placeholder and does not use the demo's mock identity as authentication. The existing `[dig_membership_join]` and `[dig_membership_verify]` shortcodes remain unchanged.
+
+**Next integration gate:** implement a secure server-side member session, authenticated Salesforce read endpoints with per-member access checks, consent history, and a staging test before showing personal information. The GitHub Pages demo remains synthetic and is not the live WordPress member portal.
+
 ## Salesforce-free membership experience preview
 
 Open [demo/offline.html](demo/offline.html) locally for an interactive demo of the future member experience: join → simulated verification → profile → accessibility and email preferences → renewal → email templates → staff metrics. **All identities and figures are synthetic. The demo never sends an email, creates a WordPress account, authenticates anyone, or contacts Salesforce.** It is intentionally separate from the production WordPress plugin.
