@@ -31,7 +31,7 @@ function harness() {
     fire(type='click'){const fn=this.listeners[type];assert.ok(fn,this.id+' has '+type+' listener');
       return fn({preventDefault(){},currentTarget:this});}
     setAttribute(){}focus(){}appendChild(c){this.children.push(c);}replaceChildren(){this.children=[];}
-    reportValidity(){return true;}
+    reportValidity(){return true;} reset(){}
   }
   const all={};
   const get=id=>all[id]??(all[id]=new Element(id));
