@@ -112,6 +112,15 @@ global with sharing class MagicLinkVerifyApi {
                 'Portal_Admin' => false,
                 'Gov_Admin' => false
             };
+            // Membership activation must survive a confirmation-email failure.
+            // This acknowledgement is never an authenticated session.
+            if (activated.changed) {
+                try {
+                    System.enqueueJob(new DigMembershipWelcomeEmailJob(activated.contactId, link.Email__c));
+                } catch (Exception emailFailure) {
+                    System.debug(LoggingLevel.ERROR, 'WEB_JOIN_CONFIRMATION_FAIL: ' + emailFailure.getTypeName());
+                }
+            }
             ok.redirectPath = null;
             response.statusCode = 200;
             return ok;

@@ -14,6 +14,12 @@ WordPress-first membership enrollment for **Deaf in Government** (DIG), backed b
 | `manifest/` | Targeted Salesforce deployment manifest to be used **in the existing Salesforce project** |
 | `docs/runbooks/` | Staging, cutover and rollback plan |
 
+## Salesforce-native email
+
+Salesforce sends the verification link and, after new-member activation, a WordPress-specific confirmation. A staff-scheduled Salesforce Batch Apex can send 30-day and 7-day WEBSITE_FREE renewal reminders after sandbox and policy review. Announcements remain a staff-driven Salesforce List Email/campaign action, never a public API. The read-only scripts/check-email-limits.mjs monitor queries actual Salesforce daily email capacity; it does not reserve capacity or send email. See [Salesforce email runbook](docs/runbooks/salesforce-email.md).
+
+**No renewal job is scheduled or enabled by this repository.**
+
 ## Registration flow
 
 1. A visitor opens `https://deafingov.org/membership` (WordPress page with `[dig_membership_join]`).
@@ -22,7 +28,7 @@ WordPress-first membership enrollment for **Deaf in Government** (DIG), backed b
 4. WordPress clears the fragment from browser history and sends the one-time token only to the Worker, which forwards it to Salesforce to validate and consume.
 5. Salesforce activates an eligible term in `Membership__c`. Existing current/future terms are preserved. Ambiguous duplicate Contacts fail closed for staff review.
 
-**No WordPress user or role is created.** No dues, authenticated member dashboard, voter eligibility, or renewals are implemented by this candidate. Those require separate policy and security review. The `WEBSITE_FREE` membership level and 12-month term are **provisional and must be confirmed against current DIG policy**.
+**No WordPress user or role is created.** No dues, authenticated member dashboard, voter eligibility, or self-service renewals are implemented by this candidate. Those require separate policy and security review. The `WEBSITE_FREE` membership level and 12-month term are **provisional and must be confirmed against current DIG policy**.
 
 ## Quick local checks
 
@@ -31,6 +37,7 @@ Requires PHP and Node.js 22+:
 ```bash
 php -l wordpress/dig-membership/dig-membership.php
 node --test wordpress/dig-membership/tests/*.test.cjs
+node --test scripts/check-email-limits.test.mjs
 (cd cf/membership-site && node --test)
 ```
 
@@ -41,6 +48,7 @@ CI runs the same commands. It does **not** deploy to DIG's website, Salesforce, 
 - [WordPress plugin installation](wordpress/dig-membership/README.md)
 - [Cloudflare Worker configuration](cf/membership-site/README.md)
 - [Website membership cutover and rollback](docs/runbooks/website-membership-cutover.md)
+- [Salesforce email quotas, announcements, renewal batches, and rollback](docs/runbooks/salesforce-email.md)
 
 Never put Salesforce credentials, Turnstile private keys, or member PII in WordPress settings, commits, CI variables visible to pull requests, or public issues. Review [SECURITY.md](SECURITY.md).
 

@@ -61,3 +61,7 @@ Current build is the **join/verify/activation core**, not a production-ready ful
 See [`../../wordpress/dig-membership/README.md`](../../wordpress/dig-membership/README.md). Set the Worker `PUBLIC_SITE_ORIGIN` variable to the exact HTTPS origin of the WordPress site, e.g. `https://deafingov.org`. The Worker allows browser requests from this origin and sends an explicit CORS header (not wildcard). The Turnstile widget must be registered for the **WordPress** hostname; siteverify validates against that hostname, not the API hostname. Worker and WordPress must use the same Turnstile site key, with the secret kept only in Cloudflare.
 
 The Cloudflare Worker does **not** replace the WordPress theme or member pages. Run `node --test` to test the same-origin and WordPress-origin flows.
+
+## Salesforce email sending
+
+All email is sent by Salesforce: the Worker has no SMTP credentials and no bulk-email route. See [the Salesforce email runbook](../../docs/runbooks/salesforce-email.md) for remaining quota checks, approved senders, optional renewal batches and staff-driven announcements.

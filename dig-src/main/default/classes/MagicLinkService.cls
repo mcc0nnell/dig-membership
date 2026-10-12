@@ -10,6 +10,9 @@ public with sharing class MagicLinkService {
         'Use this one-time sign-in link:\n\n{{MAGIC_LINK_URL}}';
     private static final String MAGIC_LINK_URL_PLACEHOLDER = '{{MAGIC_LINK_URL}}';
     private static final String MAGIC_LINK_TEMPLATE_DEVELOPER_NAME = 'DIG_Portal_Magic_Link';
+    public class EmailDeliveryException extends Exception {}
+    @TestVisible private static Boolean forceMagicEmailFailureForTest = false;
+    @TestVisible private static String websiteBaseUrlOverrideForTest;
 
     private static final String WELCOME_TEMPLATE_DEVELOPER_NAME = 'DIG_Portal_Welcome';
     private static final String DEFAULT_WELCOME_SUBJECT = 'Welcome to DIG!';
@@ -100,7 +103,8 @@ public with sharing class MagicLinkService {
                 throw new CalloutException('Website membership name is invalid.');
             }
         }
-        // Idempotency policy: invalidate prior active tokens before creating a new one.
+        Savepoint issueSavepoint = Database.setSavepoint();
+        // Roll back both invalidation and issuance when Salesforce rejects delivery.
         invalidateActiveLinks(normalizedEmail, normalizedPurpose, nowAt);
 
         String rawToken = newTokenUrlSafe(DEFAULT_TOKEN_BYTES);
@@ -141,10 +145,13 @@ public with sharing class MagicLinkService {
                 lastIssuedTokenForTest = rawToken;
             }
 
-            sendMagicLinkEmail(normalizedEmail, linkUrl, config);
+            sendMagicLinkEmail(normalizedEmail, linkUrl, config, normalizedPurpose);
             result.expiresAt = expiresAt;
         } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR, 'MAGIC_REQ_FAIL: ' + e.getTypeName() + ': ' + e.getMessage());
+            Database.rollback(issueSavepoint);
+            System.debug(LoggingLevel.ERROR, 'MAGIC_REQ_FAIL: ' + e.getTypeName());
+            result.ok = false;
+            result.expiresAt = null;
         }
         return result;
     }
@@ -251,7 +258,22 @@ public with sharing class MagicLinkService {
         String linkUrl,
         Config config
     ) {
+        sendMagicLinkEmail(normalizedEmail, linkUrl, config, null);
+    }
+
+    private static void sendMagicLinkEmail(
+        String normalizedEmail,
+        String linkUrl,
+        Config config,
+        String purpose
+    ) {
         EmailContent content = resolveMagicEmailContent(linkUrl);
+        if (purpose == 'web-join') {
+            content.subject = 'Verify your DIG membership';
+            content.plainTextBody =
+                'Please verify your email to activate your Deaf in Government membership.\n\n'
+                + linkUrl + '\n\nThis link can be used once and expires soon.';
+        }
 
         Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
         msg.setToAddresses(new String[] { normalizedEmail });
@@ -263,7 +285,72 @@ public with sharing class MagicLinkService {
             msg.setOrgWideEmailAddressId(config.orgWideEmailAddressId);
         }
 
-        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { msg }, false);
+        if (Test.isRunningTest() && forceMagicEmailFailureForTest) {
+            throw new EmailDeliveryException('Simulated delivery rejection');
+        }
+        Messaging.SendEmailResult[] results = Messaging.sendEmail(new Messaging.SingleEmailMessage[] { msg }, false);
+        if (results.isEmpty() || !results[0].isSuccess()) {
+            throw new EmailDeliveryException('Salesforce declined magic email');
+        }
+    }
+
+    /** Verified new members receive WordPress-specific confirmation, not portal login. */
+    public static void sendWebsiteConfirmation(String verifiedEmail, Id contactId) {
+        if (String.isBlank(verifiedEmail) || contactId == null) return;
+        List<Contact> contacts = [
+            SELECT Id, Email, HasOptedOutOfEmail FROM Contact WHERE Id = :contactId LIMIT 1
+        ];
+        if (contacts.isEmpty() || contacts[0].HasOptedOutOfEmail
+            || String.isBlank(contacts[0].Email)
+            || contacts[0].Email.trim().toLowerCase() != verifiedEmail.trim().toLowerCase()) return;
+        Config config = loadConfig();
+        if (String.isBlank(config.websiteBaseUrl) || !config.websiteBaseUrl.startsWith('https://')) {
+            throw new EmailDeliveryException('WordPress site URL unavailable');
+        }
+        Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+        msg.setTargetObjectId(contactId);
+        msg.setSubject('Your DIG membership is active');
+        msg.setPlainTextBody(
+            'Welcome to Deaf in Government! Your membership is active.\n\n'
+            + 'Membership information: ' + normalizeBaseUrl(config.websiteBaseUrl)
+            + '/membership\n\n'
+            + 'This message confirms membership. It is not a sign-in link.'
+        );
+        msg.setSaveAsActivity(false);
+        msg.setUseSignature(false);
+        if (canUseOrgWideEmailAddress(config.orgWideEmailAddressId)) {
+            msg.setOrgWideEmailAddressId(config.orgWideEmailAddressId);
+        }
+        Messaging.SendEmailResult[] results = Messaging.sendEmail(
+            new Messaging.SingleEmailMessage[] { msg }, false
+        );
+        if (results.isEmpty() || !results[0].isSuccess()) {
+            throw new EmailDeliveryException('Salesforce declined confirmation');
+        }
+    }
+
+    /** Returns a single-member reminder, never exposed by public REST endpoints. */
+    public static Messaging.SingleEmailMessage renewalReminder(Id contactId, Date expiresAt, Integer daysWindow) {
+        Config config = loadConfig();
+        if (String.isBlank(config.websiteBaseUrl) || !config.websiteBaseUrl.startsWith('https://')) {
+            throw new EmailDeliveryException('WordPress site URL unavailable');
+        }
+        Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+        msg.setTargetObjectId(contactId);
+        msg.setSubject('DIG membership renewal reminder');
+        msg.setPlainTextBody(
+            'Your DIG membership ends on ' + String.valueOf(expiresAt) + '.\n\n'
+            + 'Visit ' + normalizeBaseUrl(config.websiteBaseUrl)
+            + '/membership for membership information.\n\n'
+            + 'This is a ' + String.valueOf(daysWindow)
+            + '-day reminder. If you have renewed, no action is needed.'
+        );
+        msg.setSaveAsActivity(false);
+        msg.setUseSignature(false);
+        if (canUseOrgWideEmailAddress(config.orgWideEmailAddressId)) {
+            msg.setOrgWideEmailAddressId(config.orgWideEmailAddressId);
+        }
+        return msg;
     }
 
     public static void sendWelcomeEmail(String email, Id contactId) {
@@ -689,6 +776,9 @@ public with sharing class MagicLinkService {
             }
         }
         if (configMdt == null) {
+            if (Test.isRunningTest() && websiteBaseUrlOverrideForTest != null) {
+                config.websiteBaseUrl = websiteBaseUrlOverrideForTest;
+            }
             return config;
         }
 
@@ -708,6 +798,9 @@ public with sharing class MagicLinkService {
             config.orgWideEmailAddressId = configMdt.OrgWideEmailAddressId__c.trim();
         }
 
+        if (Test.isRunningTest() && websiteBaseUrlOverrideForTest != null) {
+            config.websiteBaseUrl = websiteBaseUrlOverrideForTest;
+        }
         return config;
     }
 

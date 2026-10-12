@@ -12,3 +12,7 @@
 8. After migration and verification, retire the legacy route writing only `Membership_Term__c` and any Laravel-linked public entrypoints; do not modify old data without reconciliation.
 
 Rollback: remove the root website 'Join' route/link to the new site and restore prior path. Keep Salesforce records created during the pilot for audit, and discontinue `web-join` issuance. Do not delete memberships to conceal a failed rollout.
+
+## Outbound email gate
+
+Follow [the Salesforce email runbook](salesforce-email.md) to check live daily SingleEmail and MassEmail quotas, approved org-wide sender, deliverability, opt-out behavior, WordPress-specific confirmation, staging email failures and rollback. No reminder schedule is installed by the source repository; staff must explicitly approve and schedule one after sandbox pilot.
