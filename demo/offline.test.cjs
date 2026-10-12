@@ -43,7 +43,7 @@ function harness() {
   form('join-form',{firstName:'Alex',lastName:'Example',email:'alex@example.test'});
   form('profile-form',{firstName:'',lastName:'',email:'',agency:'',title:''});
   form('preferences-form',{news:'',events:'',access:'ASL',format:'Plain text'});
-  const tabs=['overview','profile','preferences','renewal','emails','staff'].map(name=>{
+  const tabs=['overview','profile','preferences','renewal','emails','community','staff'].map(name=>{
     const e=new Element('tab-'+name);e.dataset.tab=name;return e;
   });
   const panels=tabs.map(tab=>{const e=new Element('panel-'+tab.dataset.tab);e.dataset.panel=tab.dataset.tab;return e;});
@@ -94,4 +94,13 @@ test('local profile, preferences, renewal and reset are functional',()=>{
   assert.notEqual(get('end-date').textContent,prev);
   get('reset').fire();
   assert.equal(get('join').hidden,false);assert.equal(get('dashboard').hidden,true);
+});
+
+test('new member workspace is synthetic and includes accessible community navigation',()=>{
+  assert.match(html,/id="card-name"/);
+  assert.match(html,/id="card-expiry"/);
+  assert.match(html,/class="activity-timeline"/);
+  assert.match(html,/data-panel="community"/);
+  assert.match(html,/data-go="community"/);
+  assert.match(html,/Voting is not available in this demo/);
 });
