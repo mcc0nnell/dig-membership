@@ -1,0 +1,56 @@
+name: DIG Nexus PostgreSQL schema validation
+on:
+  push:
+    paths:
+      - 'nexus/*.sql'
+      - 'newsletter/*.sql'
+      - '.github/workflows/dig-nexus-postgres.yml'
+  pull_request:
+    paths:
+      - 'nexus/*.sql'
+      - 'newsletter/*.sql'
+      - '.github/workflows/dig-nexus-postgres.yml'
+permissions:
+  contents: read
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: dig_nexus
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dig_nexus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: test-only
+      PGDATABASE: dig_nexus
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Apply ordered schemas
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f nexus/schema.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-002-lifecycle.sql
+          psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
+          psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
+      - name: Verify tables and constraints
+        run: |
+          set -euo pipefail
+          test "$(psql -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('nexus_members','nexus_membership_terms','nexus_communication_preferences','nexus_event_checkins','newsletter_subscribers','newsletter_unsubscribe_tokens')")" = "6"
+          psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_members(email,display_name) VALUES ('tester@example.invalid','Synthetic Tester');"
+          if psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_members(email,display_name) VALUES ('TESTER@example.invalid','Duplicate');"; then
+            echo "Expected case-insensitive email uniqueness failure" >&2
+            exit 1
+          fi
