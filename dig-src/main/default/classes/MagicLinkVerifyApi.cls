@@ -99,9 +99,22 @@ global with sharing class MagicLinkVerifyApi {
                 DigWebsiteMembershipService.activate(
                     link.Email__c, link.Website_First_Name__c, link.Website_Last_Name__c
                 );
-            ok.contactId = activated.contactId;
+            // This is an enrollment receipt, not a login or portal session.
+            // Do not evaluate or return identity/admin claims on the public join path.
+            ok.contactId = null;
             ok.membershipStatus = activated.membershipStatus;
             ok.membershipEnd = activated.membershipEnd;
+            ok.email = null;
+            ok.isPortalAdmin = false;
+            ok.governanceAdmin = false;
+            ok.roles = new List<String>();
+            ok.customPermissions = new Map<String, Boolean>{
+                'Portal_Admin' => false,
+                'Gov_Admin' => false
+            };
+            ok.redirectPath = null;
+            response.statusCode = 200;
+            return ok;
         } else if (resolvedPurpose == 'join' || resolvedPurpose == 'renew') {
             MagicLinkService.EnsureMembershipResult ensureResult =
                 MagicLinkService.ensureMembershipActive(link.Email__c);

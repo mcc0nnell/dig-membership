@@ -79,6 +79,13 @@ private class DigWebsiteMembershipServiceTest {
         System.assertEquals(true, verified.ok);
         System.assertEquals('ACTIVE', verified.membershipStatus);
         System.assertNotEquals(null, verified.membershipEnd);
+        System.assertEquals(null, verified.contactId);
+        System.assertEquals(null, verified.email);
+        System.assertEquals(false, verified.isPortalAdmin);
+        System.assertEquals(false, verified.governanceAdmin);
+        System.assertEquals(0, verified.roles.size());
+        System.assertEquals(false, verified.customPermissions.get('Portal_Admin'));
+        System.assertEquals(false, verified.customPermissions.get('Gov_Admin'));
         MagicLinkVerifyApi.VerifyResponse replay=MagicLinkVerifyApi.verify();
         System.assertEquals(false, replay.ok);
     }
