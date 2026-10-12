@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>DigWebsiteMembershipService</members>
+        <members>DigWebsiteMembershipServiceTest</members>
+        <members>DigOps_MembershipService</members>
+        <members>MagicLinkService</members>
+        <members>MagicLinkRequestApi</members>
+        <members>MagicLinkVerifyApi</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>DIG_PortalAuthConfig__mdt.WebsiteMembershipBaseUrl__c</members>
+        <members>Magic_Link__c.Website_First_Name__c</members>
+        <members>Magic_Link__c.Website_Last_Name__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>DIG_MembershipLevel__mdt.WEBSITE_FREE</members>
+        <name>CustomMetadata</name>
+    </types>
+    <version>65.0</version>
+</Package>

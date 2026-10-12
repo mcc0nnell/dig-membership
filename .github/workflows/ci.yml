@@ -1,0 +1,31 @@
+name: Membership checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  local-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: WordPress PHP syntax
+        run: php -l wordpress/dig-membership/dig-membership.php
+      - name: Browser tests
+        run: node --test wordpress/dig-membership/tests/*.test.cjs
+      - name: Worker tests
+        run: node --test cf/membership-site/test/*.test.mjs
+      - name: Build installable WordPress ZIP
+        run: cd wordpress && zip -qr dig-membership.zip dig-membership -x '*/tests/*'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dig-membership-wordpress
+          path: wordpress/dig-membership.zip

@@ -1,0 +1,10 @@
+name = "dig-membership-site"
+main = "src/index.mjs"
+compatibility_date = "2026-09-25"
+workers_dev = true
+# Do not add a production route or DNS record until the main site is verified.
+# Add your domain route only after reviewing how DeafInGov.org is hosted.
+# Secrets: wrangler secret put SF_CLIENT_ID, SF_CLIENT_SECRET, TURNSTILE_SECRET
+# Vars required: SF_AUTH_BASE_URL, SF_INSTANCE_URL, TURNSTILE_SITE_KEY
+# PUBLIC_SITE_ORIGIN: exact HTTPS WordPress origin (e.g. https://deafingov.org), not wildcard.
+# Set public variables through environment-specific Wrangler configuration; no credentials here.
