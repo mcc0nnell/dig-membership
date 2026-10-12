@@ -21,4 +21,4 @@ jobs:
         with:
           node-version: '22'
       - name: Run isolated unit tests (no credentials)
-        run: node --test nexus/*.test.mjs newsletter/*.test.mjs
+        run: node --test nexus/*.test.mjs nexus/api/*.test.mjs newsletter/*.test.mjs
