@@ -20,6 +20,12 @@ Salesforce sends the verification link and, after new-member activation, a WordP
 
 **No renewal job is scheduled or enabled by this repository.**
 
+## Salesforce-free membership experience preview
+
+Open [demo/offline.html](demo/offline.html) locally for an interactive demo of the future member experience: join → simulated verification → profile → accessibility and email preferences → renewal → email templates → staff metrics. **All identities and figures are synthetic. The demo never sends an email, creates a WordPress account, authenticates anyone, or contacts Salesforce.** It is intentionally separate from the production WordPress plugin.
+
+See [the offline demo guide and Salesforce integration mapping](docs/architecture/experience-demo.md). Run `node --test demo/offline.test.cjs` to check its scripted flows. The public staff view is a visual mock, **not an administrator login**.
+
 ## Registration flow
 
 1. A visitor opens `https://deafingov.org/membership` (WordPress page with `[dig_membership_join]`).
