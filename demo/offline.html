@@ -90,7 +90,7 @@ pre{white-space:pre-wrap;font:inherit;overflow-wrap:anywhere}small,.subtle{color
       welcome:['Your DIG membership is active','Welcome to DIG! Your sample membership is active.'],
       renew30:['DIG membership reminder','Your membership ends in about 30 days. [EXAMPLE ONLY]'],
       renew7:['DIG membership reminder','Your membership ends in about 7 days. [EXAMPLE ONLY]']};
-    const email=templates[$('template').value];$('subject').textContent=email[0];$('email-body').textContent=email[1];
+    const email=templates[$('template').value] || templates.verify;$('subject').textContent=email[0];$('email-body').textContent=email[1];
   }
   function reset(){sample=null;pending=null;events=[];prefs={news:false,events:false,access:'ASL',format:'Plain text'};view('join');$('status').hidden=true;$('join-form').reset();$('join-form').elements.namedItem('firstName').focus();}
   $('join-form').addEventListener('submit',e=>{
