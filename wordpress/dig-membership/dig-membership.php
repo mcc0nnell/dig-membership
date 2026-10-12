@@ -26,6 +26,7 @@ final class DIG_Membership_Plugin {
         add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ) );
         add_shortcode( 'dig_membership_join', array( __CLASS__, 'render_join' ) );
         add_shortcode( 'dig_membership_verify', array( __CLASS__, 'render_verify' ) );
+        add_shortcode( 'dig_membership_portal', array( __CLASS__, 'render_portal' ) );
         add_filter( 'wp_robots', array( __CLASS__, 'noindex_verify' ) );
     }
 
@@ -114,7 +115,8 @@ final class DIG_Membership_Plugin {
             $content = get_post_field( 'post_content', get_queried_object_id() );
             if ( is_string( $content ) && (
                 has_shortcode( $content, 'dig_membership_join' ) ||
-                has_shortcode( $content, 'dig_membership_verify' )
+                has_shortcode( $content, 'dig_membership_verify' ) ||
+                has_shortcode( $content, 'dig_membership_portal' )
             ) ) {
                 wp_enqueue_style( 'dig-membership' );
             }
@@ -171,6 +173,38 @@ final class DIG_Membership_Plugin {
             <p>We are verifying your one-time link. A link can be used only once.</p>
             <p role="status" aria-live="polite" aria-atomic="true" class="dig-membership__status" data-dig-status>Checking your link…</p>
             <p><a href="<?php echo esc_url( home_url( '/membership' ) ); ?>">Request a new verification link</a></p>
+        </section>
+        <?php return ob_get_clean();
+    }
+
+    /**
+     * Safe, reusable member portal shell. This shortcode does not authenticate,
+     * retrieve Salesforce data, or reveal member-specific records.
+     * Server-side identity and permission enforcement must precede live data.
+     */
+    public static function render_portal() {
+        wp_enqueue_style( 'dig-membership' );
+        $join_url = esc_url( home_url( '/membership' ) );
+        ob_start(); ?>
+        <section class="dig-membership dig-membership__portal" aria-labelledby="dig-portal-title">
+            <p class="dig-membership__hint">DIG member portal · Preview</p>
+            <h2 id="dig-portal-title">Your DIG membership</h2>
+            <p>The member dashboard is being prepared. To protect member privacy, personal details and renewal actions will appear only after secure sign-in is available.</p>
+            <div class="dig-membership__portal-grid">
+                <section aria-labelledby="dig-portal-status">
+                    <h3 id="dig-portal-status">Membership status</h3>
+                    <p>Sign-in required to view your status.</p>
+                </section>
+                <section aria-labelledby="dig-portal-profile">
+                    <h3 id="dig-portal-profile">Profile and access preferences</h3>
+                    <p>Profile editing and communication preferences will be available after verification and authentication.</p>
+                </section>
+                <section aria-labelledby="dig-portal-renewal">
+                    <h3 id="dig-portal-renewal">Renewal</h3>
+                    <p>Your term and renewal options will be shown securely once your account is connected.</p>
+                </section>
+            </div>
+            <p><a href="<?php echo $join_url; ?>">Join DIG or request a verification link</a></p>
         </section>
         <?php return ob_get_clean();
     }
