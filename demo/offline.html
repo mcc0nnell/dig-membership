@@ -80,7 +80,7 @@ footer{border-top:3px solid #64c6d8}
 <nav class="tab-nav" aria-label="Membership demo sections">
 <button data-tab="overview" class="current" aria-current="page">Overview</button><button data-tab="profile">Profile</button><button data-tab="preferences">Preferences</button><button data-tab="renewal">Renewal</button><button data-tab="emails">Emails</button><button data-tab="community">Community</button><button data-tab="staff">Staff preview</button>
 </nav>
-<section class="card panel" data-panel="overview"><h3>Membership overview</h3><div class="sample" aria-label="Sample digital membership card"><p class="eyebrow">DIG / Digital member card · Demo</p><h2 id="card-name"></h2><p>Member ID: DEMO-001 · Active sample membership</p><p>Valid through <strong id="card-expiry"></strong></p></div><div class="stats"><div><span>Status</span><strong>Active (demo)</strong></div><div><span>Membership level</span><strong>WEBSITE_FREE (sample)</strong></div><div><span>Term ends</span><strong id="end-date"></strong></div></div><h3>Recent events</h3><ol id="history" class="activity-timeline"></ol></section>
+<section class="card panel" data-panel="overview"><h3>Membership overview</h3><div class="sample" aria-label="Sample digital membership card"><p class="eyebrow">DIG / Digital member card · Demo</p><h2 id="card-name"></h2><p>Member ID: DEMO-001 · Active sample membership</p><p>Valid through <strong id="card-expiry"></strong></p></div><div class="stats"><div><span>Status</span><strong>Active (demo)</strong></div><div><span>Membership level</span><strong>WEBSITE_FREE (sample)</strong></div><div><span>Term ends</span><strong id="end-date"></strong></div></div><div class="actions"><button type="button" data-go="profile">Edit profile</button><button type="button" data-go="preferences">Access preferences</button><button type="button" data-go="community">Explore DIG</button></div><h3>Recent events</h3><ol id="history" class="activity-timeline"></ol></section>
 <section class="card panel" data-panel="profile" hidden><h3>Member profile</h3><p>Verified email is read-only. Changing a real email address will require a separate verification process.</p>
 <form id="profile-form"><div class="row"><label>First name<input name="firstName" maxlength="40"></label><label>Last name<input name="lastName" required maxlength="80"></label></div><label>Verified email<input name="email" disabled></label><label>Agency (optional)<input name="agency" maxlength="100"></label><label>Job title (optional)<input name="title" maxlength="100"></label><button class="primary">Save sample profile</button></form></section>
 <section class="card panel" data-panel="preferences" hidden><h3>Communication and access</h3><p>Newsletters and event notifications default to unchecked.</p>
@@ -148,6 +148,10 @@ footer{border-top:3px solid #64c6d8}
     document.querySelectorAll('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==tab);
     $('status').hidden=true;const heading=document.querySelector('[data-panel="'+tab+'"] h3');
     heading.tabIndex=-1;heading.focus();
+  }));
+  document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>{
+    const tab=document.querySelector('[data-tab="'+button.dataset.go+'"]');
+    if(tab)tab.click();
   }));
   $('profile-form').addEventListener('submit',e=>{
     e.preventDefault();if(!sample)return;
