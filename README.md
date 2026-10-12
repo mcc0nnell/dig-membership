@@ -20,6 +20,16 @@ Salesforce sends the verification link and, after new-member activation, a WordP
 
 **No renewal job is scheduled or enabled by this repository.**
 
+## Public GitHub Pages demo
+
+**Planned URL:** https://mcc0nnell.github.io/dig-membership/
+
+The `Publish offline membership demo to GitHub Pages` GitHub Actions workflow serves **only** `demo/offline.html` as the site index, keeping Salesforce overlay files, secrets, and the WordPress plugin out of the deployment artifact. The demonstration is **synthetic and nonfunctional as a live membership service**: no external requests, authentication, cookies, persistence, WordPress credentials, or real member data.
+
+To enable publishing, a repository administrator must select **Settings → Pages → Build and deployment → Source: GitHub Actions**. After the repository Pages site is enabled, run the `Publish offline membership demo to GitHub Pages` workflow using its manual `workflow_dispatch` button if needed. The workflow runs offline tests and publishes the latest HTML to GitHub Pages automatically when the demo changes. A green membership CI job does not by itself establish that Pages is live.
+
+Do **not** use this GitHub Pages address as the live DIG enrollment endpoint. Production registration remains the WordPress plugin at deafingov.org after a Salesforce sandbox and policy review.
+
 ## Salesforce-free membership experience preview
 
 Open [demo/offline.html](demo/offline.html) locally for an interactive demo of the future member experience: join → simulated verification → profile → accessibility and email preferences → renewal → email templates → staff metrics. **All identities and figures are synthetic. The demo never sends an email, creates a WordPress account, authenticates anyone, or contacts Salesforce.** It is intentionally separate from the production WordPress plugin.
