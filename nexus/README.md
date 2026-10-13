@@ -28,3 +28,7 @@ These are pure unit tests, not database or end-to-end tests.
 7. Validate concurrency on registration/waitlists and duplicate payment notifications.
 8. Commission a separate, independently reviewed election system before handling secret ballots.
 9. Do not expose membership or accommodation data in public APIs.
+
+## NTC conference milestone
+
+See [NTC-CONFERENCE.md](NTC-CONFERENCE.md) for the original product specification, migration 005, public agenda endpoints and the unpublished-by-default release gate.

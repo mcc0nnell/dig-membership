@@ -6,6 +6,8 @@ DIG Nexus is an open-source project to bring the day-to-day work of [Deaf in Gov
 
 **Project status: active development — not a live membership service.** The repository contains working components, synthetic tests, database schemas, and an offline demo. It does **not** establish that Google sign-in, Neon-backed registration, newsletters, payments, or elections are available to real members. Production launch requires DIG policy approval, security and accessibility review, and a staged deployment.
 
+**NTC conference agenda (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. Events default to draft; no real conference has been published or deployed.
+
 **[Explore the offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Security policy](SECURITY.md)**
 
 ## What we're building
@@ -14,7 +16,7 @@ DIG Nexus is an open-source project to bring the day-to-day work of [Deaf in Gov
 | --- | --- | --- |
 | Membership | Join, sign in, see status, renew, and manage a profile | Domain model and Google OIDC/session code; live onboarding not enabled |
 | Member directory | Discover opted-in colleagues across government | Schema and privacy rules; no public directory |
-| Events | Register, manage capacity, and check in at DIG events, including DC27 | Schema and lifecycle tests; no live registration |
+| Events | Register, manage capacity, and check in at DIG events, including DC27 | Published-only agenda prototype and lifecycle tests; no live registration |
 | Committees | Organize rosters, roles, and restricted documents | Model and authorization rules; no deployed staff portal |
 | Governance | Maintain terms, roles, election records, and eligible-voter snapshots | Schema and eligibility rules; **no ballot casting or counting** |
 | Communications | Manage explicit subscriptions, campaigns, and delivery outcomes | Newsletter schema and MailerSend adapter; **sending disabled** |
