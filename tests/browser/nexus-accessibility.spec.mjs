@@ -29,7 +29,7 @@ test.beforeAll(async()=>{
  origin='http://127.0.0.1:'+server.address().port;
 });
 test.afterAll(async()=>{if(server)await new Promise(resolve=>server.close(resolve));});
-for(const [route,label] of [['/portal','member portal'],['/conference/ntc-2027','attendee conference portal'],['/organizer/ntc-2027','organizer entry']]){
+for(const [route,label] of [['/portal','member portal'],['/conference/ntc-2027','attendee conference portal'],['/organizer/ntc-2027','organizer entry'],['/checkin/ntc-2027','NTC QR check-in shell']]){
  test(label+' meets automated WCAG 2 A/AA checks',async({page})=>{
   await page.goto(origin+route);
   await expect(page.locator('main')).toBeVisible();
@@ -47,4 +47,12 @@ test('portal supports keyboard access, status announcements and explicit enrollm
  await page.keyboard.press('Enter');
  await expect(page).toHaveURL(/#main$/);
  await expect(page.locator('#join-section')).toBeHidden();
+});
+
+test('unconfigured staff QR check-in cannot report a successful scan',async({page})=>{
+ await page.goto(origin+'/checkin/ntc-2027');
+ await page.locator('#credential').fill('A'.repeat(43));
+ await page.getByRole('button',{name:'Check in attendee'}).click();
+ await expect(page.getByRole('status')).toContainText('Check-in denied');
+ await expect(page.getByRole('status')).not.toContainText('Checked in:');
 });
