@@ -20,3 +20,9 @@
 5. Verify SPF/DKIM/DMARC, unsubscribe and suppression behavior before any real campaign.
 
 The existing WordPress membership plugin is Salesforce-oriented and should not be treated as a deployed Neon integration.
+
+## Clean-room list and campaign operations
+
+DIG Nexus includes original listmonk-inspired functions, without importing listmonk source or deploying it. See [association operations](../nexus/ASSOCIATION-OPERATIONS.md) for the consented list model, staff-only campaign audience previews, approvals, queued deliveries, suppression triggers, and rollout limits.
+
+These are staging-only functions; a queued campaign **never** bypasses the existing disabled MailerSend marketing gate.

@@ -205,3 +205,7 @@ characters) and a verified `MAILERSEND_FROM_EMAIL`. Existing
 `deploy/secrets/mailersend_api_token` is also mounted into Nexus for login
 messages; neither the login flag nor the email-delivery flag is on by default.
 No native Google Cloud runtime or Salesforce account is required.
+
+## Association and campaign operations
+
+See [ASSOCIATION-OPERATIONS.md](ASSOCIATION-OPERATIONS.md) for original CiviCRM/listmonk-inspired modules, explicit newsletter consent and staff access controls. The `CONSTITUENTS_ENABLED` and `CAMPAIGNS_ENABLED` flags are hard-disabled in the checked-in Docker configuration. These are not replacements for a live mailing compliance workflow.

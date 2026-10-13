@@ -67,6 +67,7 @@ These are development milestones, not a claim that DIG has replaced its existing
 | [`nexus/docker/`](nexus/docker/) | Docker startup, secret-file loading and authenticated proxy tests |
 | [`compose.yaml`](compose.yaml) and [`nexus/DOCKER.md`](nexus/DOCKER.md) | Self-hosted Caddy + Nexus stack, release and rollback runbook |
 | [`nexus/cloud-run/`](nexus/cloud-run/) | Portable Node HTTP adapter and Neon-backed state, inherited from the Cloud Run prototype |
+| [`nexus/ASSOCIATION-OPERATIONS.md`](nexus/ASSOCIATION-OPERATIONS.md) | Clean-room constituent and consent-scoped newsletter operations |
 | [`nexus/jobs/`](nexus/jobs/) | Original PostgreSQL job leases and fail-closed optional cleanup worker |
 | [`release/`](release/) | Independent OCI digest, source-label and signed-publisher verification |
 | [`nexus/CLEANROOM-OPERATIONS.md`](nexus/CLEANROOM-OPERATIONS.md) | Clean-room design, browser tests, queue and NTC operations gates |

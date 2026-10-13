@@ -1,3 +1,4 @@
+import {associationOpsRequest} from "./association-ops.mjs";
 export {AuthState} from "./auth-state.mjs";
 import {registerMember} from "./registration.mjs";
 import {createOidcVerifier} from "./oidc.mjs";
@@ -49,6 +50,8 @@ export default {
    }catch{return json({error:"agenda_unavailable"},503);}
   }
   if(url.pathname==="/api/enroll")return requestMembership(request,env);
+  const association=await associationOpsRequest(request,env,url.pathname);
+  if(association)return association;
   if(url.pathname==='/auth/magic')return request.method==='GET'?magicPage():json({error:'method_not_allowed'},405);
   if(url.pathname==='/magic-client.mjs')return request.method==='GET'?magicClient():json({error:'method_not_allowed'},405);
   const magic=await magicRequest(request,env,url.pathname);
