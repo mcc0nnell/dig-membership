@@ -24,6 +24,14 @@ fi
 exit 2
 `);
  chmodSync(docker,0o755);
+ const node=join(bin,'node');
+ writeFileSync(node,`#!/bin/sh
+if [ "$1" != "release/verify-image.mjs" ]; then exit 64; fi
+echo "$2" > "${dir}/verified-image"
+if [ "${process.env.NEXUS_TEST_VERIFIER_FAIL==='1'?'true':'false'}" = "true" ]; then exit 2; fi
+exit 0
+`);
+ chmodSync(node,0o755);
  return {dir,env:{...process.env,PATH:bin+':'+process.env.PATH},close:()=>rmSync(dir,{recursive:true,force:true})};
 }
 const release='ghcr.io/mcc0nnell/dig-nexus:sha-'+'a'.repeat(40);
@@ -33,11 +41,20 @@ test('operator release changes only image tag after successful health check',()=
   execFileSync('sh',['deploy/upgrade.sh',release],{cwd:f.dir,env:f.env,stdio:'pipe'});
   const contents=readFileSync(join(f.dir,'.env'),'utf8');
   assert.match(contents,new RegExp(release));
+  assert.equal(readFileSync(join(f.dir,'verified-image'),'utf8').trim(),release);
   assert.match(contents,/NEXUS_PUBLIC_ORIGIN=https:\/\/nexus\.example\.org/);
  }finally{f.close();}
 });
 test('failed health check restores previous image and refuses success',()=>{
  const f=fixture(true);
+ try{
+  assert.throws(()=>execFileSync('sh',['deploy/upgrade.sh',release],{cwd:f.dir,env:f.env,stdio:'pipe'}));
+  assert.match(readFileSync(join(f.dir,'.env'),'utf8'),/NEXUS_IMAGE=dig-nexus:local/);
+ }finally{f.close();}
+});
+test('missing release-signature verification preserves previous image',()=>{
+ const f=fixture();
+ const node=join(f.dir,'bin','node');writeFileSync(node,'#!/bin/sh\nexit 2\n');chmodSync(node,0o755);
  try{
   assert.throws(()=>execFileSync('sh',['deploy/upgrade.sh',release],{cwd:f.dir,env:f.env,stdio:'pipe'}));
   assert.match(readFileSync(join(f.dir,'.env'),'utf8'),/NEXUS_IMAGE=dig-nexus:local/);

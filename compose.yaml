@@ -21,6 +21,7 @@ services:
       MEMBER_ENROLLMENT_ENABLED: "false"
       ORGANIZER_ENABLED: "false"
       CONFERENCE_REGISTRATION_ENABLED: "false"
+      NTC_CHECKIN_ENABLED: "false"
     secrets:
       - database_url
       - google_client_secret
@@ -46,6 +47,27 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+
+  jobs:
+    profiles: ["jobs"]
+    image: ${NEXUS_IMAGE:-dig-nexus:local}
+    user: "${NEXUS_UID:?Set a non-root numeric UID}:${NEXUS_GID:?Set a non-root numeric GID}"
+    # Only execute against an explicitly prepared staging branch; never default-on.
+    command: ["node", "nexus/jobs/runner.mjs"]
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+      NEXUS_JOB_WORKER_ENABLED: "false"
+    secrets:
+      - database_url
+    networks:
+      - backend
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 192m
+    restart: "no"
 
   caddy:
     user: "${NEXUS_UID:?Set a non-root numeric UID}:${NEXUS_GID:?Set a non-root numeric GID}"

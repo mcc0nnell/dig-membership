@@ -63,6 +63,9 @@ These are development milestones, not a claim that DIG has replaced its existing
 | [`nexus/docker/`](nexus/docker/) | Docker startup, secret-file loading and authenticated proxy tests |
 | [`compose.yaml`](compose.yaml) and [`nexus/DOCKER.md`](nexus/DOCKER.md) | Self-hosted Caddy + Nexus stack, release and rollback runbook |
 | [`nexus/cloud-run/`](nexus/cloud-run/) | Portable Node HTTP adapter and Neon-backed state, inherited from the Cloud Run prototype |
+| [`nexus/jobs/`](nexus/jobs/) | Original PostgreSQL job leases and fail-closed optional cleanup worker |
+| [`release/`](release/) | Independent OCI digest, source-label and signed-publisher verification |
+| [`nexus/CLEANROOM-OPERATIONS.md`](nexus/CLEANROOM-OPERATIONS.md) | Clean-room design, browser tests, queue and NTC operations gates |
 | [`experiments/dig-nexus/`](experiments/dig-nexus/) | Read-only-by-default Twenty/Neon integration spike |
 | [`nexus/RUNTIME-INTEGRATION.md`](nexus/RUNTIME-INTEGRATION.md) | Shared API and authentication implementation details (historical Worker prerequisites noted) |
 
@@ -109,7 +112,7 @@ node --test nexus/cloud-run/*.test.mjs nexus/docker/*.test.mjs
 docker build -t dig-nexus:local .
 ```
 
-Additional checks run in GitHub Actions: Deno API compatibility and PostgreSQL 17 schema/constraint validation, including the conference migration. Older CI jobs still verify historical code but are not Nexus deployment gates.
+Additional checks run in GitHub Actions: Deno API compatibility, PostgreSQL 17 schema/constraint validation, a real Chromium accessibility suite, and verified Docker release-signing checks. Older CI jobs still verify historical code but are not Nexus deployment gates.
 
 **Do not run schema files against a production database to “try it out.”** Follow the ordered migrations and disposable-branch guidance in [registration deployment](nexus/REGISTRATION-DEPLOYMENT.md).
 

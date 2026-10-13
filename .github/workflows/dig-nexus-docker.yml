@@ -10,9 +10,15 @@ on:
       - 'nexus/docker/**'
       - 'nexus/cloud-run/**'
       - 'nexus/api/**'
+      - 'nexus/schema-009-jobs.sql'
+      - 'nexus/schema-010-ntc-checkin.sql'
+      - 'nexus/jobs/**'
+      - 'release/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/dig-nexus-docker.yml'
+      - 'tests/browser/**'
+      - 'playwright.config.mjs'
   pull_request:
     paths:
       - 'compose.yaml'
@@ -23,9 +29,15 @@ on:
       - 'nexus/docker/**'
       - 'nexus/cloud-run/**'
       - 'nexus/api/**'
+      - 'nexus/schema-009-jobs.sql'
+      - 'nexus/schema-010-ntc-checkin.sql'
+      - 'nexus/jobs/**'
+      - 'release/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/dig-nexus-docker.yml'
+      - 'tests/browser/**'
+      - 'playwright.config.mjs'
 permissions:
   contents: read
 
@@ -39,7 +51,7 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - name: Test runtime and trusted proxy
-        run: node --test nexus/cloud-run/*.test.mjs nexus/docker/*.test.mjs
+        run: node --test nexus/cloud-run/*.test.mjs nexus/docker/*.test.mjs nexus/jobs/*.test.mjs release/*.test.mjs
       - name: Start localhost-only Compose stack with synthetic secrets
         run: |
           set -euo pipefail
@@ -72,6 +84,7 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' "$base/portal.css")" = 200
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/enroll")" = 503
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/register")" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/checkin/ntc-2027")" = 503
           # Browser-supplied proxy headers cannot bypass Caddy's overwrite.
           test "$(curl -s -o /dev/null -w '%{http_code}' \
             -H 'X-Dig-Nexus-Proxy-Token: fake' \
@@ -84,13 +97,70 @@ jobs:
         if: always()
         run: docker compose -p dig-nexus-ci down --remove-orphans --volumes
 
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - name: Install isolated Chromium browser
+        run: npx playwright install --with-deps chromium
+      - name: Clean-room browser and automated WCAG A/AA checks
+        run: npx playwright test -c playwright.config.mjs
+
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: dig_nexus
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dig_nexus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: test-only
+      PGDATABASE: dig_nexus
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Apply entire ordered DIG Nexus schema
+        run: |
+          set -euo pipefail
+          for file in nexus/schema.sql nexus/schema-002-lifecycle.sql \
+            nexus/schema-003-identities.sql nexus/schema-004-registration.sql \
+            nexus/schema-005-conference.sql nexus/schema-006-organizer.sql \
+            nexus/schema-007-attendee.sql nexus/schema-008-cloud-run-state.sql \
+            nexus/schema-009-jobs.sql nexus/schema-010-ntc-checkin.sql; do
+            psql -v ON_ERROR_STOP=1 -f "$file" > /dev/null
+          done
+      - name: Verify independent job and manager-only check-in contracts
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/jobs-and-checkin-integration.sql
+      - name: Verify existing event lifecycle and privacy contracts
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f nexus/tests/conference-integration.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/tests/organizer-integration.sql
+
   publish:
-    needs: docker
+    needs: [docker, browser, postgres]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -101,11 +171,31 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish commit-pinned Docker image (no server deployment)
+        id: publish_image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          provenance: true
+          provenance: mode=max
+          sbom: true
+          build-args: |
+            SOURCE_REVISION=${{ github.sha }}
           tags: |
             ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
             ghcr.io/${{ github.repository }}:main
+      - uses: sigstore/cosign-installer@v4.1.0
+      - name: Sign immutable image digest with GitHub OIDC
+        env:
+          IMAGE_DIGEST: ${{ steps.publish_image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          cosign sign --yes "ghcr.io/${{ github.repository }}@$IMAGE_DIGEST"
+      - name: Independently verify signer identity and immutable digest
+        env:
+          IMAGE_DIGEST: ${{ steps.publish_image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          cosign verify \
+            --certificate-identity "https://github.com/${{ github.repository }}/.github/workflows/dig-nexus-docker.yml@refs/heads/main" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "ghcr.io/${{ github.repository }}@$IMAGE_DIGEST" > /dev/null

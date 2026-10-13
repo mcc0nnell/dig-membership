@@ -97,7 +97,7 @@ Run `docker compose up --build --wait -d` and validate the HTTPS portal. The sta
 
 ## Routine updates: no Dockerfile edits required
 
-CI tests Docker Compose on localhost with synthetic secrets. After merging into GitHub `main`, it automatically builds and publishes an image at:
+CI tests Docker Compose on localhost with synthetic secrets, plus Chromium accessibility and PostgreSQL 17 operating-contract checks. The publication job attaches BuildKit SBOM/provenance and signs the immutable image digest using GitHub OIDC. A host update requires a valid signature under the expected workflow identity (Node.js 22+ and Cosign must be installed on the server). After merging into GitHub `main`, it automatically builds and publishes an image at:
 
 ```text
 ghcr.io/mcc0nnell/dig-nexus:sha-FULL_COMMIT_SHA
@@ -131,3 +131,7 @@ This source-build path does not use the image-pinning/rollback script. Build a p
 - HTTPS certificates and renewal, host OS patching, secrets rotation, monitoring, backup/restore, incident response and a monthly cost budget.
 
 **No real member onboarding, ticket payments, elections, or newsletter sending should be activated until those gates pass.**
+
+## Current clean-room quality tracks
+
+See [CLEANROOM-OPERATIONS.md](CLEANROOM-OPERATIONS.md) for the independent PostgreSQL cleanup queue, Chromium/axe accessibility checks, signed immutable release policy, and **disabled** NTC manual check-in. These are not evidence of a live membership service.

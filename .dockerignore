@@ -23,3 +23,8 @@ deploy/state/
 
 **/*.test.mjs
 **/*.deno.test.mjs
+
+test-results/
+playwright-report/
+tests/browser/
+release/

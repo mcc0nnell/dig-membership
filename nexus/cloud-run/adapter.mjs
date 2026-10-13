@@ -15,7 +15,7 @@ export async function cloudRunEnvironment(config=process.env){
   env.conferenceRateLimiter=createPostgresRateLimiter(env.pgClient,{scope:'conference',limit:10,seconds:60});
  }
  // These gates are explicitly default-off, even with a working database.
- for(const flag of ['REGISTRATION_ENABLED','MEMBER_ENROLLMENT_ENABLED','ORGANIZER_ENABLED','CONFERENCE_REGISTRATION_ENABLED'])
+ for(const flag of ['REGISTRATION_ENABLED','MEMBER_ENROLLMENT_ENABLED','ORGANIZER_ENABLED','CONFERENCE_REGISTRATION_ENABLED','NTC_CHECKIN_ENABLED'])
   env[flag]=config[flag]==='true'?'true':'false';
  return env;
 }

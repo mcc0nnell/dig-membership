@@ -23,3 +23,7 @@ wrangler/.wrangler/
 deploy/secrets/
 deploy/state/
 compose.override.yaml
+
+# Playwright local reports
+test-results/
+playwright-report/

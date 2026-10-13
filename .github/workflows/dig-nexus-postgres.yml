@@ -53,6 +53,8 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/schema-006-organizer.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-007-attendee.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-008-cloud-run-state.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-009-jobs.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-010-ntc-checkin.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
       - name: Verify tables and constraints
@@ -111,3 +113,6 @@ jobs:
             echo "Expected raw token rejection" >&2
             exit 1
           fi
+
+      - name: Verify clean-room queue leases and private manager check-in
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/jobs-and-checkin-integration.sql
