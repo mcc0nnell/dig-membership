@@ -7,6 +7,7 @@
   "workers_dev": false,
   "vars": {
     "REGISTRATION_ENABLED": "false",
+    "MEMBER_ENROLLMENT_ENABLED": "false",
     "ORGANIZER_ENABLED": "false"
   },
   "durable_objects": {"bindings": [{"name":"AUTH_STATE","class_name":"AuthState"}]},

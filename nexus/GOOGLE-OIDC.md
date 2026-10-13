@@ -29,7 +29,7 @@ Run `npm ci`, `node --test nexus/api/google-auth.test.mjs nexus/api/member-http.
 
 - No production deployment, client registration, Neon secret, or actual Google login is complete.
 - No email-based automatic account linking, roles, membership approval, newsletter consent, or payment processing.
-- `/api/register` still requires its existing explicit origin, rate-limit and enablement gates; it does **not** accept the browser session cookie as registration authorization. This avoids silently changing registration evidence semantics.
+- The new `POST /api/enroll` is a **separately gated** browser membership **request** route with explicit intent, exact-Origin enforcement and rate limiting. It is disabled by default and creates a pending record only. The pre-existing `/api/register` still requires a verified bearer token and does **not** accept the browser cookie.
 - The portal is deliberately simple; complete keyboard/screen-reader, ASL and captions UX review before public release.
 
 ## Security work still required before public launch
@@ -37,6 +37,6 @@ Run `npm ci`, `node --test nexus/api/google-auth.test.mjs nexus/api/member-http.
 - Validate Durable Object SQLite migration and atomic state consumption in a deployed non-production environment. Current unit tests use a synthetic store; production Durable Object behavior is not yet proven.
 - Review session lifecycle policies, cross-device revocation, and key rotation; current revocation is per session ID and key rotation requires an explicit migration plan.
 - Test with a real Google OAuth client and browser, including cookie behavior, account switching, Google error responses, logout CSRF, session expiration, and assistive technology.
-- Keep `/api/register` disabled. It still expects a verified bearer token and has not been connected to the Google cookie session. Do not silently allow cookie-authenticated registration without CSRF protections and explicit consent semantics.
+- Keep both `MEMBER_ENROLLMENT_ENABLED` and `REGISTRATION_ENABLED` disabled until separate staging/operational approval. The browser request uses an exact-Origin check, mandatory non-simple action header and user-confirmed request; test these in real browsers before enabling.
 
 **Deployment requirement:** Wrangler now declares an `AUTH_STATE` SQLite-backed Durable Object binding and `auth-state-v1` migration. The auth flow fails closed without this binding. Do not remove the binding or deploy a Worker without migrating the class.
