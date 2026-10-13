@@ -12,8 +12,13 @@ BEGIN
  OR p_display_name IS NULL OR length(btrim(p_display_name))=0 OR length(p_display_name)>120
  THEN RAISE EXCEPTION 'invalid registration arguments' USING ERRCODE='22023'; END IF;
  -- Serialize requests for the same identity AND normalized email in this transaction.
- PERFORM pg_advisory_xact_lock(hashtextextended(p_issuer || ':' || p_subject, 0));
- PERFORM pg_advisory_xact_lock(hashtextextended(lower(btrim(p_email)), 1));
+ -- Acquire locks in a deterministic order to avoid cross-identity/email deadlocks.
+ PERFORM pg_advisory_xact_lock(lock_key)
+ FROM (
+   SELECT hashtextextended(p_issuer || ':' || p_subject, 0) AS lock_key
+   UNION
+   SELECT hashtextextended(lower(btrim(p_email)), 1) AS lock_key
+ ) locks ORDER BY lock_key;
  SELECT i.member_id, m.email_key INTO v_id, v_existing_email
  FROM nexus_external_identities i JOIN nexus_members m ON m.id=i.member_id
  WHERE i.issuer=p_issuer AND i.subject=p_subject;
