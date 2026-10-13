@@ -12,7 +12,7 @@ export default {
    if(request.method!=="POST")return json({error:"method_not_allowed"},405);
    // Trusted server-side verifier must validate JWT signature, issuer, audience, expiry,
    // email_verified, and provide immutable subject. Never trust incoming identity headers.
-   if(env.REGISTRATION_ENABLED!==true)return json({error:"registration_unavailable"},503);
+   if(env.REGISTRATION_ENABLED!==true && env.REGISTRATION_ENABLED!=="true")return json({error:"registration_unavailable"},503);
    const verifyIdentity=typeof env.verifyIdentity==="function"?env.verifyIdentity:
     env.OIDC_ISSUER&&env.OIDC_AUDIENCE&&env.OIDC_JWKS_URL?
     createOidcVerifier({issuer:env.OIDC_ISSUER,audience:env.OIDC_AUDIENCE,jwksUrl:env.OIDC_JWKS_URL}):null;
