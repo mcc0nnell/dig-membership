@@ -13,6 +13,19 @@ export default {
    // Trusted server-side verifier must validate JWT signature, issuer, audience, expiry,
    // email_verified, and provide immutable subject. Never trust incoming identity headers.
    if(env.REGISTRATION_ENABLED!==true && env.REGISTRATION_ENABLED!=="true")return json({error:"registration_unavailable"},503);
+   // Browser requests must originate from the configured frontend; never
+   // silently accept a browser Origin from an untrusted site.
+   const origin=request.headers.get("origin");
+   if(!env.REGISTRATION_ALLOWED_ORIGIN || !origin || origin!==env.REGISTRATION_ALLOWED_ORIGIN)
+    return json({error:"origin_not_allowed"},403);
+   // Edge rate limiting must be configured as a binding before registration.
+   if(!env.registrationRateLimiter || typeof env.registrationRateLimiter.limit!=="function")
+    return json({error:"registration_unavailable"},503);
+   try {
+    const ip=request.headers.get("cf-connecting-ip");
+    if(!ip || !(await env.registrationRateLimiter.limit({key:ip})).success)
+     return json({error:"rate_limited"},429);
+   } catch {return json({error:"registration_unavailable"},503);}
    const verifyIdentity=typeof env.verifyIdentity==="function"?env.verifyIdentity:
     env.OIDC_ISSUER&&env.OIDC_AUDIENCE&&env.OIDC_JWKS_URL?
     createOidcVerifier({issuer:env.OIDC_ISSUER,audience:env.OIDC_AUDIENCE,jwksUrl:env.OIDC_JWKS_URL}):null;
