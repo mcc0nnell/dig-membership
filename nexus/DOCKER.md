@@ -178,3 +178,16 @@ webhook examples, trusted domain, and TLS before flipping any flag. Guests and
 dependent registrations remain unsupported: each QR credential belongs to one
 verified attendee. Do not expose private accommodations in Zeffy, receipts or
 QR payloads. No production or real Zeffy data is touched by this milestone.
+
+
+## Clean-room quality checks and optional background worker
+
+See [CLEANROOM-OPERATIONS.md](CLEANROOM-OPERATIONS.md) for real Chromium
+accessibility checks, separately gated PostgreSQL background cleanup, signed
+OCI release verification and the existing Zeffy/QR check-in integration gates.
+The `jobs` Compose profile is off by default and does **not** activate cleanup
+when selected; the operator must configure an isolated Neon staging branch and
+explicitly approve `NEXUS_JOB_WORKER_ENABLED=true` in a separate override.
+Any live email and ticket/payment operations remain behind their existing flags.
+Node 22+ and Cosign on the operator's host are required for the fail-closed
+image-upgrade verification.

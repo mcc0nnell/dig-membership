@@ -54,6 +54,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/schema-007-attendee.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-008-cloud-run-state.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-009-ticketing.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-010-jobs.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
       - name: Verify tables and constraints
@@ -115,3 +116,7 @@ jobs:
             echo "Expected raw token rejection" >&2
             exit 1
           fi
+
+
+      - name: Verify original background queue leases in disposable PostgreSQL
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/jobs-integration.sql

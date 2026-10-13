@@ -25,6 +25,8 @@ if [ -z "$old_image" ]; then echo "Set NEXUS_IMAGE in .env first" >&2;exit 2;fi
 if [ "$old_image" = "$new_image" ]; then echo "Already on requested image";exit 0;fi
 echo "Pulling verified release tag from GitHub Container Registry..."
 docker pull "$new_image"
+# Fail closed unless the pulled OCI digest, source label and signed CI identity match.
+node release/verify-image.mjs "$new_image"
 tmp=".env.nexus-upgrade.$$"
 umask 077
 trap 'rm -f "$tmp"' EXIT HUP INT TERM
