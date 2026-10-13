@@ -10,8 +10,10 @@ on:
       - 'nexus/docker/**'
       - 'nexus/cloud-run/**'
       - 'nexus/api/**'
+      - 'newsletter/**'
       - 'nexus/schema-009-ticketing.sql'
       - 'nexus/schema-010-jobs.sql'
+      - 'nexus/schema-012-constituents.sql'
       - 'nexus/jobs/**'
       - 'release/**'
       - 'tests/browser/**'
@@ -29,8 +31,10 @@ on:
       - 'nexus/docker/**'
       - 'nexus/cloud-run/**'
       - 'nexus/api/**'
+      - 'newsletter/**'
       - 'nexus/schema-009-ticketing.sql'
       - 'nexus/schema-010-jobs.sql'
+      - 'nexus/schema-012-constituents.sql'
       - 'nexus/jobs/**'
       - 'release/**'
       - 'tests/browser/**'
@@ -51,7 +55,7 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - name: Test runtime and trusted proxy
-        run: node --test nexus/cloud-run/*.test.mjs nexus/docker/*.test.mjs nexus/jobs/*.test.mjs release/*.test.mjs
+        run: node --test nexus/cloud-run/*.test.mjs nexus/docker/*.test.mjs nexus/jobs/*.test.mjs nexus/api/association-ops.test.mjs release/*.test.mjs
       - name: Start localhost-only Compose stack with synthetic secrets
         run: |
           set -euo pipefail
@@ -88,6 +92,8 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' "$base/portal.css")" = 200
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/enroll")" = 503
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/register")" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$base/api/association/members/11111111-1111-4111-8111-111111111111")" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$base/api/association/campaigns/22222222-2222-4222-8222-222222222222")" = 503
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/ticketing/ntc/issue")" = 503
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/zeffy/webhook")" = 503
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/ticketing/ntc/checkin")" = 503
@@ -148,9 +154,17 @@ jobs:
             nexus/schema-003-identities.sql nexus/schema-004-registration.sql \
             nexus/schema-005-conference.sql nexus/schema-006-organizer.sql \
             nexus/schema-007-attendee.sql nexus/schema-008-cloud-run-state.sql \
-            nexus/schema-009-ticketing.sql nexus/schema-010-jobs.sql; do
+            nexus/schema-009-ticketing.sql nexus/schema-010-jobs.sql \
+            nexus/schema-011-magic-links.sql nexus/schema-012-constituents.sql; do
             psql -v ON_ERROR_STOP=1 -f "$file" > /dev/null
           done
+      - name: Apply newsletter schema and verify subscriber separation
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
+          psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
+          psql -v ON_ERROR_STOP=1 -f newsletter/schema-003-operations.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/tests/constituent-operations-integration.sql
       - name: Verify clean-room jobs and ticketing contracts
         run: psql -v ON_ERROR_STOP=1 -f nexus/tests/jobs-integration.sql
       - name: Verify existing event lifecycle and privacy contracts
