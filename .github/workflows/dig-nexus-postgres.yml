@@ -104,7 +104,7 @@ jobs:
           set -euo pipefail
           test "$(psql -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('nexus_runtime_tokens','nexus_runtime_rate_limits')")" = "2"
           psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_runtime_tokens(token_hash,kind,expires_at) VALUES (repeat('a',64),'flow',now()+interval '5 minutes'), (repeat('b',64),'session',now()+interval '1 hour');"
-          test "$(psql -At -c "DELETE FROM nexus_runtime_tokens WHERE token_hash=repeat('a',64) AND kind='flow' AND expires_at>now() RETURNING token_hash")" = "$(printf 'a%.0s' {1..64})"
+          test "$(psql -At -c "WITH consumed AS (DELETE FROM nexus_runtime_tokens WHERE token_hash=repeat('a',64) AND kind='flow' AND expires_at>now() RETURNING token_hash) SELECT token_hash FROM consumed")" = "$(printf 'a%.0s' {1..64})"
           test "$(psql -At -c "SELECT count(*) FROM nexus_runtime_tokens WHERE token_hash=repeat('a',64)")" = "0"
           test "$(psql -At -c "SELECT count(*) FROM nexus_runtime_tokens WHERE token_hash=repeat('b',64) AND expires_at>now()")" = "1"
           if psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_runtime_tokens(token_hash,kind,expires_at) VALUES('raw-session-key','session',now())"; then
