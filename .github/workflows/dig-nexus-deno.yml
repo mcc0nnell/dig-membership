@@ -1,0 +1,22 @@
+name: DIG Nexus Deno compatibility
+on:
+  push:
+    paths:
+      - 'nexus/api/**'
+      - '.github/workflows/dig-nexus-deno.yml'
+  pull_request:
+    paths:
+      - 'nexus/api/**'
+      - '.github/workflows/dig-nexus-deno.yml'
+permissions:
+  contents: read
+jobs:
+  deno:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run Deno compatibility tests
+        run: deno test --no-check nexus/api/worker.deno.test.mjs
