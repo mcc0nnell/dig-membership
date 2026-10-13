@@ -6,7 +6,7 @@ DIG Nexus is an open-source project to bring the day-to-day work of [Deaf in Gov
 
 **Project status: active development — not a live membership service.** The repository contains working components, synthetic tests, database schemas, and an offline demo. It does **not** establish that Google sign-in, Neon-backed registration, newsletters, payments, or elections are available to real members. Production launch requires DIG policy approval, security and accessibility review, and a staged deployment.
 
-**NTC conference agenda (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. Events default to draft; no real conference has been published or deployed.
+**NTC conference foundation (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. The [organizer console deployment guide](nexus/ORGANIZER-DEPLOYMENT.md) covers staff permissions, editing, previews, and publication. Events default to draft; no real conference has been published or deployed.
 
 **[Explore the offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Security policy](SECURITY.md)**
 
