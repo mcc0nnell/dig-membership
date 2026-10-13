@@ -14,7 +14,7 @@ DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deaf
 
 **NTC conference foundation (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. The [organizer console deployment guide](nexus/ORGANIZER-DEPLOYMENT.md) covers staff permissions, editing, previews, and publication. The [attendee registration guide](nexus/ATTENDEE-REGISTRATION.md) documents the membership-free individual registration, atomic workshop waitlists, authenticated confirmation references and restricted accommodations workflow. Events default to draft; no real conference has been published or deployed.
 
-**[Try the interactive offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Latest implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Docker deployment](nexus/DOCKER.md)** · **[Security](SECURITY.md)**
+**[Try the interactive offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Visual systems atlas](https://mcc0nnell.github.io/dig-nexus/atlas.html)** · **[Mermaid system maps](docs/architecture/system-maps.md)** · **[Latest implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Docker deployment](nexus/DOCKER.md)** · **[Security](SECURITY.md)**
 
 ## What we're building
 
@@ -34,21 +34,17 @@ These are development milestones, not a claim that DIG has replaced its existing
 
 ## The platform architecture
 
-```text
-  WordPress experience / DIG website
-                 |
-                 v
-  Caddy HTTPS → DIG Nexus Docker container
-      |                         |
-      |                 Neon-backed state
-      |               (OAuth state and
-      |                session revocation)
-      v
-  Neon PostgreSQL
-  (members, terms, events, governance, consent)
-      |
-      +-- Optional, gated outbound provider --> MailerSend
-      +-- Optional, gated NTC checkout/reconciliation --> Zeffy
+```mermaid
+flowchart LR
+  W["WordPress portal"] --> C["Caddy / HTTPS"]
+  C --> A["DIG Nexus Node API"]
+  A --> N[("Neon PostgreSQL<br/>members · events · consent")]
+  G["Google OIDC<br/>development"] -. "identity" .-> A
+  L["Magic links<br/>development"] -. "identity" .-> A
+  Z["Zeffy hosted checkout"] -->|signed webhook| A
+  A -. "gated delivery" .-> M["MailerSend adapter"]
+  classDef core fill:#145974,color:#fff,stroke:#42ddc2,stroke-width:2px
+  class C,A,N core
 ```
 
 - **WordPress** is the website-facing integration. The `[dig_nexus_portal]` shortcode is a development candidate. It directs members to the Nexus service; no database credentials or authorization logic belong in WordPress.
@@ -74,6 +70,8 @@ These are development milestones, not a claim that DIG has replaced its existing
 | [`nexus/ASSOCIATION-OPERATIONS.md`](nexus/ASSOCIATION-OPERATIONS.md) | Clean-room constituents, staff workspace and consent-scoped newsletter operations |
 | [`nexus/IMPLEMENTATION-STATUS.md`](nexus/IMPLEMENTATION-STATUS.md) | Updated source-backed status, migration order and launch blockers |
 | [`docs/architecture/experience-demo.md`](docs/architecture/experience-demo.md) | Four offline demo walkthroughs and browser-test contract |
+| [`docs/architecture/system-maps.md`](docs/architecture/system-maps.md) | Mermaid maps of runtime, membership, NTC paid admission, staff constituents, and newsletter consent |
+| [`demo/atlas.html`](demo/atlas.html) | Separate online Mermaid/ECharts systems atlas; original four-journey demo stays offline |
 | [`nexus/PAID-INVENTORY.md`](nexus/PAID-INVENTORY.md) | NTC non-holding paid intent, verified admission and inventory boundary |
 | [`nexus/jobs/`](nexus/jobs/) | Original PostgreSQL job leases and fail-closed optional cleanup worker |
 | [`release/`](release/) | Independent OCI digest, source-label and signed-publisher verification |
