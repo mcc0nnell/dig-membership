@@ -1,4 +1,10 @@
-# DIG Membership
+# DIG Nexus
+
+**DIG Nexus** is the developing Deaf in Government membership, events, committees, governance, and communications platform. The Neon/PostgreSQL and Cloudflare foundation is documented in [`nexus/README.md`](nexus/README.md); the existing WordPress/Salesforce enrollment candidate is retained below for separate staging and policy review.
+
+> **Repository rename:** The GitHub repository is now [`mcc0nnell/dig-nexus`](https://github.com/mcc0nnell/dig-nexus). Existing WordPress plugin paths, shortcodes, API settings, and Cloudflare Worker identifiers intentionally retain `dig-membership` names. Renaming those deployed integration identifiers requires its own migration plan.
+
+## Legacy membership enrollment candidate
 
 WordPress-first membership enrollment for **Deaf in Government** (DIG), backed by Salesforce and a credential-isolating Cloudflare Worker. Apache-2.0 licensed; independent of the existing Laravel portal.
 
@@ -22,7 +28,7 @@ Salesforce sends the verification link and, after new-member activation, a WordP
 
 ## Public GitHub Pages demo
 
-**Planned URL:** https://mcc0nnell.github.io/dig-membership/
+**Demo URL:** https://mcc0nnell.github.io/dig-nexus/
 
 The `Publish offline membership demo to GitHub Pages` GitHub Actions workflow serves **only** `demo/offline.html` as the site index, keeping Salesforce overlay files, secrets, and the WordPress plugin out of the deployment artifact. The demonstration is **synthetic and nonfunctional as a live membership service**: no external requests, authentication, cookies, persistence, WordPress credentials, or real member data.
 
