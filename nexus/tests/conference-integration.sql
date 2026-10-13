@@ -86,7 +86,7 @@ BEGIN
  PERFORM nexus_conference_accommodation('conf-test','https://accounts.google.com','alice',NULL,false);
  IF (SELECT count(*) FROM nexus_conference_accessibility_requests)<>0 THEN RAISE EXCEPTION 'attendee delete failed'; END IF;
  PERFORM nexus_conference_cancel('conf-test','https://accounts.google.com','alice');
- IF (SELECT count(*) FROM nexus_conference_enrollments WHERE status='registered')<>1
+ IF (SELECT count(*) FROM nexus_conference_enrollments en JOIN nexus_events e ON en.event_id=e.id WHERE e.slug='conf-test' AND en.status='registered')<>1
  THEN RAISE EXCEPTION 'conference attendance after cancellations wrong'; END IF;
 END $$;
 ROLLBACK;
