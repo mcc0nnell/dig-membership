@@ -13,19 +13,19 @@ Updated 2026-10-12. Development only. Draft PR #6.
 - `nexus/api/registration.mjs`: pure registration orchestration. Requires verified identity from a trusted server-side verifier; never trusts member ID, roles, consent, or email in the request body.
 - `nexus/api/registration.test.mjs`: denied unauthenticated requests, validation, duplicate/idempotent response contract, and email conflict.
 - `nexus/schema-003-identities.sql`: issuer/subject to member mapping. Newly added to PostgreSQL CI, **not yet applied to Neon**.
-- `nexus/api/worker.mjs`: public health endpoint; `/api/me` intentionally returns 501. No registration HTTP route yet.
+- `nexus/api/worker.mjs`: public health endpoint; `/api/me` intentionally returns 501. A fail-closed `POST /api/register` route is implemented; it returns 503 until trusted verifier and transactional DB adapters are configured.
 - `nexus/wordpress/dig-nexus.php`: accessible shortcode placeholder; not deployed.
 
 ## Remaining gates before a real registration
 1. Configure and validate OIDC issuer, JWKS signature, audience, expiry, and verified email.
 2. Implement a transactional Neon adapter that atomically inserts member and identity mapping, serializes races, and refuses email-based automatic account linking.
-3. Expose a rate-limited authenticated registration HTTP endpoint with origin/CSRF controls appropriate to the chosen session mechanism.
+3. Add rate limiting and origin/CSRF controls to the authenticated registration endpoint appropriate to the chosen session mechanism.
 4. Apply schema 003 to isolated Neon staging after CI validation and inspect indexes/constraints.
 5. Test concurrent duplicate requests, account collisions, provider errors, and no-consent defaults against a disposable database.
 6. Connect WordPress only after authentication and server-side authorization work. No payment, election ballots, or marketing email in this milestone.
 
 ## Test commands
-- Node: `node --test nexus/*.test.mjs nexus/api/worker.test.mjs nexus/api/registration.test.mjs newsletter/*.test.mjs`
+- Node: `node --test nexus/*.test.mjs nexus/api/worker.test.mjs nexus/api/registration.test.mjs nexus/api/registration-http.test.mjs newsletter/*.test.mjs`
 - Deno: `deno test --no-check --allow-net=127.0.0.1 nexus/api/*.deno.test.mjs`
 - PostgreSQL: GitHub Actions `DIG Nexus PostgreSQL schema validation`.
 
