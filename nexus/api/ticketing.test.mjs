@@ -59,6 +59,21 @@ test('ticket issuance returns a valid PNG QR and check-in requires same-origin v
  const scanned=await worker.fetch(legit,env);assert.equal(scanned.status,200);
  assert.equal((await scanned.json()).checkin.status,'checked_in');
 });
+test('signed-in purchaser may recover a verified Zeffy payment, mismatched email denied',async()=>{
+ const api=origin+'/api/ticketing/'+slug+'/recover';
+ const good=()=>new Request(api,{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({paymentId:uuid})});
+ let captured=null;
+ const config={...env,ZEFFY_API_KEY:'synthetic',zeffyFetch:async()=>new Response(JSON.stringify(payment),{status:200}),
+  ticketingDb:{...env.ticketingDb,recover:async(event,user,p)=>{captured={event,user,p};return {status:'paid'};}}};
+ const ok=await worker.fetch(good(),config);
+ assert.equal(ok.status,200);assert.equal((await ok.json()).payment.status,'paid');
+ assert.equal(captured.user.email,identity.email);
+ const mismatch={...config,zeffyFetch:async()=>new Response(JSON.stringify({...payment,buyer:{email:'different@example.invalid'}}),{status:200})};
+ assert.equal((await worker.fetch(good(),mismatch)).status,409);
+ assert.equal((await worker.fetch(good(),{...config,zeffyFetch:async()=>new Response(JSON.stringify({...payment,status:'pending'}),{status:200})})).status,422);
+ const invalid=new Request(api,{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({paymentId:'injected'})});
+ assert.equal((await worker.fetch(invalid,config)).status,400);
+});
 test('Zeffy webhook fails closed for unsigned payloads and re-fetches signed payment independently',async()=>{
  const event={id:'event-test-123456789',type:'payment.completed',data:{id:uuid}};
  const body=JSON.stringify(event),secret='whsec_synthetic_test',t=Math.floor(Date.now()/1000);
@@ -71,6 +86,19 @@ test('Zeffy webhook fails closed for unsigned payloads and re-fetches signed pay
  const r=await worker.fetch(signed(),setup);assert.equal(r.status,200);assert.equal((await r.json()).status,'paid');
  const offline={...setup,zeffyFetch:async()=>new Response(JSON.stringify({...payment,type:'manual'}),{status:200})};
  assert.equal((await worker.fetch(signed(),offline)).status,422);
+});
+test('verified but unmatched webhook payment is acknowledged for manual review without admission',async()=>{
+ const event={id:'event-unmatched-1234',type:'payment.completed',data:{id:uuid}};
+ const body=JSON.stringify(event),secret='whsec_synthetic_test',t=Math.floor(Date.now()/1000);
+ const signature='t='+t+',v1='+createHmac('sha256',secret).update(t+'.'+body).digest('hex');
+ let held=null;
+ const notFound=Object.assign(new Error('not found'),{code:'P0002'});
+ const config={...env,NTC_ZEFFY_WEBHOOK_ENABLED:true,ZEFFY_WEBHOOK_SECRET:secret,ZEFFY_API_KEY:'synthetic',
+  zeffyFetch:async()=>new Response(JSON.stringify(payment),{status:200}),
+  ticketingDb:{...env.ticketingDb,reconcile:async()=>{throw notFound;},review:async(p)=>{held=p;return {status:'manual_review'};}}};
+ const r=await worker.fetch(new Request(origin+'/api/zeffy/webhook',{method:'POST',body,
+  headers:{'content-type':'application/json','zeffy-signature':signature}}),config);
+ assert.equal(r.status,200);assert.equal((await r.json()).status,'manual_review');assert.equal(held.id,uuid);
 });
 test('ticket DB query bindings never accept client-selected identifiers',async()=>{
  const queries=[];const db=createTicketingDb({query:async(sql,parameters)=>{

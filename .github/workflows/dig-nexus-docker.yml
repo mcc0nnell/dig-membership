@@ -63,6 +63,7 @@ jobs:
           : > deploy/secrets/zeffy_api_key
           : > deploy/secrets/zeffy_webhook_secret
           : > deploy/secrets/mailersend_api_token
+          : > deploy/secrets/magic_link_session_secret
           openssl rand -hex 32 > deploy/secrets/proxy_token
           cat > .env <<EOV
           NEXUS_SITE_ADDRESS=http://localhost:18080

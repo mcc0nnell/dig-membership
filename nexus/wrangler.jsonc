@@ -13,7 +13,9 @@
     "NTC_TICKETING_ENABLED": "false",
     "NTC_TICKETS_ENABLED": "false",
     "NTC_CHECKIN_ENABLED": "false",
-    "NTC_ZEFFY_WEBHOOK_ENABLED": "false"
+    "NTC_ZEFFY_WEBHOOK_ENABLED": "false",
+    "MAGIC_LINK_ENABLED": "false",
+    "MAGIC_LINK_EMAIL_ENABLED": "false"
   },
   "durable_objects": {"bindings": [{"name":"AUTH_STATE","class_name":"AuthState"}]},
   "migrations": [{"tag":"auth-state-v1","new_sqlite_classes":["AuthState"]}],

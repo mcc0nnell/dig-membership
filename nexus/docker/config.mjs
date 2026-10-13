@@ -1,6 +1,6 @@
 import {readFileSync} from 'node:fs';
 
-const fileVars=['DATABASE_URL','GOOGLE_CLIENT_SECRET','GOOGLE_SESSION_SECRET','ZEFFY_API_KEY','ZEFFY_WEBHOOK_SECRET','MAILERSEND_API_TOKEN'];
+const fileVars=['DATABASE_URL','GOOGLE_CLIENT_SECRET','GOOGLE_SESSION_SECRET','ZEFFY_API_KEY','ZEFFY_WEBHOOK_SECRET','MAILERSEND_API_TOKEN','MAGIC_LINK_SESSION_SECRET'];
 export function loadDockerConfig(env=process.env,readFile=readFileSync){
  const config={...env};
  for(const name of fileVars){
