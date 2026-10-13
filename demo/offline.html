@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
-<title>DIG Membership — Offline Experience Demo</title>
+<title>DIG Nexus — Offline Membership Experience Demo</title>
 <style>
 :root{--ink:#16344e;--blue:#165b88;--line:#cadbe6;--background:#f2f7fa}
 *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--background)}
@@ -63,9 +63,9 @@ footer{border-top:3px solid #64c6d8}
 <body>
 <a href="#main" class="skip">Skip to main content</a>
 <header><div class="brand"><strong>DIG</strong> Deaf in Government</div><div class="demo">OFFLINE DEMO · SYNTHETIC DATA</div></header>
-<div class="notice"><strong>Interactive prototype, not a membership service.</strong> No Salesforce connection, no real email, no authenticated account, no persistent records. Use invented names and example.test addresses only.</div>
+<div class="notice"><strong>DIG Nexus interactive prototype, not a live membership service.</strong> No Salesforce connection, no real email, no real identity provider, Neon connection, payment, or persistent records. Use invented names and example.test addresses only.</div>
 <main id="main">
-<div class="intro"><p class="eyebrow">Future DIG membership experience</p><h1>A better way to belong</h1><p>Explore the WordPress member journey, communication preferences, renewals and a sample staff overview. Nothing leaves this browser tab.</p></div>
+<div class="intro"><p class="eyebrow">DIG Nexus · Membership experience</p><h1>A better way to belong</h1><p>Explore simulated identity verification, membership terms, independent newsletter consent, DC27, and the member workspace. Nothing leaves this browser tab.</p></div>
 <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 <section class="card" id="join"><p class="eyebrow">Step 1 of 2</p><h2>Join DIG</h2><p>Use a fictional identity. This does not send a membership application.</p>
 <form id="join-form">
@@ -76,6 +76,31 @@ footer{border-top:3px solid #64c6d8}
 <section class="card" id="verify" hidden><p class="eyebrow">Step 2 of 2</p><h2>Check your simulated inbox</h2>
 <div class="sample"><strong>Subject: Verify your DIG membership</strong><p>To: <span id="recipient"></span></p><p>This demo link is valid for 30 simulated minutes. No email is actually sent.</p></div>
 <div class="actions"><button id="activate" class="primary">Use demo verification link</button><button id="expire">Simulate expired link</button><button id="restart">Start again</button></div></section>
+<section class="card" aria-labelledby="nexus-progress-title">
+<p class="eyebrow">DIG Nexus · Engineering preview</p>
+<h2 id="nexus-progress-title">What's connected — and what's simulated</h2>
+<div class="stats">
+<div><span>PostgreSQL schema</span><strong>Validated</strong><small>Separate Neon development database</small></div>
+<div><span>Node + Deno tests</span><strong>Passing</strong><small>Worker HTTP compatibility</small></div>
+<div><span>Identity registration</span><strong>Prototype</strong><small>Verified-identity contract; no live OIDC</small></div>
+<div><span>Member services</span><strong>Offline only</strong><small>No account or payment is created</small></div>
+</div>
+<p>Identity, membership terms, communication consent, and election eligibility are separate. A verified email does not automatically activate membership, subscribe to newsletters, or confer voting rights.</p>
+</section>
+<section class="card" aria-labelledby="nexus-flow-title">
+<p class="eyebrow">Registration architecture · Simulation</p>
+<h2 id="nexus-flow-title">Try the registration decision flow</h2>
+<p>This local exercise models API decisions only. It does not contact Neon or validate a real identity token.</p>
+<form id="nexus-flow-form">
+<label>Identity verification state
+<select id="nexus-identity"><option value="verified">Verified identity (simulated)</option><option value="unverified">Unverified identity</option></select></label>
+<label>Registration scenario
+<select id="nexus-scenario"><option value="new">First registration</option><option value="repeat">Repeat request, same identity</option><option value="conflict">Existing email, different identity</option></select></label>
+<button class="primary" type="submit">Evaluate simulated registration</button>
+</form>
+<p id="nexus-flow-result" class="status" role="status" aria-live="polite">No scenario evaluated yet.</p>
+<p><small>Newsletter: pending, not subscribed · Directory: private · Membership: pending · Election eligibility: not granted.</small></p>
+</section>
 <section id="dashboard" hidden><div class="card"><p class="eyebrow">Your member workspace · demo</p><h2 id="welcome"></h2><p>Sample identifier: DEMO-001 · <strong>Active sample membership</strong></p></div>
 <nav class="tab-nav" aria-label="Membership demo sections">
 <button data-tab="overview" class="current" aria-current="page">Overview</button><button data-tab="profile">Profile</button><button data-tab="preferences">Preferences</button><button data-tab="renewal">Renewal</button><button data-tab="emails">Emails</button><button data-tab="community">Community</button><button data-tab="staff">Staff preview</button>
@@ -171,6 +196,23 @@ footer{border-top:3px solid #64c6d8}
     events.push(date(Date.now())+' — Demo renewal simulated');render();msg('Renewal simulated; no real member record changed.');
   });
   $('template').addEventListener('change',render);
+})();
+</script>
+<script>
+(function(){
+const form=document.getElementById('nexus-flow-form');
+form.addEventListener('submit',function(event){
+event.preventDefault();
+const verified=document.getElementById('nexus-identity').value==='verified';
+const scenario=document.getElementById('nexus-scenario').value;
+const result=document.getElementById('nexus-flow-result');
+let message;
+if(!verified) message='401 Unauthorized — verification required; no member record would be created.';
+else if(scenario==='repeat') message='200 Existing member — repeated verified identity request is idempotent.';
+else if(scenario==='conflict') message='409 Identity conflict — matching email does not authorize account linking.';
+else message='201 Created (simulation) — member identity pending; newsletter consent remains pending.';
+result.textContent=message;
+});
 })();
 </script>
 </body></html>
