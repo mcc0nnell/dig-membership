@@ -70,6 +70,8 @@ flowchart LR
 | [`nexus/ASSOCIATION-OPERATIONS.md`](nexus/ASSOCIATION-OPERATIONS.md) | Clean-room constituents, staff workspace and consent-scoped newsletter operations |
 | [`nexus/IMPLEMENTATION-STATUS.md`](nexus/IMPLEMENTATION-STATUS.md) | Updated source-backed status, migration order and launch blockers |
 | [`docs/architecture/experience-demo.md`](docs/architecture/experience-demo.md) | Four offline demo walkthroughs and browser-test contract |
+| [`docs/architecture/system-maps.md`](docs/architecture/system-maps.md) | Mermaid maps of runtime, membership, NTC paid admission, staff constituents, and newsletter consent |
+| [`demo/atlas.html`](demo/atlas.html) | Separate online Mermaid/ECharts systems atlas; original four-journey demo stays offline |
 | [`nexus/PAID-INVENTORY.md`](nexus/PAID-INVENTORY.md) | NTC non-holding paid intent, verified admission and inventory boundary |
 | [`nexus/jobs/`](nexus/jobs/) | Original PostgreSQL job leases and fail-closed optional cleanup worker |
 | [`release/`](release/) | Independent OCI digest, source-label and signed-publisher verification |
