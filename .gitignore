@@ -18,3 +18,8 @@ wrangler/.wrangler/
 
 # Local Cloudflare development state (any module)
 .wrangler/
+
+# Self-hosted runtime secret files and local Compose overrides
+deploy/secrets/
+deploy/state/
+compose.override.yaml

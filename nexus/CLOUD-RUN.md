@@ -1,6 +1,6 @@
-# DIG Nexus on Google Cloud Run
+# Optional deployment: DIG Nexus on Google Cloud Run
 
-**Target runtime: Cloud Run (Node.js 22 container) + Neon PostgreSQL.**
+**Alternate runtime: Cloud Run (Node.js 22 container) + Neon PostgreSQL.** For the selected DIG Nexus hosting architecture, use [Docker Compose + Caddy](DOCKER.md). Cloud Run is kept as an optional future hosting option, not the current deployment target.
 
 This is a supported *development and staging path*, not a claim that Cloud Run or a public member portal has been deployed. The application code stays in `nexus/api/`; `nexus/cloud-run/` provides the HTTP adapter, durable database-backed sessions, and shared rate limiting.
 
