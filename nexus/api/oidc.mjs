@@ -23,7 +23,7 @@ export function createOidcVerifier({issuer,audience,jwksUrl,fetcher=fetch,clock=
   const response=await fetcher(jwksUrl,{headers:{accept:"application/json"},redirect:"error"});
   if(!response.ok)throw Error("JWKS unavailable");
   const jwks=await response.json();
-  const keys=Array.isArray(jwks.keys)?jwks.keys.filter(k=>k.kid===header.kid&&k.kty==="RSA"&&(!k.alg||k.alg==="RS256")&&(!k.use||k.use==="sig")):[];
+  const keys=Array.isArray(jwks.keys)?jwks.keys.filter(k=>k.kid===header.kid&&k.kty==="RSA"&&(!k.alg||k.alg==="RS256")&&(!k.use||k.use==="sig")&&typeof k.n==="string"&&typeof k.e==="string"&&!k.d&&!k.p&&!k.q&&!k.dp&&!k.dq&&!k.qi):[];
   if(keys.length!==1)throw Error("ambiguous signing key");
   const key=await crypto.subtle.importKey("jwk",keys[0],{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
   const ok=await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,base64url(s),encoder.encode(h+"."+p));
