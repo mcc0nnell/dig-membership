@@ -4,6 +4,8 @@ import {createOidcVerifier} from "./oidc.mjs";
 import {createRegistrationDb} from "./registration-db.mjs";
 import {createNeonClient} from "./database.mjs";
 import {createMemberDb} from "./member-db.mjs";
+import {createAgendaDb} from "./agenda-db.mjs";
+import {renderAgendaPage} from "./agenda-page.mjs";
 import {startGoogleLogin,finishGoogleLogin,sessionIdentity,logoutGoogle,portalPage,portalClient,googleAuthConfigured} from "./google-auth.mjs";
 const headers={"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"};
 const json=(value,status)=>new Response(JSON.stringify(value),{status,headers});
@@ -16,6 +18,28 @@ export default {
   if(url.pathname==='/auth/google/callback'&&request.method==='GET')return finishGoogleLogin(request,env);
   if(url.pathname==='/auth/logout')return request.method==='POST'?await logoutGoogle(request,env):json({error:'method_not_allowed'},405);
   if(request.method==="GET"&&url.pathname==="/api/health")return json({service:"dig-nexus",status:"ok"},200);
+  // Public conference projection only: no roster, registration, or accommodation data.
+  const agendaJson=url.pathname.match(/^\/api\/events\/([^/]+)\/agenda\/?$/);
+  const agendaHtml=url.pathname.match(/^\/events\/([^/]+)\/?$/);
+  if(agendaJson||agendaHtml) {
+   if(request.method!=="GET")return json({error:"method_not_allowed"},405);
+   const slug=(agendaJson||agendaHtml)[1];
+   if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)||slug.length>80)
+    return json({error:"not_found"},404);
+   try {
+    const db=env.agendaDb||(env.pgClient?createAgendaDb(env.pgClient):env.DATABASE_URL?createAgendaDb(await createNeonClient(env)):null);
+    if(!db)return json({error:"agenda_unavailable"},503);
+    const agenda=await db.getPublishedAgenda(slug);
+    if(!agenda)return json({error:"not_found"},404);
+    if(agendaJson)return json({event:agenda},200);
+    return new Response(renderAgendaPage(agenda),{status:200,headers:{
+     "content-type":"text/html; charset=utf-8","cache-control":"no-store",
+     "x-content-type-options":"nosniff","x-frame-options":"DENY",
+     "referrer-policy":"no-referrer",
+     "content-security-policy":"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    }});
+   }catch{return json({error:"agenda_unavailable"},503);}
+  }
   if(url.pathname==="/api/me") {
    if(request.method!=="GET")return json({error:"method_not_allowed"},405);
    if(!googleAuthConfigured(env)&&(!env.OIDC_ISSUER||!env.OIDC_AUDIENCE||!env.OIDC_JWKS_URL))return json({error:"authentication_not_configured"},503);

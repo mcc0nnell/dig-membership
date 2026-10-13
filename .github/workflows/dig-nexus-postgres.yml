@@ -45,6 +45,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/schema-002-lifecycle.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-003-identities.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-004-registration.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-005-conference.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
       - name: Verify tables and constraints
@@ -54,6 +55,19 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_members(email,display_name) VALUES ('tester@example.invalid','Synthetic Tester');"
           if psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_members(email,display_name) VALUES ('TESTER@example.invalid','Duplicate');"; then
             echo "Expected case-insensitive email uniqueness failure" >&2
+            exit 1
+          fi
+
+      - name: Verify NTC conference isolation and constraints
+        run: |
+          set -euo pipefail
+          test "$(psql -At -c "SELECT count(*) FROM information_schema.tables WHERE table_name IN ('nexus_conference_sessions','nexus_conference_speakers','nexus_conference_session_speakers')")" = "3"
+          psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_events(slug,title,starts_at,ends_at) VALUES ('ntc-synthetic','Synthetic NTC','2027-04-28T09:00:00-04:00','2027-04-30T18:00:00-04:00');"
+          test "$(psql -At -c "SELECT publication_status FROM nexus_events WHERE slug='ntc-synthetic'")" = "draft"
+          psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_conference_sessions(event_id,slug,title,kind,starts_at,ends_at) SELECT id,'intro','Synthetic Session','workshop','2027-04-28T10:00:00-04:00','2027-04-28T11:00:00-04:00' FROM nexus_events WHERE slug='ntc-synthetic';"
+          test "$(psql -At -c "SELECT count(*) FROM nexus_conference_sessions WHERE published=true")" = "0"
+          if psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_conference_sessions(event_id,slug,title,kind,starts_at,ends_at) SELECT id,'invalid','Bad','workshop','2027-04-28T12:00:00-04:00','2027-04-28T11:00:00-04:00' FROM nexus_events WHERE slug='ntc-synthetic';"; then
+            echo "Expected invalid session time rejection" >&2
             exit 1
           fi
 
