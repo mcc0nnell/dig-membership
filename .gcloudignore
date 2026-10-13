@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gcloudignore
+node_modules/
+**/.wrangler/
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+*.key
+*.pem
+*.p12
+*.log
+coverage/

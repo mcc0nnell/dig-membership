@@ -26,6 +26,9 @@ export class AuthState {
  }
 }
 export async function authState(env,action,id,ttl){
+ // Cloud Run adapter replaces Durable Objects without changing the
+ // tested Google OAuth/session semantics or trusting in-memory state.
+ if(typeof env.authStateStore==='function')return env.authStateStore(action,id,ttl);
  if(!env.AUTH_STATE||typeof env.AUTH_STATE.idFromName!=='function')throw Error('auth state unavailable');
  const stub=env.AUTH_STATE.get(env.AUTH_STATE.idFromName('dig-nexus-auth'));
  const response=await stub.fetch('https://auth-state.internal/',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action,id,ttl})});

@@ -2,7 +2,7 @@
 
 **Neon-powered membership, events, and governance for Deaf in Government.**
 
-DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deafingov.org/): a single home for member profiles, conference programs, committees, governance, and communications. The foundation is **Cloudflare Workers + Neon PostgreSQL**, with WordPress as the website-facing layer. DIG Nexus owns its membership data and does not depend on an external CRM.
+DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deafingov.org/): a single home for member profiles, conference programs, committees, governance, and communications. The foundation is **Google Cloud Run + Neon PostgreSQL**, with WordPress as the website-facing layer. DIG Nexus owns its membership data and does not depend on an external CRM.
 
 **Project status: active development — not a live membership service.** The repository contains working components, synthetic tests, database schemas, and an offline demo. It does **not** establish that Google sign-in, Neon-backed registration, newsletters, payments, or elections are available to real members. Production launch requires DIG policy approval, security and accessibility review, and a staged deployment.
 
@@ -30,9 +30,9 @@ These are development milestones, not a claim that DIG has replaced its existing
   WordPress experience / DIG website
                  |
                  v
-  Cloudflare Workers (HTTP API, OAuth, authorization)
+  Google Cloud Run (Node API, OAuth, authorization)
       |                         |
-      |                 Durable Object
+      |                 Neon-backed state
       |               (OAuth state and
       |                session revocation)
       v
@@ -43,13 +43,13 @@ These are development milestones, not a claim that DIG has replaced its existing
       +-- Optional staff CRM experiment -> Twenty (not required)
 ```
 
-- **WordPress** is the website-facing integration. The `[dig_nexus_portal]` shortcode is a development candidate. It directs members to the Cloudflare Worker; no database credentials or authorization logic belong in WordPress.
-- **Cloudflare Workers** implements the API and Google OpenID Connect authorization-code flow with PKCE. The session design includes encrypted cookies, one-time OAuth state, and revocation through a Durable Object. Real provider and browser deployment tests are still required.
+- **WordPress** is the website-facing integration. The `[dig_nexus_portal]` shortcode is a development candidate. It directs members to the Nexus service; no database credentials or authorization logic belong in WordPress.
+- **Cloud Run** hosts the Node adapter for the existing API and Google OpenID Connect authorization-code flow with PKCE. The Cloud Run session design retains encrypted cookies and uses hashed, expiring state and revocation records in Neon. Real provider and browser deployment tests are still required.
 - **Neon/PostgreSQL** is the source-of-truth architecture for the Nexus domain. The `dig-nexus-dev` development project exists; versioned SQL and isolated PostgreSQL CI do **not** imply every migration has been applied to Neon or production.
 - **MailerSend** has an adapter, not an enabled mailing operation. Consent, one-click unsubscribe, suppression, signed webhooks, sender verification, and delivery controls remain release gates.
 - **Twenty** is an optional CRM experiment, **not** the member system of record and not a deployed dependency.
 
-**The architecture is Neon-first.** No parallel CRM, legacy membership gateway, or data migration is part of the DIG Nexus runtime. See [Historical artifacts](#historical-artifacts) for obsolete code still tracked in this repository.
+**The architecture is Cloud Run + Neon-first.** No parallel CRM, legacy membership gateway, or data migration is part of the DIG Nexus runtime. See [Historical artifacts](#historical-artifacts) for obsolete code still tracked in this repository.
 
 ## Repository map
 
@@ -60,8 +60,10 @@ These are development milestones, not a claim that DIG has replaced its existing
 | [`demo/`](demo/) | Offline, synthetic member experience published to GitHub Pages |
 | [`nexus/wordpress/`](nexus/wordpress/) | DIG Nexus WordPress portal integration |
 | [`nexus/NTC-CONFERENCE.md`](nexus/NTC-CONFERENCE.md) | NTC conference design and publish-only agenda release gate |
+| [`nexus/cloud-run/`](nexus/cloud-run/) | Cloud Run HTTP adapter, hashed Neon session state and shared rate limiting |
+| [`nexus/CLOUD-RUN.md`](nexus/CLOUD-RUN.md) | Google Cloud deployment prerequisites and default-off launch gates |
 | [`experiments/dig-nexus/`](experiments/dig-nexus/) | Read-only-by-default Twenty/Neon integration spike |
-| [`nexus/RUNTIME-INTEGRATION.md`](nexus/RUNTIME-INTEGRATION.md) | Worker, session and Neon integration gates |
+| [`nexus/RUNTIME-INTEGRATION.md`](nexus/RUNTIME-INTEGRATION.md) | Shared API and authentication implementation details (historical Worker prerequisites noted) |
 
 ### Authentication and registration are different gates
 
@@ -69,7 +71,7 @@ The implemented development Google sign-in flow is `/auth/google/start` → Goog
 
 `POST /api/register` is separately protected and **disabled by default**. It currently expects a verified bearer identity plus origin/rate-limit controls; it does **not** accept the Google browser session cookie as registration authorization. The browser request route is distinct and does not change the bearer endpoint or silently subscribe anyone to email. Neither endpoint is enabled in production.
 
-Read [Google OIDC](nexus/GOOGLE-OIDC.md), [runtime integration](nexus/RUNTIME-INTEGRATION.md), and [registration deployment gates](nexus/REGISTRATION-DEPLOYMENT.md) before wiring up real credentials or member data.
+Read [Cloud Run deployment](nexus/CLOUD-RUN.md), [Google OIDC](nexus/GOOGLE-OIDC.md), and [registration deployment gates](nexus/REGISTRATION-DEPLOYMENT.md) before wiring up real credentials or member data.
 
 ## Try the project
 
@@ -101,8 +103,9 @@ node --test nexus/*.test.mjs \
 # Offline demo
 node --test demo/offline.test.cjs
 
-# Validate the Cloudflare Worker bundle without deploying
-npx wrangler deploy --dry-run --config nexus/wrangler.jsonc
+# Google Cloud Run runtime and Docker packaging (no cloud deployment)
+node --test nexus/cloud-run/*.test.mjs
+docker build -t dig-nexus-cloudrun:local .
 ```
 
 Additional checks run in GitHub Actions: Deno API compatibility and PostgreSQL 17 schema/constraint validation, including the conference migration. Older CI jobs still verify historical code but are not Nexus deployment gates.
@@ -126,7 +129,7 @@ Earlier experiments still appear under `wordpress/dig-membership/`, `cf/membersh
 
 ## Next milestones
 
-1. **Finish live validation of the staged member journey:** deploy to a non-production Worker and isolated Neon branch, complete real Google OAuth and Durable Object tests, verify grants, and exercise `/api/me` end to end.
+1. **Finish live validation of the staged member journey:** deploy to a non-production Cloud Run service and isolated Neon branch, complete real Google OAuth and Neon session-state tests, verify grants, and exercise `/api/me` end to end.
 2. **Decide the registration contract:** document the verified-identity trust boundary, complete atomic/idempotent registration tests, and retain the default-off gate until reviewed.
 3. **Ship a usable accessible member experience:** test the WordPress flow on real browsers with Deaf members and assistive-technology users; establish privacy, incident response, and retention procedures.
 4. **Enable integrations one at a time:** MailerSend consent/suppression and verified delivery, payment-provider reconciliation, events, committees, and administrative reporting.

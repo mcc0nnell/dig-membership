@@ -52,6 +52,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/schema-005-conference.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-006-organizer.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-007-attendee.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-008-cloud-run-state.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
       - name: Verify tables and constraints
@@ -97,3 +98,16 @@ jobs:
           test "$(psql -At -c "SELECT count(*) FROM nexus_external_identities WHERE issuer='https://id.example.invalid'")" = "1"
           test "$(psql -At -c "SELECT count(*) FROM nexus_members WHERE email_key='alpha@example.invalid' AND member_status='pending' AND directory_opt_in=false")" = "1"
           test "$(psql -At -c "SELECT count(*) FROM nexus_communication_preferences WHERE member_id IN (SELECT member_id FROM nexus_external_identities)")" = "0"
+
+      - name: Verify Cloud Run state persistence and schema constraints
+        run: |
+          set -euo pipefail
+          test "$(psql -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('nexus_runtime_tokens','nexus_runtime_rate_limits')")" = "2"
+          psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_runtime_tokens(token_hash,kind,expires_at) VALUES (repeat('a',64),'flow',now()+interval '5 minutes'), (repeat('b',64),'session',now()+interval '1 hour');"
+          test "$(psql -At -c "DELETE FROM nexus_runtime_tokens WHERE token_hash=repeat('a',64) AND kind='flow' AND expires_at>now() RETURNING token_hash")" = "$(printf 'a%.0s' {1..64})"
+          test "$(psql -At -c "SELECT count(*) FROM nexus_runtime_tokens WHERE token_hash=repeat('a',64)")" = "0"
+          test "$(psql -At -c "SELECT count(*) FROM nexus_runtime_tokens WHERE token_hash=repeat('b',64) AND expires_at>now()")" = "1"
+          if psql -v ON_ERROR_STOP=1 -c "INSERT INTO nexus_runtime_tokens(token_hash,kind,expires_at) VALUES('raw-session-key','session',now())"; then
+            echo "Expected raw token rejection" >&2
+            exit 1
+          fi

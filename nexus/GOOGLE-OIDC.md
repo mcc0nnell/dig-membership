@@ -1,5 +1,7 @@
 # DIG Nexus: Google OpenID Connect sign-in
 
+> **Current target:** Google Cloud Run; see [CLOUD-RUN.md](CLOUD-RUN.md) for the deployed-runtime plan and Secret Manager. Cloudflare/Worker secret and Durable Object setup below documents the earlier implementation and is not the new hosting requirement. The Google OIDC/PKCE verification logic is reused by Cloud Run.
+
 **Status:** Implementation and synthetic tests only. Not deployed. No real Google OAuth client or production secrets have been configured. Registration remains disabled.
 
 ## Architecture
