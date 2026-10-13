@@ -19,7 +19,7 @@ DO $$
 DECLARE v jsonb; v_notice jsonb;
 BEGIN
  PERFORM nexus_conference_register('ticket-test','https://accounts.google.com','ticketbuyer','ticketbuyer@fixture.invalid','Synthetic Buyer');
- IF (SELECT count(*) FROM nexus_conference_notifications WHERE kind='registration')<>1
+ IF (SELECT count(*) FROM nexus_conference_notifications n JOIN nexus_conference_enrollments en ON en.id=n.enrollment_id JOIN nexus_events ev ON ev.id=en.event_id WHERE ev.slug='ticket-test' AND n.kind='registration')<>1
  THEN RAISE EXCEPTION 'registration mail not enqueued'; END IF;
  v_notice=nexus_conference_claim_mail();
  IF v_notice->>'email'<>'ticketbuyer@fixture.invalid' OR v_notice->>'kind'<>'registration'
@@ -57,7 +57,7 @@ BEGIN
  THEN RAISE EXCEPTION 'event replay not idempotent'; END IF;
  IF nexus_conference_payment_link('ticket-test','https://accounts.google.com','ticketbuyer')->>'url' IS NOT NULL
  THEN RAISE EXCEPTION 'paid attendee offered another checkout'; END IF;
- IF (SELECT count(*) FROM nexus_conference_notifications WHERE kind='payment')<>1
+ IF (SELECT count(*) FROM nexus_conference_notifications n JOIN nexus_conference_enrollments en ON en.id=n.enrollment_id JOIN nexus_events ev ON ev.id=en.event_id WHERE ev.slug='ticket-test' AND n.kind='payment')<>1
  THEN RAISE EXCEPTION 'payment notice missing'; END IF;
  PERFORM nexus_conference_issue_ticket('ticket-test','https://accounts.google.com','ticketbuyer',repeat('a',64));
  BEGIN
