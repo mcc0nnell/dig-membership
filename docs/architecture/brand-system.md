@@ -42,3 +42,11 @@ UI variants like `#ff8d79` are contrast-adjusted derived accents against dark su
 ## Verification
 
 Run `node --test demo/*.test.cjs` and `npx playwright test -c demo/playwright.config.mjs`. Verify offline resource isolation, desktop/mobile overflow, no JavaScript errors, all demo journeys, disabled controls, accessible automated axe baseline, and five Mermaid diagrams plus three ECharts SVGs when network is available.
+
+## Nexus Pulse: synthetic, interactive ECharts studio
+
+The separate `demo/pulse.html` page reuses the DIG brand tokens. It hosts eight SVG-rendered ECharts 5.6 exhibits: membership-state donut, member-verification funnel, paid-admission inventory bars, hypothetical room-demand heatmap, interactive non-holding-request time series, consent bars, staff-approval Sankey, and conceptual server/provider graph.
+
+The scenario controls change **only browser-local invented values**. A surge in unverified requests never changes 84 separately verified sample admissions or 46 available sample places. Revoking the single synthetic newsletter opt-in reduces eligibility from one to zero while messages actually sent remain zero. No live service, tracking, API, storage, payment provider, or Neon query is used. If the ECharts CDN fails, the native controls and expanded HTML tables remain functional.
+
+A chart click must have an equivalent button control; no essential facts live in tooltips alone. Chart alternatives provide explicit numbers, captions and policy explanation. The page is **not** DIG operational telemetry.
