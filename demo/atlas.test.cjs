@@ -6,7 +6,7 @@ const atlas = readFileSync(path.join(__dirname, 'atlas.html'), 'utf8');
 const docs = readFileSync(path.join(__dirname, '..', 'docs', 'architecture', 'system-maps.md'), 'utf8');
 
 test('systems atlas contains valid browser-side JavaScript', () => {
-  const scripts = [...atlas.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x => x[1]);
+  const scripts = [...atlas.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x => x[1]).filter(Boolean);
   assert.equal(scripts.length, 2);
   const vm = require('node:vm');
   assert.doesNotThrow(() => new vm.Script(scripts[0]));
