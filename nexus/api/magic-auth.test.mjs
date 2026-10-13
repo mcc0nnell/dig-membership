@@ -46,6 +46,19 @@ test('email magic link single-use, verified attendee session, logout and staff i
  const staff=await worker.fetch(new Request(origin+'/api/conference/ntc-2027/coordination',{headers:{cookie}}),{
   ...env,CONFERENCE_REGISTRATION_ENABLED:true,conferenceDb:{coordination:async()=>{throw Error('should not be reached');}}});
  assert.equal(staff.status,401);
+ // Exercise the real attendee routing boundary; neither Google nor DIG membership is required.
+ let enrollee;
+ const conference=await worker.fetch(req('/api/conference/ntc-2027/register',{displayName:'Magic Attendee'},{headers:{cookie}}),{
+  ...env,CONFERENCE_REGISTRATION_ENABLED:true,conferenceRateLimiter:{limit:async()=>({success:true})},
+  conferenceDb:{register:async(event,identity)=>{enrollee={event,identity};return {status:'registered',confirmationReference:'synthetic'};}}});
+ assert.equal(conference.status,200);assert.equal(enrollee.identity.issuer,'urn:dig:nexus:magic');
+ const purchase=await worker.fetch(new Request(origin+'/api/ticketing/ntc-2027/payment-link',{headers:{cookie}}),{
+  ...env,NTC_TICKETING_ENABLED:true,ticketingDb:{paymentLink:async()=>({provider:'zeffy',url:'https://www.zeffy.com/en-US/ticketing/synthetic'})}});
+ assert.equal(purchase.status,200);
+ const scan=await worker.fetch(req('/api/ticketing/ntc-2027/checkin',{token:'A'.repeat(43)},{headers:{cookie}}),{
+  ...env,NTC_TICKETING_ENABLED:true,NTC_CHECKIN_ENABLED:true,ticketingRateLimiter:{limit:async()=>({success:true})},
+  ticketingDb:{checkin:async()=>{throw Error('nonstaff denied');}}});
+ assert.equal(scan.status,401);
  const cancelled=await worker.fetch(req('/api/auth/magic/logout',{}, {headers:{cookie}}),env);
  assert.equal(cancelled.status,200);assert.match(cancelled.headers.get('set-cookie'),/Max-Age=0/);
  await assert.rejects(attendeeIdentity(login,env));
