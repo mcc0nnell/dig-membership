@@ -14,7 +14,7 @@ DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deaf
 
 | Area | Intended experience | Current state |
 | --- | --- | --- |
-| Membership | Join, sign in, see status, renew, and manage a profile | Domain model and Google OIDC/session code; live onboarding not enabled |
+| Membership | Sign in, request membership, see status, then eventually renew and manage a profile | Google OIDC/session code, explicit pending-request flow and Neon adapter; live onboarding disabled |
 | Member directory | Discover opted-in colleagues across government | Schema and privacy rules; no public directory |
 | Events | Register, manage capacity, and check in at DIG events, including DC27 | Published-only agenda prototype and lifecycle tests; no live registration |
 | Committees | Organize rosters, roles, and restricted documents | Model and authorization rules; no deployed staff portal |
@@ -65,9 +65,9 @@ These are development milestones, not a claim that DIG has replaced its existing
 
 ### Authentication and registration are different gates
 
-The proposed Google sign-in flow is `/auth/google/start` → Google → `/auth/google/callback` → session cookie → `/portal` and read-only `/api/me`. Sign-in alone does **not** create, approve, renew, or activate a membership.
+The implemented development Google sign-in flow is `/auth/google/start` → Google → `/auth/google/callback` → session cookie → `/portal` and read-only `/api/me`. Sign-in alone does **not** create, approve, renew, or activate a membership. A new, explicit `POST /api/enroll` can create a **pending** request from the verified Google browser session, but its `MEMBER_ENROLLMENT_ENABLED` flag is off by default. The browser route enforces same-origin checks, a custom action header and rate limiting.
 
-`POST /api/register` is separately protected and **disabled by default**. It currently expects a verified bearer identity plus origin/rate-limit controls; it does **not** accept the Google browser session cookie as registration authorization. Do not combine these paths without a reviewed identity, CSRF, and consent design.
+`POST /api/register` is separately protected and **disabled by default**. It currently expects a verified bearer identity plus origin/rate-limit controls; it does **not** accept the Google browser session cookie as registration authorization. The browser request route is distinct and does not change the bearer endpoint or silently subscribe anyone to email. Neither endpoint is enabled in production.
 
 Read [Google OIDC](nexus/GOOGLE-OIDC.md), [runtime integration](nexus/RUNTIME-INTEGRATION.md), and [registration deployment gates](nexus/REGISTRATION-DEPLOYMENT.md) before wiring up real credentials or member data.
 
@@ -126,7 +126,7 @@ Earlier experiments still appear under `wordpress/dig-membership/`, `cf/membersh
 
 ## Next milestones
 
-1. **Prove the Neon-backed identity-to-member read path:** deploy to a non-production Worker and isolated Neon branch, complete real Google OAuth and Durable Object tests, verify grants, and exercise `/api/me` end to end.
+1. **Finish live validation of the staged member journey:** deploy to a non-production Worker and isolated Neon branch, complete real Google OAuth and Durable Object tests, verify grants, and exercise `/api/me` end to end.
 2. **Decide the registration contract:** document the verified-identity trust boundary, complete atomic/idempotent registration tests, and retain the default-off gate until reviewed.
 3. **Ship a usable accessible member experience:** test the WordPress flow on real browsers with Deaf members and assistive-technology users; establish privacy, incident response, and retention procedures.
 4. **Enable integrations one at a time:** MailerSend consent/suppression and verified delivery, payment-provider reconciliation, events, committees, and administrative reporting.

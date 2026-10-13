@@ -81,8 +81,33 @@ export async function logoutGoogle(request,env){
  return response('/portal',{'set-cookie':clear(cookieName)});
 }
 export function portalPage(){
- const html=`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIG Member Portal</title><main><h1>DIG Member Portal</h1><p>Google verifies your identity; DIG approves membership separately.</p><p><a href="/auth/google/start">Continue with Google</a></p><section aria-live="polite" aria-atomic="true" id="member-status">Checking your membership status…</section><form action="/auth/logout" method="post"><button type="submit">Sign out</button></form><p>Membership registration is not yet open.</p></main><script src="/portal-client.mjs" type="module"></script></html>`;
- return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff'}});
+ const html=`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member portal | DIG Nexus</title><link rel="stylesheet" href="/portal.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a>
+<header><span class="eyebrow">DEAF IN GOVERNMENT</span><strong>DIG Nexus</strong></header>
+<main id="main">
+ <div class="intro"><span class="eyebrow">MEMBERSHIP</span><h1>Your DIG membership</h1>
+  <p>One place to see your membership status and take the next step.</p></div>
+ <section class="panel" aria-labelledby="account-heading">
+  <h2 id="account-heading">Your account</h2>
+  <p id="member-status" role="status" aria-live="polite" aria-atomic="true">Checking your membership status…</p>
+  <p id="sign-in"><a class="action" href="/auth/google/start">Continue with Google</a></p>
+  <form id="sign-out" action="/auth/logout" method="post" hidden><button class="secondary" type="submit">Sign out</button></form>
+ </section>
+ <section id="join-section" class="panel" aria-labelledby="join-heading" hidden>
+  <span class="eyebrow">NEXT STEP</span><h2 id="join-heading">Request DIG membership</h2>
+  <p>Signing in verifies your identity. This request creates a <strong>pending</strong> member record; DIG must approve membership separately.</p>
+  <form id="join-form">
+   <label for="display-name">Name for your membership record</label>
+   <input id="display-name" name="displayName" autocomplete="name" maxlength="120" required>
+   <label class="checkbox"><input type="checkbox" required name="intent"><span>I want to request DIG membership. This does not subscribe me to newsletters or make my profile public.</span></label>
+   <button type="submit">Request membership</button>
+  </form>
+  <p id="join-feedback" role="status" aria-live="polite"></p>
+ </section>
+ <p class="fine-print">Your directory listing is private by default. Membership approval, dues, and communication preferences are handled separately.</p>
+</main><script src="/portal-client.mjs" type="module"></script></body></html>`;
+ return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'no-referrer'}});
 }
-
 export function portalClient(){return new Response(PORTAL_CLIENT,{headers:{'content-type':'text/javascript; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});}

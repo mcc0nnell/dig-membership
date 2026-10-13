@@ -5,6 +5,8 @@ import {createRegistrationDb} from "./registration-db.mjs";
 import {createNeonClient} from "./database.mjs";
 import {createMemberDb} from "./member-db.mjs";
 import {createAgendaDb} from "./agenda-db.mjs";
+import {requestMembership} from "./member-enrollment.mjs";
+import {PORTAL_STYLE} from "./portal-style.mjs";
 import {renderAgendaPage} from "./agenda-page.mjs";
 import {startGoogleLogin,finishGoogleLogin,sessionIdentity,logoutGoogle,portalPage,portalClient,googleAuthConfigured} from "./google-auth.mjs";
 const headers={"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"};
@@ -14,6 +16,7 @@ export default {
   const url=new URL(request.url);
   if(url.pathname==='/portal'&&request.method==='GET')return portalPage();
   if(url.pathname==='/portal-client.mjs'&&request.method==='GET')return portalClient();
+  if(url.pathname==='/portal.css'&&request.method==='GET')return new Response(PORTAL_STYLE,{headers:{'content-type':'text/css; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
   if(url.pathname==='/auth/google/start'&&request.method==='GET')return startGoogleLogin(request,env);
   if(url.pathname==='/auth/google/callback'&&request.method==='GET')return finishGoogleLogin(request,env);
   if(url.pathname==='/auth/logout')return request.method==='POST'?await logoutGoogle(request,env):json({error:'method_not_allowed'},405);
@@ -40,6 +43,7 @@ export default {
     }});
    }catch{return json({error:"agenda_unavailable"},503);}
   }
+  if(url.pathname==="/api/enroll")return requestMembership(request,env);
   if(url.pathname==="/api/me") {
    if(request.method!=="GET")return json({error:"method_not_allowed"},405);
    if(!googleAuthConfigured(env)&&(!env.OIDC_ISSUER||!env.OIDC_AUDIENCE||!env.OIDC_JWKS_URL))return json({error:"authentication_not_configured"},503);
@@ -51,7 +55,7 @@ export default {
     const db=env.memberDb||(env.pgClient?createMemberDb(env.pgClient):env.DATABASE_URL?createMemberDb(await createNeonClient(env)):null);
     if(!db)return json({error:"membership_unavailable"},503);
     const member=await db.findByIdentity(identity);
-    return member?json({member},200):json({member:null},200);
+    return json({member:member??null,enrollmentAvailable:env.MEMBER_ENROLLMENT_ENABLED===true||env.MEMBER_ENROLLMENT_ENABLED==="true"},200);
    }catch{return json({error:"membership_unavailable"},503);}
   }
   if(url.pathname==="/api/register") {

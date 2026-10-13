@@ -6,7 +6,8 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
   "vars": {
-    "REGISTRATION_ENABLED": "false"
+    "REGISTRATION_ENABLED": "false",
+    "MEMBER_ENROLLMENT_ENABLED": "false"
   },
   "durable_objects": {"bindings": [{"name":"AUTH_STATE","class_name":"AuthState"}]},
   "migrations": [{"tag":"auth-state-v1","new_sqlite_classes":["AuthState"]}],

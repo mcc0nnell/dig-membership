@@ -1,15 +1,17 @@
 # DIG Nexus registration deployment gate
 
-**Status: disabled, not deployed.** `POST /api/register` defaults to HTTP 503 unless `REGISTRATION_ENABLED=true`. Google browser sign-in does **not** enable registration or constitute membership approval.
+**Status: disabled, not deployed.** `POST /api/register` defaults to HTTP 503 unless `REGISTRATION_ENABLED=true`. Separately, the new **explicit-request** `POST /api/enroll` defaults to 503 unless `MEMBER_ENROLLMENT_ENABLED=true`. Signing in is not a membership request or approval.
 
 ## Authentication paths are intentionally separate
 
 - **Google browser login:** `/auth/google/start` -> Google -> `/auth/google/callback` -> encrypted, HttpOnly, Secure session cookie -> `/portal` and read-only `/api/me`. The Google session is tracked in the `AUTH_STATE` Durable Object. See [GOOGLE-OIDC.md](GOOGLE-OIDC.md).
-- **Registration API:** `POST /api/register` currently requires its existing server-verified **Bearer** identity, a matching `REGISTRATION_ALLOWED_ORIGIN`, the `registrationRateLimiter` binding, and `REGISTRATION_ENABLED=true`. A Google session cookie is **not** accepted as registration authorization. Do not conflate the two flows or silently add cookie-based registration without CSRF and consent review.
+- **Browser membership request:** `POST /api/enroll` uses only the verified Google **session cookie**, exact same-origin `Origin`, same-origin Fetch Metadata if present, `x-dig-nexus-action: request-membership`, an enabled `registrationRateLimiter`, and a body with `{displayName, requestMembership:true}`. It is disabled by default and creates pending membership only.
+- **Bearer registration API:** `POST /api/register` requires an independently verified **Bearer** identity, a matching `REGISTRATION_ALLOWED_ORIGIN`, the `registrationRateLimiter` binding, and `REGISTRATION_ENABLED=true`. A Google session cookie is **not** accepted by this endpoint.
 
 ## Registration-specific configuration
 
-- `REGISTRATION_ENABLED` — keep `false` until the gates below pass.
+- `REGISTRATION_ENABLED` — keep `false` until the bearer-token gates below pass.
+- `MEMBER_ENROLLMENT_ENABLED` — keep `false` until the separate Google browser enrollment flow passes staging and policy review.
 - `OIDC_ISSUER` — exact HTTPS issuer for registration bearer tokens.
 - `OIDC_AUDIENCE` — exact expected bearer-token audience.
 - `OIDC_JWKS_URL` — HTTPS JWKS endpoint on the issuer's origin.
