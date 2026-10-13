@@ -4,20 +4,23 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const html=fs.readFileSync(path.join(__dirname,'offline.html'),'utf8');
-const script=html.match(/<script>\s*([\s\S]*?)<\/script>/)?.[1];
+const scripts=[...html.matchAll(/<script>\s*([\s\S]*?)<\/script>/g)].map(x=>x[1]);
+const script=scripts[0];
 test('standalone demo has parseable JavaScript and no external dependencies',()=>{
-  assert.ok(script);
-  assert.doesNotThrow(()=>new vm.Script(script));
+  assert.equal(scripts.length,3);
+  for(const part of scripts)assert.doesNotThrow(()=>new vm.Script(part));
   assert.doesNotMatch(html,/<script[^>]+src=/i);
   assert.doesNotMatch(html,/\bfetch\s*\(|XMLHttpRequest|localStorage|sessionStorage|document\.cookie/);
   assert.doesNotMatch(html,/<form[^>]+action=/i);
+  assert.doesNotMatch(html,/<a[^>]+href="https?:/i);
+  assert.match(html,/connect-src 'none'/);
 });
 test('all simulated UX views and disclaimers exist',()=>{
   for(const name of ['join','verify','dashboard','overview','profile','preferences','renewal','emails','staff'])
     assert.ok(html.includes(name),name);
   assert.match(html,/SYNTHETIC DATA/);
-  assert.match(html,/No Salesforce connection/);
-  assert.match(html,/no real email/i);
+  assert.match(html,/No backend calls/);
+  assert.match(html,/real emails/i);
   assert.match(html,/aria-live="polite"/);
   assert.match(html,/Skip to main content/);
   assert.match(html,/name="news"/);
@@ -69,7 +72,7 @@ test('join requires simulated verification; activation is local',()=>{
   get('activate').fire();
   assert.equal(get('dashboard').hidden,false);
   assert.match(get('welcome').textContent,/Alex Example/);
-  assert.match(get('status').textContent,/no Salesforce/i);
+  assert.match(get('status').textContent,/Actual DIG enrollment requires an explicit pending request/i);
 });
 test('expired mock verification fails and does not activate',()=>{
   const {get}=harness();get('join-form').fire('submit');
@@ -103,4 +106,15 @@ test('new member workspace is synthetic and includes accessible community naviga
   assert.match(html,/data-panel="community"/);
   assert.match(html,/data-go="community"/);
   assert.match(html,/Voting is not available in this demo/);
+});
+
+test('offline platform explorer has all three distinct journeys and truthful service boundaries',()=>{
+ for(const id of ['ntc-tour','ntc-status','ntc-request','ntc-verify','ntc-checkin','ntc-refund',
+  'association-tour','staff-load','staff-activity','newsletter-tour','news-preview','news-confirm',
+  'news-queue','news-optout','news-eligible'])
+  assert.match(html,new RegExp('id="'+id+'"'),id);
+ assert.match(html,/no Zeffy stock held and no admission/i);
+ assert.match(html,/List assignment never implies opt-in/i);
+ assert.match(html,/queueing does not send/i);
+ assert.doesNotMatch(html,/Salesforce/i);
 });

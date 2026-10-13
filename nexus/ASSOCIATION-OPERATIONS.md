@@ -39,24 +39,24 @@ Existing session and verified immutable subject are required. PostgreSQL functio
 | `/api/association/campaigns/:uuid` | GET | Preview eligible audience count | `CAMPAIGNS_ENABLED` |
 | `/api/association/campaigns/:uuid/queue` | POST | Queue approved, consented recipients | `CAMPAIGNS_ENABLED` |
 
-Every route requires staff verification, a configured rate limiter, server-side SQL authorization and parameterized queries. Writes additionally require exact HTTPS same-origin checks and `X-Dig-Nexus-Action` set to `record-activity` or `queue-campaign`, respectively. Activity payload permits only `action` and `summary`; campaign queue accepts no body. Unknown errors do not leak SQL or private records. These routes have **no public administration UI** yet.
+Every route requires staff verification, a configured rate limiter, server-side SQL authorization and parameterized queries. Writes additionally require exact HTTPS same-origin checks and `X-Dig-Nexus-Action` set to `record-activity` or `queue-campaign`, respectively. Activity payload permits only `action` and `summary`; campaign queue accepts no body. Unknown errors do not leak SQL or private records. These routes have a **default-disabled, private staff workspace** at `/association`; there is no public administrative interface and no live deployment.
 
 ## Migration and test order
 
 Only on a fresh, isolated PostgreSQL 17 or Neon staging branch:
 
 ```text
-nexus/schema.sql and migrations 002–011
-nexus/schema-012-constituents.sql
+nexus/schema.sql and migrations 002–013
 newsletter/schema.sql
 newsletter/schema-002-unsubscribe.sql
 newsletter/schema-003-operations.sql
+newsletter/schema-004-unsubscribe-redemption.sql
 nexus/tests/constituent-operations-integration.sql
 ```
 
 The integration script uses synthetic staff, members, organizations, two contrasting consent states and a campaign. It proves staff denial, activity immutability, member/email separation, one-time queue approval, content locking, subscriber suppression and transaction rollback.
 
-Before any production launch, apply restricted grants, audit real-data visibility, validate subject revocation, enforce privacy retention and response workflows, review audience/legal compliance and add full staff UI accessibility testing. Do not run these migrations against Neon `main` by default.
+Before any production launch, apply restricted grants, audit real-data visibility, validate subject revocation, enforce privacy retention and response workflows, review audience/legal compliance, and complete human staff UI accessibility testing. The Chromium/axe checks are automated proof only. Do not run these migrations against Neon `main` by default.
 
 
 ## Staff workspace — browser-tested
