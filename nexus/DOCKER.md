@@ -45,6 +45,10 @@ umask 077
 : > deploy/secrets/database_url
 : > deploy/secrets/google_client_secret
 : > deploy/secrets/google_session_secret
+: > deploy/secrets/zeffy_api_key
+: > deploy/secrets/zeffy_webhook_secret
+: > deploy/secrets/mailersend_api_token
+: > deploy/secrets/magic_link_session_secret
 openssl rand -hex 32 > deploy/secrets/proxy_token
 chmod 600 deploy/secrets/*
 

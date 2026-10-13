@@ -17,6 +17,8 @@ available for staff and Google-registered participants.
 - MailerSend sends the link via HTTPS. The token lives in the URL **fragment**,
   not the request path or query. A minimal page strips the fragment from browser
   history and waits for an explicit click before posting the token to the server.
+  MailerSend click/open/content tracking is explicitly **disabled per login
+  message** to prevent link rewriting and avoid tracking sensitive sign-in URLs.
   This also prevents typical mail scanners from consuming it by merely opening
   the URL.
 - `POST /api/auth/magic/redeem` atomically consumes the hashed token once and
@@ -57,8 +59,8 @@ available for staff and Google-registered participants.
 
 ## Configuration and verification
 
-Migration order: `nexus/schema.sql` through `nexus/schema-011-magic-links.sql`
-(including schema 009). Apply to an isolated Neon staging branch **only**.
+Migration order: `nexus/schema.sql`, schemas 002–009,
+`nexus/schema-010-jobs.sql`, then `nexus/schema-011-magic-links.sql`. Apply to an isolated Neon staging branch **only**.
 
 For Docker/Caddy, create mode-0600 file
 `deploy/secrets/magic_link_session_secret` with a cryptographically strong

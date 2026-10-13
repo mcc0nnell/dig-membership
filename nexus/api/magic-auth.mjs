@@ -41,7 +41,7 @@ export async function sendMagicEmail(env,{to,token,event,origin},fetchImpl=fetch
  const result=await fetchImpl('https://api.mailersend.com/v1/email',{method:'POST',redirect:'error',
   headers:{authorization:'Bearer '+env.MAILERSEND_API_TOKEN,'content-type':'application/json'},
   body:JSON.stringify({from:{email:env.MAILERSEND_FROM_EMAIL,name:'Deaf in Government'},to:[{email:to}],
-   subject:'Your DIG Nexus conference sign-in',text,html:`<p><a href="${url}">Complete your conference sign-in</a></p><p>Link expires in 15 minutes. If you did not request it, ignore this email.</p>`,tags:['dig-nexus-magic-link']})});
+   subject:'Your DIG Nexus conference sign-in',text,html:`<p><a href="${url}">Complete your conference sign-in</a></p><p>Link expires in 15 minutes. If you did not request it, ignore this email.</p>`,tags:['dig-nexus-magic-link'],settings:{track_clicks:false,track_opens:false,track_content:false}})});
  if(result.status!==202)throw Error('email not accepted');
 }
 

@@ -66,6 +66,7 @@ test('mailer sends no marketing consent and handles provider failure',async()=>{
   {to:'receiver@example.invalid',token:'t'.repeat(43),event:'ntc-2027',origin},
   async(_url,options)=>{msg=JSON.parse(options.body);return new Response(null,{status:202});});
  assert.equal(result,undefined);assert.deepEqual(msg.tags,['dig-nexus-magic-link']);
+ assert.deepEqual(msg.settings,{track_clicks:false,track_opens:false,track_content:false});
  assert.match(msg.text,/#token=/);
  assert.equal('unsubscribeUrl' in msg,false);
  await assert.rejects(sendMagicEmail({MAILERSEND_API_TOKEN:'x',MAILERSEND_FROM_EMAIL:'events@example.invalid'},
