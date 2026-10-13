@@ -6,6 +6,9 @@ on:
     paths:
       - 'demo/offline.html'
       - 'demo/offline.test.cjs'
+      - 'demo/atlas.html'
+      - 'demo/atlas.test.cjs'
+      - 'docs/architecture/system-maps.md'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -34,14 +37,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test offline demo
-        run: node --test demo/offline.test.cjs
+      - name: Test static demos
+        run: node --test demo/*.test.cjs
       - name: Build static site from demo only
         run: |
           mkdir -p _site
           cp demo/offline.html _site/index.html
+          cp demo/atlas.html _site/atlas.html
           touch _site/.nojekyll
           test -s _site/index.html
+          test -s _site/atlas.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
