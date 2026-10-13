@@ -1,94 +1,144 @@
 # DIG Nexus
 
-**DIG Nexus** is the developing Deaf in Government membership, events, committees, governance, and communications platform. The Neon/PostgreSQL and Cloudflare foundation is documented in [`nexus/README.md`](nexus/README.md); the existing WordPress/Salesforce enrollment candidate is retained below for separate staging and policy review.
+**One platform for membership, communication, events, and governance at Deaf in Government.**
 
-> **Repository rename:** The GitHub repository is now [`mcc0nnell/dig-nexus`](https://github.com/mcc0nnell/dig-nexus). Existing WordPress plugin paths, shortcodes, API settings, and Cloudflare Worker identifiers intentionally retain `dig-membership` names. Renaming those deployed integration identifiers requires its own migration plan.
+DIG Nexus is an open-source project to bring the day-to-day work of [Deaf in Government (DIG)](https://deafingov.org/) into one accessible, privacy-conscious experience. The goal is straightforward: make it easier for members to participate, for volunteers to serve, and for DIG to operate without stitching together disconnected systems.
 
-## Legacy membership enrollment candidate
+**Project status: active development — not a live membership service.** The repository contains working components, synthetic tests, database schemas, and an offline demo. It does **not** establish that Google sign-in, Neon-backed registration, newsletters, payments, or elections are available to real members. Production launch requires DIG policy approval, security and accessibility review, and a staged deployment.
 
-WordPress-first membership enrollment for **Deaf in Government** (DIG), backed by Salesforce and a credential-isolating Cloudflare Worker. Apache-2.0 licensed; independent of the existing Laravel portal.
+**[Explore the offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Security policy](SECURITY.md)**
 
-> **Status: development candidate; not installed or deployed.** Local tests use mocks. A Salesforce sandbox review, WordPress staging pilot, policy approval, and production infrastructure configuration are required before launch.
+## What we're building
 
-## Components
+| Area | Intended experience | Current state |
+| --- | --- | --- |
+| Membership | Join, sign in, see status, renew, and manage a profile | Domain model and Google OIDC/session code; live onboarding not enabled |
+| Member directory | Discover opted-in colleagues across government | Schema and privacy rules; no public directory |
+| Events | Register, manage capacity, and check in at DIG events, including DC27 | Schema and lifecycle tests; no live registration |
+| Committees | Organize rosters, roles, and restricted documents | Model and authorization rules; no deployed staff portal |
+| Governance | Maintain terms, roles, election records, and eligible-voter snapshots | Schema and eligibility rules; **no ballot casting or counting** |
+| Communications | Manage explicit subscriptions, campaigns, and delivery outcomes | Newsletter schema and MailerSend adapter; **sending disabled** |
+| Dues | Record externally confirmed payments and membership terms | Data model only; **no payment processor integration** |
 
-| Directory | Responsibility |
-|---|---|
-| `wordpress/dig-membership/` | Installable WordPress plugin: `[dig_membership_join]` and `[dig_membership_verify]` shortcodes, theme-friendly styling and browser-side logic |
-| `cf/membership-site/` | Worker gateway: Turnstile validation, restricted WordPress CORS, server-side Salesforce OAuth and REST forwarding |
-| `dig-src/` | **Salesforce overlay**, not a standalone Salesforce project. Apex services and metadata to apply to DIG's existing Salesforce source tree |
-| `manifest/` | Targeted Salesforce deployment manifest to be used **in the existing Salesforce project** |
-| `docs/runbooks/` | Staging, cutover and rollback plan |
+These are development milestones, not a claim that DIG has replaced its existing systems.
 
-## Salesforce-native email
+## How it fits together
 
-Salesforce sends the verification link and, after new-member activation, a WordPress-specific confirmation. A staff-scheduled Salesforce Batch Apex can send 30-day and 7-day WEBSITE_FREE renewal reminders after sandbox and policy review. Announcements remain a staff-driven Salesforce List Email/campaign action, never a public API. The read-only scripts/check-email-limits.mjs monitor queries actual Salesforce daily email capacity; it does not reserve capacity or send email. See [Salesforce email runbook](docs/runbooks/salesforce-email.md).
-
-**No renewal job is scheduled or enabled by this repository.**
-
-## Public GitHub Pages demo
-
-**Demo URL:** https://mcc0nnell.github.io/dig-nexus/
-
-The `Publish offline membership demo to GitHub Pages` GitHub Actions workflow serves **only** `demo/offline.html` as the site index, keeping Salesforce overlay files, secrets, and the WordPress plugin out of the deployment artifact. The demonstration is **synthetic and nonfunctional as a live membership service**: no external requests, authentication, cookies, persistence, WordPress credentials, or real member data.
-
-On its first run, the workflow uses its Pages write permission to enable the Pages site and set the source to **GitHub Actions**. If repository or organization policy prevents automatic enablement, a repository administrator can select **Settings → Pages → Build and deployment → Source: GitHub Actions** manually. Run the `Publish offline membership demo to GitHub Pages` workflow using its manual `workflow_dispatch` button if needed. The workflow runs offline tests and publishes the latest HTML to GitHub Pages automatically when the demo changes. A green membership CI job does not by itself establish that Pages is live.
-
-Do **not** use this GitHub Pages address as the live DIG enrollment endpoint. Production registration remains the WordPress plugin at deafingov.org after a Salesforce sandbox and policy review.
-
-## WordPress member portal shell
-
-Add `[dig_membership_portal]` to a WordPress page (for example, `/members`). This new shortcode renders responsive membership, profile/preferences and renewal sections **without showing real records or claiming a member is signed in**. It is a privacy-safe placeholder and does not use the demo's mock identity as authentication. The existing `[dig_membership_join]` and `[dig_membership_verify]` shortcodes remain unchanged.
-
-**Next integration gate:** implement a secure server-side member session, authenticated Salesforce read endpoints with per-member access checks, consent history, and a staging test before showing personal information. The GitHub Pages demo remains synthetic and is not the live WordPress member portal.
-
-## Salesforce-free membership experience preview
-
-Open [demo/offline.html](demo/offline.html) locally for an interactive demo of the future member experience: join → simulated verification → profile → accessibility and email preferences → renewal → email templates → staff metrics. **All identities and figures are synthetic. The demo never sends an email, creates a WordPress account, authenticates anyone, or contacts Salesforce.** It is intentionally separate from the production WordPress plugin.
-
-See [the offline demo guide and Salesforce integration mapping](docs/architecture/experience-demo.md). Run `node --test demo/offline.test.cjs` to check its scripted flows. The public staff view is a visual mock, **not an administrator login**.
-
-## Registration flow
-
-1. A visitor opens `https://deafingov.org/membership` (WordPress page with `[dig_membership_join]`).
-2. The browser sends a verified Turnstile response, name and email to the Cloudflare Worker on a separate HTTPS origin.
-3. The Worker requests a one-time email link from Salesforce, which uses the website-specific WordPress `/magic` URL with token in the URL **fragment**.
-4. WordPress clears the fragment from browser history and sends the one-time token only to the Worker, which forwards it to Salesforce to validate and consume.
-5. Salesforce activates an eligible term in `Membership__c`. Existing current/future terms are preserved. Ambiguous duplicate Contacts fail closed for staff review.
-
-**No WordPress user or role is created.** No dues, authenticated member dashboard, voter eligibility, or self-service renewals are implemented by this candidate. Those require separate policy and security review. The `WEBSITE_FREE` membership level and 12-month term are **provisional and must be confirmed against current DIG policy**.
-
-## Quick local checks
-
-Requires PHP and Node.js 22+:
-
-```bash
-php -l wordpress/dig-membership/dig-membership.php
-node --test wordpress/dig-membership/tests/*.test.cjs
-node --test scripts/check-email-limits.test.mjs
-(cd cf/membership-site && node --test)
+```text
+  WordPress experience / DIG website
+                 |
+                 v
+  Cloudflare Workers (HTTP API, OAuth, authorization)
+      |                         |
+      |                 Durable Object
+      |               (OAuth state and
+      |                session revocation)
+      v
+  Neon PostgreSQL
+  (members, terms, events, governance, consent)
+      |
+      +-- Planned delivery integration --> MailerSend
+      +-- Optional CRM exploration -----> Twenty
 ```
 
-CI runs the same commands. It does **not** deploy to DIG's website, Salesforce, or Cloudflare.
+- **WordPress** is the website-facing integration. The new `[dig_nexus_portal]` shortcode is a development candidate, separate from the older membership shortcodes.
+- **Cloudflare Workers** implements the API and Google OpenID Connect authorization-code flow with PKCE. The session design includes encrypted cookies, one-time OAuth state, and revocation through a Durable Object. Real provider and browser deployment tests are still required.
+- **Neon/PostgreSQL** is the proposed source of truth for the new Nexus domain. The `dig-nexus-dev` development project exists; versioned SQL and isolated PostgreSQL CI do **not** imply every migration has been applied to Neon or production.
+- **MailerSend** has an adapter, not an enabled mailing operation. Consent, one-click unsubscribe, suppression, signed webhooks, sender verification, and delivery controls remain release gates.
+- **Twenty** is an optional CRM experiment, **not** the member system of record and not a deployed dependency.
 
-## Installation on staging
+The older WordPress/Salesforce membership candidate remains in this repository for compatibility and evaluation. **There is no approved Salesforce-to-Neon migration or production cutover.** See [Legacy enrollment path](#legacy-enrollment-path).
 
-- [WordPress plugin installation](wordpress/dig-membership/README.md)
-- [Cloudflare Worker configuration](cf/membership-site/README.md)
-- [Website membership cutover and rollback](docs/runbooks/website-membership-cutover.md)
-- [Salesforce email quotas, announcements, renewal batches, and rollback](docs/runbooks/salesforce-email.md)
+## Repository map
 
-Never put Salesforce credentials, Turnstile private keys, or member PII in WordPress settings, commits, CI variables visible to pull requests, or public issues. Review [SECURITY.md](SECURITY.md).
+| Path | What lives there |
+| --- | --- |
+| [`nexus/`](nexus/) | PostgreSQL schemas, domain policies, event lifecycle, authentication, member API, and WordPress Nexus shell |
+| [`newsletter/`](newsletter/) | Subscriber/campaign schemas, delivery adapter, unsubscribe tokens, and rollout rules |
+| [`demo/`](demo/) | Offline, synthetic member experience published to GitHub Pages |
+| [`wordpress/dig-membership/`](wordpress/dig-membership/) | Existing WordPress membership plugin candidate |
+| [`cf/membership-site/`](cf/membership-site/) | Existing Cloudflare gateway for the Salesforce-oriented enrollment path |
+| [`dig-src/`](dig-src/) and [`manifest/`](manifest/) | Salesforce overlay and scoped deployment manifest; **not** a standalone Salesforce project |
+| [`experiments/dig-nexus/`](experiments/dig-nexus/) | Read-only-by-default Twenty/Neon integration spike |
+| [`docs/`](docs/) | Architecture notes and operator runbooks |
 
-## Integrating with DIG's Salesforce repo
+### Authentication and registration are different gates
 
-`dig-src/` contains the new classes/metadata **and updated versions of four existing classes**. They need to be reconciled with the latest DIG Salesforce baseline before deployment. Do not blindly overwrite live org source or run the manifest outside DIG's existing SFDX project. There is a known legacy `Membership_Term__c` vs. `Membership__c` split; this path intentionally uses `Membership__c` but does not backfill historical data.
+The proposed Google sign-in flow is `/auth/google/start` → Google → `/auth/google/callback` → session cookie → `/portal` and read-only `/api/me`. Sign-in alone does **not** create, approve, renew, or activate a membership.
 
-## Roadmap
+`POST /api/register` is separately protected and **disabled by default**. It currently expects a verified bearer identity plus origin/rate-limit controls; it does **not** accept the Google browser session cookie as registration authorization. Do not combine these paths without a reviewed identity, CSRF, and consent design.
 
-1. Sandbox contract tests for Salesforce and Contact field rollups; reconcile duplicate Contacts and legacy membership terms.
-2. Staging end-to-end join, email delivery, invalid/expired/replayed link, screen-reader, keyboard, and anti-abuse tests.
-3. Explicit membership policy, privacy/consent and retention review; pilot with admins and rollback.
-4. Authenticated self-service profile, renewal workflow, communication preferences, and optional directory/governance modules after security review.
+Read [Google OIDC](nexus/GOOGLE-OIDC.md), [runtime integration](nexus/RUNTIME-INTEGRATION.md), and [registration deployment gates](nexus/REGISTRATION-DEPLOYMENT.md) before wiring up real credentials or member data.
 
-Contributions are welcome, but avoid submitting personal member data or production logs in issues or pull requests.
+## Try the project
+
+### View the demo
+
+Visit **[mcc0nnell.github.io/dig-nexus](https://mcc0nnell.github.io/dig-nexus/)** or open [`demo/offline.html`](demo/offline.html) locally. The public demo is a **self-contained simulation**: no login, persistence, emails, API requests, or actual member records. It must never be used as a production enrollment link.
+
+### Run local checks
+
+Use **Node.js 22+** and npm. These commands validate isolated code paths and mock integrations; they do not deploy infrastructure or send email.
+
+```bash
+git clone https://github.com/mcc0nnell/dig-nexus.git
+cd dig-nexus
+npm ci
+
+# Nexus and newsletter unit tests
+node --test nexus/*.test.mjs \
+  nexus/api/worker.test.mjs \
+  nexus/api/registration.test.mjs \
+  nexus/api/registration-http.test.mjs \
+  nexus/api/registration-db.test.mjs \
+  nexus/api/oidc.test.mjs \
+  nexus/api/database.test.mjs \
+  nexus/api/member-http.test.mjs \
+  nexus/api/google-auth.test.mjs \
+  newsletter/*.test.mjs
+
+# Offline demo
+node --test demo/offline.test.cjs
+
+# Validate the Cloudflare Worker bundle without deploying
+npx wrangler deploy --dry-run --config nexus/wrangler.jsonc
+```
+
+Additional checks run in GitHub Actions: Deno API compatibility, PostgreSQL 17 schema/constraint validation, and legacy WordPress/Cloudflare tests. For the WordPress PHP syntax check, use PHP 8.3 (see [membership CI](.github/workflows/ci.yml)).
+
+**Do not run schema files against a production database to “try it out.”** Follow the ordered migrations and disposable-branch guidance in [registration deployment](nexus/REGISTRATION-DEPLOYMENT.md).
+
+## Privacy, accessibility, and trust boundaries
+
+DIG Nexus is for a Deaf-led organization. Accessibility and personal-data protection are requirements, not later enhancements:
+
+- **Accessible by design:** keyboard and screen-reader operation, clear language, and ASL/captioned content need review with real users before launch.
+- **Explicit consent:** being a member does not subscribe someone to a newsletter. Directory participation is opt-in and private by default.
+- **Least privilege:** enforce identity, roles, and record access on the server. Never trust a browser-supplied member ID, role, or consent flag.
+- **Sensitive information stays restricted:** accessibility/accommodation requests belong with authorized event staff, not public directories or marketing lists.
+- **Financial and voting boundaries:** do not store card details; verify payment-provider receipts. Voter eligibility is **not** a secure secret-ballot system.
+- **No production secrets or personal data in Git:** use scoped runtime secrets and synthetic test identities. See [SECURITY.md](SECURITY.md).
+
+## Legacy enrollment path
+
+The [WordPress membership plugin](wordpress/dig-membership/README.md), [Salesforce gateway](cf/membership-site/README.md), and [Salesforce overlay](dig-src/) were built as a **separate development candidate** for enrollment through DIG's existing website and Salesforce environment. They require sandbox reconciliation, DIG policy approval, and WordPress staging tests before deployment.
+
+Identifiers such as `wordpress/dig-membership/`, `[dig_membership_join]`, `[dig_membership_verify]`, and the `dig-membership-site` Worker name are intentionally retained for compatibility. A repository rename is **not** a migration of these integration contracts.
+
+Operator references: [website cutover and rollback](docs/runbooks/website-membership-cutover.md), [Salesforce email](docs/runbooks/salesforce-email.md), and [legacy experience mapping](docs/architecture/experience-demo.md).
+
+## Next milestones
+
+1. **Prove the identity-to-member read path:** deploy to a non-production Worker and isolated Neon branch, complete real Google OAuth and Durable Object tests, verify grants, and exercise `/api/me` end to end.
+2. **Decide the registration contract:** document the verified-identity trust boundary, complete atomic/idempotent registration tests, and retain the default-off gate until reviewed.
+3. **Ship a usable accessible member experience:** test the WordPress flow on real browsers with Deaf members and assistive-technology users; establish privacy, incident response, and retention procedures.
+4. **Enable integrations one at a time:** MailerSend consent/suppression and verified delivery, payment-provider reconciliation, events, committees, and administrative reporting.
+5. **Treat elections separately:** commission and review an appropriate ballot system before any binding vote.
+
+For the detailed status and known limitations, use [`nexus/IMPLEMENTATION-STATUS.md`](nexus/IMPLEMENTATION-STATUS.md) alongside the more recent [runtime integration](nexus/RUNTIME-INTEGRATION.md) notes.
+
+## Contributing
+
+Issues and small, testable pull requests are welcome. Prefer changes with a documented user need, explicit security and privacy boundaries, and synthetic tests. Never include member records, credentials, or production logs in an issue or pull request.
+
+Licensed under [Apache 2.0](LICENSE). DIG Nexus is a development project; this repository does not authorize changes to DIG production infrastructure or policy.
