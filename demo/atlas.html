@@ -34,15 +34,15 @@ h2{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 10px;letter-spacing:-.035em}h3{
 <a class="skip" href="#main">Skip to content</a>
 <header>
 <a class="brand" href="./"><b>DIG</b><span>NEXUS / SYSTEMS ATLAS</span></a>
-<nav aria-label="Page sections"><a href="#architecture">Architecture</a><a href="#boundaries">Trust boundaries</a><a href="#signals">Synthetic charts</a><a href="./">Offline member demo</a></nav>
+<nav aria-label="Page sections"><a href="#architecture">Architecture</a><a href="#boundaries">Trust boundaries</a><a href="#journeys">Operational journeys</a><a href="#signals">Synthetic charts</a><a href="./">Offline demo</a></nav>
 </header>
 <main id="main">
 <section class="hero">
 <p class="eyebrow">Engineering visualization / October 2026</p>
 <h1>One platform.<br><em>Clear boundaries.</em></h1>
-<p class="lead">An explorable map of DIG Nexus: how members reach services, where verified state lives, and why identity, consent, conference admissions and voting must stay separate.</p>
-<div class="tags"><span>Docker + Caddy</span><span>Neon PostgreSQL</span><span>NTC27 foundation</span><span>Accessible by design</span></div>
-<div class="notice"><strong>Development preview · synthetic examples only.</strong> The diagrams show intended architecture and guarded development routes. Charts use invented fixture values, not DIG records, Neon queries or real NTC registrations. This page loads only pinned Mermaid/ECharts libraries from a CDN; it makes no application API requests.</div>
+<p class="lead">Explore the updated DIG Nexus architecture across membership, NTC admission, staff constituent work, and consent-first communications. Every path has a distinct authorization boundary.</p>
+<div class="tags"><span>Docker + Caddy</span><span>Neon PostgreSQL</span><span>NTC27 / Zeffy</span><span>Staff constituent operations</span><span>Consent-first newsletter</span></div>
+<div class="notice"><strong>Development preview · synthetic examples only.</strong> Diagrams distinguish implemented development boundaries from live services. Charts use invented fixtures, including the offline demo’s sample member and newsletter counts—not DIG records, Neon queries, or real NTC registrations. This page loads only pinned Mermaid/ECharts libraries from a CDN; it makes no application API requests.</div>
 </section>
 <section id="architecture" aria-labelledby="architecture-heading">
 <div class="section-head"><div><p class="eyebrow">01 / Architecture</p><h2 id="architecture-heading">The runtime at a glance</h2></div><p>WordPress is the experience layer; authorization and domain state belong to the containerized Nexus API and Neon. Integrations are independent boundaries.</p></div>
@@ -81,13 +81,81 @@ flowchart LR
     classDef separate fill:#4c3853,stroke:#ffd087,color:#fff
     class Verified,Pending,Review,Active,Snapshot protected
     class Optin,Subscribed,Directory,Private,Access,Restricted,Visitor,Event,Payment,Checkin separate
-</pre></div><p class="note">This is a logical policy diagram, not a claim that real-member enrollment, email, payment or check-in is enabled.</p></div>
+</pre></div><p class="note">Sign-in does not activate membership, approve a campaign, expose a staff case or grant a ticket. No real-world email, checkout, check-in or ballot service is enabled by these diagrams.</p></div>
 </section>
+
+<section id="journeys" aria-labelledby="journeys-heading">
+<div class="section-head"><div><p class="eyebrow">03 / Operational journeys</p><h2 id="journeys-heading">Four journeys. Different permissions.</h2></div>
+<p>Based on the updated offline walkthroughs and current development contracts. The diagrams remain source-readable when third-party rendering is unavailable.</p></div>
+<div class="cards">
+<article class="card wide" aria-labelledby="ntc-flow-title"><p class="kicker">NTC · verified paid admission</p><h3 id="ntc-flow-title">Purchase is not admission</h3>
+<div class="mermaid-wrap"><pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Attendee
+    participant Nexus as DIG Nexus
+    participant Neon as Neon PostgreSQL
+    participant Zeffy as Zeffy hosted checkout
+    participant Staff as Authorized event staff
+    Note over Attendee,Staff: Staging contract only - live sales and expiry jobs off
+    Attendee->>Nexus: Start registration (no membership required)
+    Nexus->>Neon: Record non-holding payment request
+    Nexus-->>Attendee: Zeffy hosted checkout
+    Attendee->>Zeffy: Pay on provider page
+    Zeffy-->>Nexus: Signed event notification
+    Nexus->>Neon: Validate purchase and atomically claim seat
+    alt Valid paid receipt and available seat
+      Neon-->>Nexus: Verified admission
+      Nexus-->>Attendee: Scoped confirmation without accommodation data
+      Attendee->>Staff: Present scoped QR or manual confirmation
+      Staff->>Nexus: Authorized check-in
+    else Mismatch, refund, late payment or sold out
+      Neon-->>Nexus: Restricted manual review
+      Nexus-->>Staff: Review required, no admission granted
+    end
+</pre></div><p class="note">Non-holding requests do not decrement inventory. Payment-provider success alone is never sufficient for admission. Example behavior only: no payment or ticket is created here.</p></article>
+<article class="card" aria-labelledby="cases-flow-title"><p class="kicker">Constituents · private records</p><h3 id="cases-flow-title">Role-scoped staff follow-ups</h3>
+<div class="mermaid-wrap"><pre class="mermaid">
+flowchart TB
+  Portal["Staff association workspace"] --> Auth{"Verified staff role?"}
+  Auth -->|No| Deny["Access denied"]
+  Auth -->|Yes| API["Nexus constituent API"]
+  API --> Store[("Neon associations<br/>affiliations and cases")]
+  API --> Audit["Restricted activity records"]
+  Public["Public member portal"] -. "cannot grant staff authority" .-> Deny
+  classDef allow fill:#155976,stroke:#62e7cf,color:#fff
+  classDef restrict fill:#50394f,stroke:#ffd087,color:#fff
+  class API,Store,Audit allow
+  class Auth,Deny,Portal,Public restrict
+</pre></div><p class="note">The offline case example is fictional and has no login. Real staff authorization, record access and case editing must be enforced by the server.</p></article>
+<article class="card" aria-labelledby="newsletter-flow-title"><p class="kicker">Communications · suppress by default</p><h3 id="newsletter-flow-title">Consent before campaign queue</h3>
+<div class="mermaid-wrap"><pre class="mermaid">
+flowchart TB
+  Audience["Candidate association audience"] --> Consent{"Explicit mailing consent?"}
+  Consent -->|No or pending| Exclude["Excluded from delivery"]
+  Consent -->|Yes| Scope["Consented audience"]
+  Scope --> Approval{"Staff campaign approval?"}
+  Approval -->|No| Draft["Remain draft"]
+  Approval -->|Yes| Queue["Guarded delivery claim"]
+  Stop["Unsubscribe or suppression"] --> Exclude
+  Stop -. "before send" .-> Queue
+  Queue -. "default-off provider" .-> Mail["MailerSend adapter"]
+  classDef permit fill:#155976,stroke:#62e7cf,color:#fff
+  classDef denied fill:#50394f,stroke:#ffd087,color:#fff
+  class Scope,Queue permit
+  class Consent,Exclude,Approval,Draft,Stop,Mail,Audience denied
+</pre></div><p class="note">The synthetic preview has one opted-in identity and one pending identity; nothing is sent. Mailing remains disabled pending verification and release gates.</p></article>
+</div></section>
+
 <section id="signals" aria-labelledby="signals-heading">
-<div class="section-head"><div><p class="eyebrow">03 / Interactive exhibits</p><h2 id="signals-heading">What a dashboard could feel like</h2></div><p>ECharts-powered illustrations use static example values, include accessible tables, and contain no personally identifiable information.</p></div>
+<div class="section-head"><div><p class="eyebrow">04 / Interactive exhibits</p><h2 id="signals-heading">Illustrative operations, not live analytics</h2></div><p>ECharts views reflect synthetic scenarios only. Sample membership and consent counts match the offline experience; invented capacity figures illustrate why paid inventory must be reconciled atomically.</p></div>
 <div class="cards">
 <article class="card" aria-labelledby="members-title"><p class="kicker">Synthetic membership states</p><h3 id="members-title">Illustrative member mix</h3><div id="members-chart" class="chart" role="img" aria-label="Illustrative sample of 2,000 invented members: 1,775 active, 65 pending, 160 lapsed."><p class="chart-fallback">Charts require the ECharts CDN; the table below always contains the values.</p></div><div class="table-wrap"><table><caption>Invented sample counts, not DIG statistics</caption><thead><tr><th scope="col">State</th><th scope="col">Count</th></tr></thead><tbody><tr><td>Active</td><td>1,775</td></tr><tr><td>Pending</td><td>65</td></tr><tr><td>Lapsed</td><td>160</td></tr></tbody></table></div></article>
-<article class="card" aria-labelledby="capacity-title"><p class="kicker">Synthetic workshop inventory</p><h3 id="capacity-title">Capacity without overselling</h3><div id="capacity-chart" class="chart" role="img" aria-label="Invented workshop A: 24 reserved and 16 available. B: 42 reserved and 8 available. C: 18 reserved and 22 available."><p class="chart-fallback">Charts require the ECharts CDN; the table below always contains the values.</p></div><div class="table-wrap"><table><caption>Fictional workshop fixtures, not the DC27 schedule</caption><thead><tr><th scope="col">Workshop</th><th scope="col">Reserved</th><th scope="col">Open</th></tr></thead><tbody><tr><td>Sample A</td><td>24</td><td>16</td></tr><tr><td>Sample B</td><td>42</td><td>8</td></tr><tr><td>Sample C</td><td>18</td><td>22</td></tr></tbody></table></div></article>
+<article class="card" aria-labelledby="capacity-title"><p class="kicker">Synthetic NTC workshop inventory</p><h3 id="capacity-title">Only verified admission allocates inventory</h3><div id="capacity-chart" class="chart" role="img" aria-label="Invented workshops: A has 24 verified allocations and 16 open; B 42 allocated and 8 open; C 18 allocated and 22 open. Non-holding payment requests are not counted."><p class="chart-fallback">Charts require the ECharts CDN; the table below always contains the values.</p></div><div class="table-wrap"><table><caption>Invented workshop fixtures; paid intents do not hold seats</caption><thead><tr><th scope="col">Workshop</th><th scope="col">Verified allocated</th><th scope="col">Open</th></tr></thead><tbody><tr><td>Sample A</td><td>24</td><td>16</td></tr><tr><td>Sample B</td><td>42</td><td>8</td></tr><tr><td>Sample C</td><td>18</td><td>22</td></tr></tbody></table></div></article>
+<article class="card wide" aria-labelledby="consent-title"><p class="kicker">Consent first · synthetic audience</p><h3 id="consent-title">Only explicit opt-in is eligible</h3>
+<div id="consent-chart" class="chart" role="img" aria-label="Offline newsletter example: one opted-in subscriber is eligible, one pending consent is excluded; zero messages sent."><p class="chart-fallback">Charts require the ECharts CDN; the data table below always remains visible.</p></div>
+<div class="table-wrap"><table><caption>Offline sample identities, not DIG subscribers</caption><thead><tr><th scope="col">Consent state</th><th scope="col">Sample identities</th><th scope="col">Delivery eligible</th></tr></thead><tbody><tr><td>Explicitly opted in</td><td>1</td><td>1</td></tr><tr><td>Consent pending</td><td>1</td><td>0</td></tr><tr><td>Actual emails sent</td><td>0</td><td>0</td></tr></tbody></table></div>
+<p class="note">Audience approval and a guarded queue are distinct from delivery. Unsubscribe must suppress even a previously queued recipient.</p></article>
 </div><p class="note">For complete operational boundaries, read <a href="https://github.com/mcc0nnell/dig-nexus/blob/main/nexus/PAID-INVENTORY.md">paid inventory</a>, <a href="https://github.com/mcc0nnell/dig-nexus/blob/main/nexus/MAGIC-PAYMENT-RECOVERY.md">magic link recovery</a>, and <a href="https://github.com/mcc0nnell/dig-nexus/blob/main/nexus/DOCKER.md">Docker deployment</a>.</p>
 </section>
 </main>
@@ -111,11 +179,20 @@ window.addEventListener('load', () => {
     legend:{top:0,textStyle:{color:'#d7ebf2'}},
     xAxis:{type:'category',data:['Sample A','Sample B','Sample C'],axisLabel:{color:'#d7ebf2',interval:0},axisLine:{lineStyle:{color:'#507286'}}},
     yAxis:{type:'value',name:'Sample seats',nameTextStyle:{color:'#d7ebf2'},axisLabel:{color:'#d7ebf2'},splitLine:{lineStyle:{color:'#31546a'}}},
-    series:[{name:'Reserved',type:'bar',stack:'capacity',barMaxWidth:62,data:[24,42,18],itemStyle:{borderRadius:[0,0,4,4]}},
+    series:[{name:'Verified allocated',type:'bar',stack:'capacity',barMaxWidth:62,data:[24,42,18],itemStyle:{borderRadius:[0,0,4,4]}},
             {name:'Open',type:'bar',stack:'capacity',barMaxWidth:62,data:[16,8,22],itemStyle:{borderRadius:[4,4,0,0]}}]});
-  for (const chart of [members, capacity]) chart.getDom().querySelector('.chart-fallback')?.remove();
+  const consent=echarts.init(document.getElementById('consent-chart'),null,{renderer:'svg'});
+  consent.setOption({...common,color:['#62e7cf','#ffd087'],
+    grid:{left:132,right:30,top:40,bottom:38},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{type:'value',max:1,interval:1,axisLabel:{color:'#d7ebf2'},splitLine:{lineStyle:{color:'#31546a'}}},
+    yAxis:{type:'category',data:['Opted in','Pending'],axisLabel:{color:'#e7f6fa'},axisLine:{lineStyle:{color:'#507286'}}},
+    series:[{name:'Eligible',type:'bar',barMaxWidth:56,data:[1,0],itemStyle:{borderRadius:[0,5,5,0]},label:{show:true,position:'right',color:'#e7f6fa',formatter:({value})=>String(value)}},
+      {name:'Excluded',type:'bar',barMaxWidth:56,data:[0,1],itemStyle:{borderRadius:[0,5,5,0]},label:{show:true,position:'right',color:'#e7f6fa',formatter:({value})=>String(value)}}]});
+  const charts=[members,capacity,consent];
+  for (const chart of charts) chart.getDom().querySelector('.chart-fallback')?.remove();
   let raf=0;
-  window.addEventListener('resize',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{members.resize();capacity.resize()})});
+  window.addEventListener('resize',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{for(const chart of charts)chart.resize()})});
 });
 </script>
 <script type="module">
