@@ -1,7 +1,7 @@
 // Registration core. The caller must supply a VERIFIED identity and a transactional DB adapter.
 // Never accept member identity, status, roles, or consent from client JSON.
 export function normalizeEmail(email) {
- if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("invalid_email");
+ if (typeof email !== "string" || email.trim().length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) throw new Error("invalid_email");
  return email.trim().toLowerCase();
 }
 export function parseRegistration(body) {
