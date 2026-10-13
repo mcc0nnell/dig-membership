@@ -191,3 +191,13 @@ explicitly approve `NEXUS_JOB_WORKER_ENABLED=true` in a separate override.
 Any live email and ticket/payment operations remain behind their existing flags.
 Node 22+ and Cosign on the operator's host are required for the fail-closed
 image-upgrade verification.
+## Email magic sign-in and purchaser payment recovery
+
+See [MAGIC-PAYMENT-RECOVERY.md](MAGIC-PAYMENT-RECOVERY.md) for the Nexus-native
+single-use sign-in tokens, verified-buyer Zeffy reconciliation, and manual
+review queue. Apply migration 011 after the background-job migration 010 on isolated staging. Add a
+mode-0600 `deploy/secrets/magic_link_session_secret` (48+ random base64
+characters) and a verified `MAILERSEND_FROM_EMAIL`. Existing
+`deploy/secrets/mailersend_api_token` is also mounted into Nexus for login
+messages; neither the login flag nor the email-delivery flag is on by default.
+No native Google Cloud runtime or Salesforce account is required.

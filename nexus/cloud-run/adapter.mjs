@@ -16,7 +16,8 @@ export async function cloudRunEnvironment(config=process.env){
  }
  // These gates are explicitly default-off, even with a working database.
  env.ticketingRateLimiter=env.pgClient?createPostgresRateLimiter(env.pgClient,{scope:'ticketing',limit:10,seconds:60}):undefined;
- for(const flag of ['REGISTRATION_ENABLED','MEMBER_ENROLLMENT_ENABLED','ORGANIZER_ENABLED','CONFERENCE_REGISTRATION_ENABLED','NTC_TICKETING_ENABLED','NTC_TICKETS_ENABLED','NTC_CHECKIN_ENABLED','NTC_ZEFFY_WEBHOOK_ENABLED','DIG_TRANSACTIONAL_EMAIL_ENABLED'])
+ env.magicRateLimiter=env.pgClient?createPostgresRateLimiter(env.pgClient,{scope:'magic-login',limit:5,seconds:3600}):undefined;
+ for(const flag of ['REGISTRATION_ENABLED','MEMBER_ENROLLMENT_ENABLED','ORGANIZER_ENABLED','CONFERENCE_REGISTRATION_ENABLED','NTC_TICKETING_ENABLED','NTC_TICKETS_ENABLED','NTC_CHECKIN_ENABLED','NTC_ZEFFY_WEBHOOK_ENABLED','DIG_TRANSACTIONAL_EMAIL_ENABLED','MAGIC_LINK_ENABLED','MAGIC_LINK_EMAIL_ENABLED'])
   env[flag]=config[flag]==='true'?'true':'false';
  return env;
 }

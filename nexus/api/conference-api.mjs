@@ -1,6 +1,7 @@
 import {createConferenceDb} from './conference-db.mjs';
 import {createNeonClient} from './database.mjs';
 import {sessionIdentity} from './google-auth.mjs';
+import {attendeeIdentity} from './magic-auth.mjs';
 import {conferencePage,conferenceClient,coordinationPage,coordinationClient} from './conference-page.mjs';
 const json=(value,status)=>new Response(JSON.stringify(value),{status,headers:{
  'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'
@@ -44,7 +45,7 @@ export async function conferenceRequest(request,env,pathname){
  if(env.CONFERENCE_REGISTRATION_ENABLED!==true&&env.CONFERENCE_REGISTRATION_ENABLED!=='true')
   return json({error:'conference_unavailable'},503);
  let identity;
- try {identity=await (env.verifyConferenceIdentity??((req)=>sessionIdentity(req,env)))(request,env);}
+ try {identity=await (env.verifyConferenceIdentity??((req)=>command==='coordination'?sessionIdentity(req,env):attendeeIdentity(req,env)))(request,env);}
  catch{return json({error:'unauthorized'},401);}
  if(!validIdentity(identity))return json({error:'unauthorized'},401);
  if(expectedMethod!=='GET'&&request.headers.get('origin')!==new URL(request.url).origin)

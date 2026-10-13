@@ -10,7 +10,7 @@ async function api(path,method='GET',data){
  if(method!=='GET'){options.headers={'content-type':'application/json'};options.body=JSON.stringify(data);}
  const r=await fetch(base+path,options);
  if(!r.ok){const code=(await r.json().catch(()=>({}))).error;
-  if(r.status===401)throw Error('Sign in using the Google link above, then return here.');
+  if(r.status===401)throw Error('Sign in using Google or an email magic link above, then return here.');
   if(r.status===409)throw Error('Identity conflict: ask the conference organizer for account help.');
   throw Error('Request not completed ('+(code||r.status)+').');}
  return r.json();
@@ -25,6 +25,7 @@ function render(){
  byId('cancel-event').hidden=!active;
  byId('access-form').hidden=!active;
  byId('create-qr').hidden=self?.status!=='registered';
+ byId('payment-recovery').hidden=self?.status!=='registered';
  const note=byId('access-note');note.value=self?.accessibilityRequest??'';
  const workshops=byId('workshops');workshops.replaceChildren();
  const booked=new Map((self?.workshops||[]).map(w=>[w.slug,w.status]));
@@ -70,6 +71,15 @@ async function ticketingStatus(){
   }
  }catch{}
 }
+byId('payment-recovery').addEventListener('submit',e=>{e.preventDefault();run(async()=>{
+ const paymentId=byId('zeffy-payment-id').value.trim();
+ const r=await fetch('/api/ticketing/'+encodeURIComponent(slug)+'/recover',{
+  method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},
+  body:JSON.stringify({paymentId})});
+ const data=await r.json();
+ if(!r.ok){say(data.error==='buyer_email_mismatch'?'The purchase email does not match this signed-in email. Contact an NTC organizer for manual review.':'Payment could not be verified ('+(data.error||r.status)+').');return;}
+ await ticketingStatus();say('Zeffy payment verification: '+data.payment.status+'.');
+});});
 byId('create-qr').addEventListener('click',()=>run(async()=>{
  if(!confirm('Generate a QR credential? This replaces any previous unused credential.'))return;
  const r=await fetch('/api/ticketing/'+encodeURIComponent(slug)+'/issue',{

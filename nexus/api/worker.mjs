@@ -11,6 +11,8 @@ import {renderAgendaPage} from "./agenda-page.mjs";
 import {organizerRequest} from "./organizer.mjs";
 import {conferenceRequest} from "./conference-api.mjs";
 import {ticketingRequest} from "./ticketing.mjs";
+import {magicRequest} from "./magic-auth.mjs";
+import {magicPage,magicClient} from "./magic-page.mjs";
 import {startGoogleLogin,finishGoogleLogin,sessionIdentity,logoutGoogle,portalPage,portalClient,googleAuthConfigured} from "./google-auth.mjs";
 const headers={"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"};
 const json=(value,status)=>new Response(JSON.stringify(value),{status,headers});
@@ -47,6 +49,10 @@ export default {
    }catch{return json({error:"agenda_unavailable"},503);}
   }
   if(url.pathname==="/api/enroll")return requestMembership(request,env);
+  if(url.pathname==='/auth/magic')return request.method==='GET'?magicPage():json({error:'method_not_allowed'},405);
+  if(url.pathname==='/magic-client.mjs')return request.method==='GET'?magicClient():json({error:'method_not_allowed'},405);
+  const magic=await magicRequest(request,env,url.pathname);
+  if(magic)return magic;
   const ticketing=await ticketingRequest(request,env,url.pathname);
   if(ticketing)return ticketing;
   const conference=await conferenceRequest(request,env,url.pathname);
