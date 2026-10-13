@@ -22,6 +22,7 @@ services:
       ORGANIZER_ENABLED: "false"
       CONSTITUENTS_ENABLED: "false"
       CAMPAIGNS_ENABLED: "false"
+      NEWSLETTER_UNSUBSCRIBE_ENABLED: "false"
       CONFERENCE_REGISTRATION_ENABLED: "false"
       NTC_TICKETING_ENABLED: "false"
       NTC_TICKETS_ENABLED: "false"

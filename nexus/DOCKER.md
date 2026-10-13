@@ -219,3 +219,14 @@ staging branch. A paid event requires **finite capacity** and complete Zeffy
 campaign/rate/form mapping before registration. Operators must separately
 verify actual Zeffy stock for each date/occurrence. No stock reservation or
 automatic refund exists across Zeffy and Nexus.
+
+
+
+### Newsletter delivery remains off
+
+The selected Docker configuration sets `NEWSLETTER_UNSUBSCRIBE_ENABLED=false`
+and the MailerSend sending/marketing flags stay disabled. The
+consent recheck/one-click flow is tested with synthetic data but is **not**
+launched and no scheduled marketing worker is present. See
+[ASSOCIATION-OPERATIONS.md](ASSOCIATION-OPERATIONS.md) before planning
+a real provider acceptance test.

@@ -1,4 +1,6 @@
 import {associationOpsRequest} from "./association-ops.mjs";
+import {associationPage,associationClient,associationStyle} from "./association-page.mjs";
+import {unsubscribeRequest} from "./newsletter-unsubscribe.mjs";
 export {AuthState} from "./auth-state.mjs";
 import {registerMember} from "./registration.mjs";
 import {createOidcVerifier} from "./oidc.mjs";
@@ -21,6 +23,11 @@ export default {
  async fetch(request,env={}) {
   const url=new URL(request.url);
   if(url.pathname==='/portal'&&request.method==='GET')return portalPage();
+  if(url.pathname==='/association'&&request.method==='GET')
+   return env.CONSTITUENTS_ENABLED===true||env.CONSTITUENTS_ENABLED==='true'||env.CAMPAIGNS_ENABLED===true||env.CAMPAIGNS_ENABLED==='true'?
+    associationPage():json({error:'association_unavailable'},503);
+  if(url.pathname==='/association-client.mjs'&&request.method==='GET')return associationClient();
+  if(url.pathname==='/association.css'&&request.method==='GET')return associationStyle();
   if(url.pathname==='/portal-client.mjs'&&request.method==='GET')return portalClient();
   if(url.pathname==='/portal.css'&&request.method==='GET')return new Response(PORTAL_STYLE,{headers:{'content-type':'text/css; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
   if(url.pathname==='/auth/google/start'&&request.method==='GET')return startGoogleLogin(request,env);
@@ -50,6 +57,8 @@ export default {
    }catch{return json({error:"agenda_unavailable"},503);}
   }
   if(url.pathname==="/api/enroll")return requestMembership(request,env);
+  const unsubscribe=await unsubscribeRequest(request,env,url.pathname);
+  if(unsubscribe)return unsubscribe;
   const association=await associationOpsRequest(request,env,url.pathname);
   if(association)return association;
   if(url.pathname==='/auth/magic')return request.method==='GET'?magicPage():json({error:'method_not_allowed'},405);
