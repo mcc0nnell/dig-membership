@@ -34,10 +34,24 @@ test('gallery uses pinned ECharts and Mermaid with accessible alternatives', () 
   assert.match(atlas, /Charts require the ECharts CDN/);
 });
 
-test('Mermaid docs have three rendered diagrams and guarded feature language', () => {
-  assert.equal((docs.match(/\x60{3}mermaid/g) || []).length, 3);
+test('Mermaid docs map runtime, membership, admission, staff and consent boundaries', () => {
+  assert.equal((docs.match(/\x60{3}mermaid/g) || []).length, 5);
   assert.match(docs, /flowchart LR/);
   assert.match(docs, /sequenceDiagram/);
   assert.match(docs, /live sales and expiry jobs disabled/i);
   assert.match(docs, /does not approve membership/i);
+  assert.match(docs, /Staff constituent access boundary/);
+  assert.match(docs, /Newsletter consent and suppression/);
+});
+
+test('systems atlas reflects new offline NTC, constituent and newsletter journeys', () => {
+  for (const name of ['ntc-flow-title','cases-flow-title','newsletter-flow-title','consent-chart'])
+    assert.match(atlas, new RegExp(name));
+  assert.equal((atlas.match(/class="mermaid"/g) || []).length, 5);
+  assert.match(atlas, /non-holding payment request/i);
+  assert.match(atlas, /Verified allocated/);
+  assert.match(atlas, /one opted-in identity and one pending identity/);
+  assert.match(atlas, /Actual emails sent/);
+  assert.match(atlas, /Restricted activity records/);
+  assert.match(atlas, /default-off provider/);
 });
