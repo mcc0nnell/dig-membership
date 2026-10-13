@@ -7,7 +7,7 @@ test('HTML features labeled accessible intake and explicit consent',async()=>{
  assert.match(html,/lang="en"/);assert.match(html,/aria-live="polite"/);
  assert.match(html,/for="access-note"/);assert.match(html,/id="access-consent"/);
  assert.match(html,/without joining DIG/);assert.match(html,/does not guarantee services/);
- assert.match(html,/No email is sent/);assert.match(r.headers.get('content-security-policy'),/script-src 'self'/);
+ assert.match(html,/Transactional email delivery is optional/);assert.match(r.headers.get('content-security-policy'),/script-src 'self'/);
  assert.doesNotMatch(html,/onClick=|javascript:/i);
 });
 test('browser source does not use HTML insertion for server-originated content',async()=>{

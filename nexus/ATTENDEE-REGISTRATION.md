@@ -101,3 +101,11 @@ confirmed and published by authorized DIG staff.
   workshop seat. The shell script refuses remote or non-explicit databases.
 
 No real member or attendee data was created by this milestone.
+
+## Payment, notifications, and check-in extension
+
+Migration 009 adds Zeffy payment reconciliation, queued transactional email,
+opaque QR credentials, and staff check-in. See [DOCKER.md](DOCKER.md) for the
+current Docker/Neon deployment target and every live-enablement gate. Zeffy
+collects money on its own hosted campaign: returning to Nexus does not prove
+payment, and a receipt reference cannot be presented as a QR credential.

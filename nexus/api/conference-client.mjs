@@ -24,6 +24,7 @@ function render(){
  byId('register-form').hidden=!!active;
  byId('cancel-event').hidden=!active;
  byId('access-form').hidden=!active;
+ byId('create-qr').hidden=self?.status!=='registered';
  const note=byId('access-note');note.value=self?.accessibilityRequest??'';
  const workshops=byId('workshops');workshops.replaceChildren();
  const booked=new Map((self?.workshops||[]).map(w=>[w.slug,w.status]));
@@ -43,8 +44,45 @@ function render(){
  if(!choices.length)workshops.append(el('li','No bookable workshops are published yet.'));
 }
 async function reload(){
- const r=await api('/me');self=r.enrollment;render();
+ const r=await api('/me');self=r.enrollment;render();await ticketingStatus();
 }
+async function ticketingStatus(){
+ const link=byId('zeffy-payment');link.hidden=true;
+ if(self?.status!=='registered')return;
+ try{
+  const r=await fetch('/api/ticketing/'+encodeURIComponent(slug)+'/payment-link',{credentials:'same-origin'});
+  if(!r.ok)return;
+  const data=(await r.json()).payment;
+  if(data?.provider==='zeffy'&&data.status==='paid'){
+   byId('ticket-message').textContent='Payment verified by Zeffy. You can generate your QR credential.';
+   return;
+  }
+  if(data?.provider==='zeffy'&&['refunded','disputed'].includes(data.status)){
+   byId('ticket-message').textContent='Payment needs organizer review. QR credentials are unavailable.';
+   return;
+  }
+  if(data?.provider==='zeffy'&&typeof data.url==='string'){
+   const url=new URL(data.url);
+   if(url.protocol==='https:'&&(/(^|\.)zeffy\.com$/).test(url.hostname)){
+    link.href=url.href;link.hidden=false;
+    byId('ticket-message').textContent='Zeffy collects payment securely. Return here after payment is verified.';
+   }
+  }
+ }catch{}
+}
+byId('create-qr').addEventListener('click',()=>run(async()=>{
+ if(!confirm('Generate a QR credential? This replaces any previous unused credential.'))return;
+ const r=await fetch('/api/ticketing/'+encodeURIComponent(slug)+'/issue',{
+  method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:'{}'
+ });
+ const payload=await r.json();
+ if(!r.ok)throw Error('QR unavailable ('+(payload.error||r.status)+'). An approved paid registration may be required.');
+ const place=byId('qr-display');place.replaceChildren();
+ const image=el('img');image.src=payload.qrDataUrl;image.alt='Your private QR check-in credential';image.width=250;image.height=250;
+ place.append(el('p','Present this QR at check-in. Keep it private.'));
+ place.append(image,el('p','Manual check-in token: '+payload.token));
+ byId('ticket-message').textContent='QR issued. Generating a replacement invalidates this one.';
+}));
 byId('register-form').addEventListener('submit',e=>{e.preventDefault();run(async()=>{
  const displayName=byId('display-name').value.trim();
  const {result}=await api('/register','POST',{displayName});await reload();
