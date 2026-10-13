@@ -7,7 +7,7 @@ const enc=x=>Buffer.from(JSON.stringify(x)).toString("base64url");
 const {privateKey,publicKey}=generateKeyPairSync("rsa",{modulusLength:2048});
 const jwk=publicKey.export({format:"jwk"});jwk.kid="test-key";jwk.alg="RS256";
 const issuer="https://id.example.invalid",audience="dig-nexus";
-const fetcher=async()=>({ok:true,json:async()=>({keys:[jwk]})});
+const fetcher=async()=>new Response(JSON.stringify({keys:[jwk]}),{status:200});
 const verifier=createOidcVerifier({issuer,audience,jwksUrl:issuer+"/jwks",fetcher});
 function token(claims={},header={}) {
  const now=Math.floor(Date.now()/1000);

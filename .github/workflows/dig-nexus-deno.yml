@@ -18,5 +18,9 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci --ignore-scripts
       - name: Run Deno compatibility tests
         run: deno test --no-check --allow-net=127.0.0.1 nexus/api/*.deno.test.mjs
