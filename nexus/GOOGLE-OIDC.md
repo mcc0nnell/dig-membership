@@ -9,7 +9,8 @@
 - Google Authorization Code flow redirects to `/auth/google/callback`; Worker exchanges the code directly with Google's token endpoint, validates Google's ID token signature against Google JWKS using `jose`, checks Google issuer, client audience, nonce, and verified email.
 - Worker issues a one-hour encrypted, Secure, HttpOnly, SameSite=Lax host-only session cookie; redirects to `/portal`. No Google access or refresh token is persisted.
 - `/portal` reads `/api/me` on the same Worker origin, rendering the member status using `textContent`, never trusting HTML from the database. The Worker queries Neon by `(issuer, sub)`; email is not used for account linking. Sign-in does not activate or enroll members.
-- POST `/auth/logout` expires the session cookie. Session encryption uses A256GCM and a secret derived from `GOOGLE_SESSION_SECRET`.
+- POST `/auth/logout` requires a same-origin `Origin` header and expires the browser session cookie. **This is not server-side session revocation:** a stolen cookie remains valid until expiration. Session encryption uses A256GCM and a secret derived from `GOOGLE_SESSION_SECRET`.
+- Portal JavaScript is served as a same-origin module with CSP `script-src 'self'`; no inline script exception.
 
 ## Google Cloud setup (operator action required)
 
@@ -30,3 +31,10 @@ Run `npm ci`, `node --test nexus/api/google-auth.test.mjs nexus/api/member-http.
 - No email-based automatic account linking, roles, membership approval, newsletter consent, or payment processing.
 - `/api/register` still requires its existing explicit origin, rate-limit and enablement gates; it does **not** accept the browser session cookie as registration authorization. This avoids silently changing registration evidence semantics.
 - The portal is deliberately simple; complete keyboard/screen-reader, ASL and captions UX review before public release.
+
+## Security work still required before public launch
+
+- Introduce server-side session IDs and revocation storage (prefer Durable Objects or a transactional database), so logout invalidates a captured cookie and session rotation can be enforced. Current logout only clears the browser cookie.
+- Consume OAuth transaction state atomically in server-side storage to prevent reuse; Google's code is single-use, but the encrypted OAuth state cookie alone is not a one-time record.
+- Test with a real Google OAuth client and browser, including cookie behavior, account switching, Google error responses, logout CSRF, session expiration, and assistive technology.
+- Keep `/api/register` disabled. It still expects a verified bearer token and has not been connected to the Google cookie session. Do not silently allow cookie-authenticated registration without CSRF protections and explicit consent semantics.

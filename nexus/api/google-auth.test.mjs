@@ -28,7 +28,7 @@ test('Google login uses PKCE, nonce, state, encrypted cookie and secure session'
  const session=cookies.find(c=>c.startsWith('__Host-dig_nexus_session='));
  assert.ok(session);
  assert.equal((await sessionIdentity(new Request('https://nexus.example.invalid/api/me',{headers:{cookie:session.split(';')[0]}}),env)).subject,'subject-1');
- assert.equal(logoutGoogle().status,303);
+ assert.equal(logoutGoogle(new Request('https://nexus.example.invalid/auth/logout',{method:'POST',headers:{origin:'https://nexus.example.invalid'}})).status,303);
 });
 test('Google callback rejects missing and mismatched state without token exchange',async()=>{
  const start=await startGoogleLogin(new Request('https://nexus.example.invalid/auth/google/start'),env);
@@ -48,4 +48,14 @@ test('Google callback rejects wrong nonce, audience and unverified email',async(
   assert.equal(result.status,401);
   assert.equal(result.headers.get('set-cookie').includes('Max-Age=0'),true);
  }
+});
+test('logout requires exact same origin and portal avoids inline scripts',async()=>{
+ const {portalPage,portalClient}=await import('./google-auth.mjs');
+ const req=origin=>new Request('https://nexus.example.invalid/auth/logout',{method:'POST',headers:{origin}});
+ assert.equal(logoutGoogle(req('https://attacker.example.invalid')).status,403);
+ assert.equal(logoutGoogle(req('https://nexus.example.invalid')).status,303);
+ const portal=portalPage();
+ assert.equal(portal.headers.get('content-security-policy').includes('unsafe-inline'),false);
+ assert.ok((await portal.text()).includes('src="/portal-client.mjs"'));
+ assert.equal(portalClient().status,200);
 });

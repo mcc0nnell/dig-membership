@@ -3,16 +3,17 @@ import {createOidcVerifier} from "./oidc.mjs";
 import {createRegistrationDb} from "./registration-db.mjs";
 import {createNeonClient} from "./database.mjs";
 import {createMemberDb} from "./member-db.mjs";
-import {startGoogleLogin,finishGoogleLogin,sessionIdentity,logoutGoogle,portalPage,googleAuthConfigured} from "./google-auth.mjs";
+import {startGoogleLogin,finishGoogleLogin,sessionIdentity,logoutGoogle,portalPage,portalClient,googleAuthConfigured} from "./google-auth.mjs";
 const headers={"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"};
 const json=(value,status)=>new Response(JSON.stringify(value),{status,headers});
 export default {
  async fetch(request,env={}) {
   const url=new URL(request.url);
   if(url.pathname==='/portal'&&request.method==='GET')return portalPage();
+  if(url.pathname==='/portal-client.mjs'&&request.method==='GET')return portalClient();
   if(url.pathname==='/auth/google/start'&&request.method==='GET')return startGoogleLogin(request,env);
   if(url.pathname==='/auth/google/callback'&&request.method==='GET')return finishGoogleLogin(request,env);
-  if(url.pathname==='/auth/logout')return request.method==='POST'?logoutGoogle():json({error:'method_not_allowed'},405);
+  if(url.pathname==='/auth/logout')return request.method==='POST'?logoutGoogle(request):json({error:'method_not_allowed'},405);
   if(request.method==="GET"&&url.pathname==="/api/health")return json({service:"dig-nexus",status:"ok"},200);
   if(url.pathname==="/api/me") {
    if(request.method!=="GET")return json({error:"method_not_allowed"},405);

@@ -1,4 +1,5 @@
 import {EncryptJWT, jwtDecrypt, createRemoteJWKSet, jwtVerify} from 'jose';
+import {PORTAL_CLIENT} from './portal-client.mjs';
 
 const cookieName='__Host-dig_nexus_session';
 const flowCookie='__Host-dig_nexus_oauth';
@@ -66,8 +67,15 @@ export async function sessionIdentity(request,env){
  if(payload.issuer!=='https://accounts.google.com'||typeof payload.subject!=='string'||!payload.subject||payload.emailVerified!==true||typeof payload.email!=='string')throw Error('invalid session');
  return {verified:true,emailVerified:true,issuer:payload.issuer,subject:payload.subject,email:payload.email};
 }
-export function logoutGoogle(){return response('/portal',{'set-cookie':clear(cookieName)});}
-export function portalPage(){
- const html=`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIG Member Portal</title><main><h1>DIG Member Portal</h1><p>Google verifies your identity; DIG approves membership separately.</p><p><a href="/auth/google/start">Continue with Google</a></p><section aria-live="polite" aria-atomic="true" id="member-status">Checking your membership status…</section><form action="/auth/logout" method="post"><button type="submit">Sign out</button></form><p>Membership registration is not yet open.</p></main><script>fetch('/api/me',{credentials:'same-origin'}).then(async r=>{const data=await r.json();const status=document.getElementById('member-status');if(r.status===401){status.textContent='Not signed in.';}else if(!r.ok){status.textContent='Membership status is temporarily unavailable.';}else if(!data.member){status.textContent='Signed in. No DIG membership record is linked to this Google account.';}else{status.textContent='Membership status: '+data.member.memberStatus;}}).catch(()=>{document.getElementById('member-status').textContent='Membership status is temporarily unavailable.';});</script></html>`;
- return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff'}});
+export function logoutGoogle(request){
+ const origin=request.headers.get('origin');
+ const target=new URL(request.url).origin;
+ if(origin!==target)return new Response('Origin not allowed',{status:403,headers:{'cache-control':'no-store'}});
+ return response('/portal',{'set-cookie':clear(cookieName)});
 }
+export function portalPage(){
+ const html=`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIG Member Portal</title><main><h1>DIG Member Portal</h1><p>Google verifies your identity; DIG approves membership separately.</p><p><a href="/auth/google/start">Continue with Google</a></p><section aria-live="polite" aria-atomic="true" id="member-status">Checking your membership status…</section><form action="/auth/logout" method="post"><button type="submit">Sign out</button></form><p>Membership registration is not yet open.</p></main><script src="/portal-client.mjs" type="module"></script></html>`;
+ return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff'}});
+}
+
+export function portalClient(){return new Response(PORTAL_CLIENT,{headers:{'content-type':'text/javascript; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});}
