@@ -83,9 +83,44 @@ sequenceDiagram
 
 **Important:** A Zeffy checkout success screen does not grant admission. Nexus must independently validate provider evidence and atomic inventory allocation; otherwise staff review is required. No card details or accommodation details belong in QR payloads.
 
-## 4. What the visualization is and is not
+## 4. Staff constituent access boundary
 
-- [Systems atlas](../../demo/atlas.html) combines Mermaid rendering with two ECharts charts. It loads pinned third-party visualization code from a CDN and requires connectivity; chart values are invented fixtures.
+```mermaid
+flowchart TB
+  Staff["Staff association workspace"] --> Permit{"Verified and authorized staff?"}
+  Permit -->|No| Refuse["No constituent access"]
+  Permit -->|Yes| Nexus["DIG Nexus API"]
+  Nexus --> Data[("Neon constituents, cases and affiliations")]
+  Nexus --> Audit["Restricted staff activity"]
+  Public["Public member portal"] -. "cannot grant staff authority" .-> Refuse
+  classDef safe fill:#155976,color:#fff,stroke:#62e7cf,stroke-width:2px
+  class Nexus,Data,Audit safe
+```
+
+The association staff workspace and case APIs exist as guarded development code, not a public case-management service. The offline demo's Jordan Example profile is fictional. Server-authorized access and explicit staff grants remain launch gates.
+
+## 5. Newsletter consent and suppression
+
+```mermaid
+flowchart TB
+  Candidate["Candidate audience"] --> Consent{"Explicit consent?"}
+  Consent -->|No or pending| Exclude["Excluded"]
+  Consent -->|Yes| Eligible["Consented audience"]
+  Eligible --> Approve{"Staff approval?"}
+  Approve -->|No| Draft["Remain draft"]
+  Approve -->|Yes| Queue["Guarded queue and preflight"]
+  Unsub["Unsubscribe or suppression"] --> Exclude
+  Unsub -. "also affects queued claim" .-> Queue
+  Queue -. "default-off delivery" .-> Provider["MailerSend adapter"]
+  classDef core fill:#155976,color:#fff,stroke:#62e7cf,stroke-width:2px
+  class Eligible,Queue core
+```
+
+The offline newsletter walkthrough illustrates **one opted-in identity and one pending identity**; neither is a real subscriber. Pending consent cannot receive a message, and queued delivery does not mean email has been sent. Actual sending stays disabled until its release gates are satisfied.
+
+## 6. What the visualization is and is not
+
+- [Systems atlas](../../demo/atlas.html) combines Mermaid rendering with three ECharts charts. It loads pinned third-party visualization code from a CDN and requires connectivity; chart values are invented fixtures.
 - [Offline demo](../../demo/offline.html) remains a single file with **no external scripts, network requests, storage, or real member data**.
 - Browser charts have explicit table equivalents and textual diagram sources. Keyboard navigation, screen readers, reduced-motion preference and mobile layouts still require manual accessibility review.
 - This document describes current intended boundaries, not deployment proof. Consult the [implementation status](../../nexus/IMPLEMENTATION-STATUS.md), [paid inventory](../../nexus/PAID-INVENTORY.md), and [Docker runbook](../../nexus/DOCKER.md) for feature gates and validation procedures.
