@@ -1,13 +1,28 @@
 import {registerMember} from "./registration.mjs";
 import {createOidcVerifier} from "./oidc.mjs";
 import {createRegistrationDb} from "./registration-db.mjs";
+import {createNeonClient} from "./database.mjs";
+import {createMemberDb} from "./member-db.mjs";
 const headers={"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"};
 const json=(value,status)=>new Response(JSON.stringify(value),{status,headers});
 export default {
  async fetch(request,env={}) {
   const url=new URL(request.url);
   if(request.method==="GET"&&url.pathname==="/api/health")return json({service:"dig-nexus",status:"ok"},200);
-  if(url.pathname==="/api/me")return json({error:"authentication_not_configured"},501);
+  if(url.pathname==="/api/me") {
+   if(request.method!=="GET")return json({error:"method_not_allowed"},405);
+   if(!env.OIDC_ISSUER||!env.OIDC_AUDIENCE||!env.OIDC_JWKS_URL)return json({error:"authentication_not_configured"},503);
+   let identity;
+   try {identity=await (env.verifyIdentity||createOidcVerifier({issuer:env.OIDC_ISSUER,audience:env.OIDC_AUDIENCE,jwksUrl:env.OIDC_JWKS_URL}))(request);}
+   catch{return json({error:"unauthorized"},401);}
+   if(!identity?.verified||!identity.emailVerified)return json({error:"unauthorized"},401);
+   try {
+    const db=env.memberDb||(env.pgClient?createMemberDb(env.pgClient):env.DATABASE_URL?createMemberDb(await createNeonClient(env)):null);
+    if(!db)return json({error:"membership_unavailable"},503);
+    const member=await db.findByIdentity(identity);
+    return member?json({member},200):json({member:null},200);
+   }catch{return json({error:"membership_unavailable"},503);}
+  }
   if(url.pathname==="/api/register") {
    if(request.method!=="POST")return json({error:"method_not_allowed"},405);
    // Trusted server-side verifier must validate JWT signature, issuer, audience, expiry,
@@ -29,7 +44,7 @@ export default {
    const verifyIdentity=typeof env.verifyIdentity==="function"?env.verifyIdentity:
     env.OIDC_ISSUER&&env.OIDC_AUDIENCE&&env.OIDC_JWKS_URL?
     createOidcVerifier({issuer:env.OIDC_ISSUER,audience:env.OIDC_AUDIENCE,jwksUrl:env.OIDC_JWKS_URL}):null;
-   const registrationDb=env.registrationDb||(env.pgClient?createRegistrationDb(env.pgClient):null);
+   const registrationDb=env.registrationDb||(env.pgClient?createRegistrationDb(env.pgClient):null)||(env.DATABASE_URL?createRegistrationDb(await createNeonClient(env)):null);
    if(!verifyIdentity||!registrationDb)return json({error:"registration_unavailable"},503);
    let identity;
    try {identity=await verifyIdentity(request);} catch {return json({error:"unauthorized"},401);}

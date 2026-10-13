@@ -11,7 +11,7 @@ Deno.test("real HTTP health and identity denial", async () => {
   assertEquals(health.status,200);
   assertEquals((await health.json()).status,"ok");
   const member = await fetch(base + "/api/me", {headers:{"x-role":"admin","x-member-id":"synthetic"}});
-  assertEquals(member.status,501);
+  assertEquals(member.status,503);
   assertEquals((await member.json()).error,"authentication_not_configured");
   const unknown = await fetch(base + "/api/members");
   assertEquals(unknown.status,404);

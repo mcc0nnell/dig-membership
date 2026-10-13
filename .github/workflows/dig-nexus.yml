@@ -3,11 +3,15 @@ on:
   push:
     paths:
       - 'nexus/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'newsletter/**'
       - '.github/workflows/dig-nexus.yml'
   pull_request:
     paths:
       - 'nexus/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'newsletter/**'
       - '.github/workflows/dig-nexus.yml'
 permissions:
@@ -22,4 +26,7 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - name: Run isolated unit tests (no credentials)
-        run: node --test nexus/*.test.mjs nexus/api/worker.test.mjs nexus/api/registration.test.mjs nexus/api/registration-http.test.mjs nexus/api/registration-db.test.mjs nexus/api/oidc.test.mjs newsletter/*.test.mjs
+        run: node --test nexus/*.test.mjs nexus/api/worker.test.mjs nexus/api/registration.test.mjs nexus/api/registration-http.test.mjs nexus/api/registration-db.test.mjs nexus/api/oidc.test.mjs nexus/api/database.test.mjs nexus/api/member-http.test.mjs newsletter/*.test.mjs
+
+      - name: Validate Worker bundle without deploying
+        run: npx wrangler deploy --dry-run --config nexus/wrangler.jsonc
