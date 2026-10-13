@@ -77,14 +77,133 @@ footer{border-top:3px solid #64c6d8}
 .tour-card .stats span{font-size:.78rem}
 .tour-card .check{font-size:.94rem}.tour-card [disabled]{cursor:not-allowed;opacity:.55}
 @media(max-width:480px){.tour-card .stats{grid-template-columns:1fr}.tour-card .stats div{min-height:unset}.detail-list{grid-template-columns:1fr}}
+/* Brand alignment: tokens extracted from DIG source ZIP, portal/public/css/house.css.
+   Visual-only enhancement; no external assets, requests, or dependencies. */
+:root {
+ --dig-navy-900:#0a1628;--dig-navy-700:#1a2d4d;--dig-slate-600:#475569;
+ --dig-electric:#3b82f6;--dig-brand-red:#e63312;--dig-red:#dc2626;
+ --dig-green:#16a34a;--dig-amber:#d97706;--dig-white:#ffffff;
+ --dig-focus-ring:#f9b13d;--dig-page:#f4f6f7;--dig-hairline:#d7dfe5;
+ --dig-soft:#eaf0f5;--dig-rad:18px;--dig-shadow:0 18px 45px #0a162816;
+ --ink:var(--dig-navy-900);--blue:var(--dig-navy-700);--line:var(--dig-hairline);--background:var(--dig-page);
+}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+body{font-family:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:var(--dig-page);color:var(--ink)}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--dig-focus-ring);outline-offset:4px}
+header{background:var(--dig-navy-900);border-bottom:3px solid var(--dig-brand-red);padding-block:17px;box-shadow:none}
+.brand{display:flex;align-items:center;gap:13px;font-size:1.05rem;line-height:1.12;letter-spacing:-.02em}
+.brand strong{display:grid;place-items:center;background:var(--dig-brand-red);color:white;border-radius:9px;font-weight:900;padding:11px 14px;font-size:1.5rem;letter-spacing:-.075em;margin:0}
+.brand small{display:block;font-size:.59rem;font-weight:800;letter-spacing:.14em;margin-top:6px;color:#abc4dc}
+.header-actions{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.atlas-link{color:#c8defb;text-decoration:none;font-weight:700;font-size:.87rem}.atlas-link:hover{text-decoration:underline;color:#fff}
+.demo{background:#ffede8;color:#8b230f;font-size:.68rem;letter-spacing:.06em;padding:9px 12px;border-radius:5px}
+.notice{background:#e7edf2;border-bottom:1px solid #c9d5df;padding:0 max(20px,calc((100vw - 1180px)/2));color:var(--ink);font-size:.83rem;line-height:1.5}
+.notice summary{position:relative;padding-right:25px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;cursor:pointer;padding:11px 0;font-weight:650;list-style:none}
+.notice summary::-webkit-details-marker{display:none}.notice summary::after{content:"+";position:absolute;right:3px;top:9px;font-weight:900;font-size:1.08rem}
+.notice[open] summary::after{content:"−"}.notice-marker{color:var(--dig-brand-red);font-size:.76rem}
+.notice-more{margin-left:auto;text-decoration:underline;text-underline-offset:3px;color:#244769}
+.notice-details{border-top:1px solid #cad6df;padding:14px 0 17px;max-width:86ch}
+.notice a{color:#154e8b}
+main{max-width:1180px;padding:0 24px 95px}
+.intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(310px,.8fr);gap:0;background:var(--dig-navy-900);color:white;max-width:none;margin:0 calc(50% - 50vw) 25px;padding:0 max(24px,calc((100vw - 1180px)/2));position:relative;overflow:hidden}
+.intro::before{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at 52% 30%,#335a8a24,transparent 55%);z-index:0}
+.hero-copy{position:relative;z-index:1;padding:clamp(48px,7vw,96px) clamp(15px,3vw,50px) 56px 0}
+.intro .eyebrow{color:#ff9b87;letter-spacing:.16em;font-size:.74rem}
+.intro h1{background:none;-webkit-text-fill-color:initial;color:#fff;max-width:700px;font-size:clamp(3.3rem,6.4vw,6.55rem);font-weight:850;letter-spacing:-.07em;line-height:.99;margin:19px 0 26px}
+.intro h1 em{font-style:normal;color:#ff8d79;display:inline}
+.intro .hero-copy>p:not(.eyebrow):not(.hero-footnote){max-width:550px;font-size:clamp(1rem,1.6vw,1.18rem);color:#cad8e7;line-height:1.72}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:34px 0 52px}
+.hero-actions a{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:25px;border-radius:8px;font-weight:800;font-size:.93rem;padding:12px 18px;text-decoration:none}
+.hero-cta{background:var(--dig-brand-red);color:white!important;border:2px solid var(--dig-brand-red)}
+.hero-cta:hover{background:#bb290e;border-color:#bb290e}.hero-secondary{border:1px solid #6481a2;color:white!important}
+.hero-secondary:hover{background:#26415f}
+.hero-footnote{font-size:.67rem!important;letter-spacing:.15em;font-weight:800;color:#93aec9!important}
+.hero-stage{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;background:#122845;min-height:570px;padding:28px;overflow:hidden;border-inline:1px solid #ffffff13}
+.hero-stage::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 43px,#ffffff07 44px),repeating-linear-gradient(90deg,transparent 0 43px,#ffffff07 44px);pointer-events:none}
+.stage-top{position:relative;z-index:1;display:flex;gap:10px;justify-content:space-between;color:#c2d5ea;font-size:.63rem;font-weight:800;letter-spacing:.15em}
+.stage-orbit{position:relative;isolation:isolate;display:grid;place-items:center;aspect-ratio:1/1;width:min(100%,360px);margin:0 auto;transform:rotate(-10deg)}
+.stage-orbit::before,.stage-orbit::after{content:"";position:absolute;inset:4%;border:2px solid #fa725c;border-radius:50%;box-shadow:0 0 0 28px #e6331220,0 0 0 52px #e6331209}
+.stage-orbit::after{inset:22%;border-width:22px;border-color:#f15b43;box-shadow:none}
+.orbit-center{font-size:clamp(3rem,6vw,6rem);font-weight:900;letter-spacing:-.1em;color:#fff;transform:rotate(10deg);z-index:1}
+.stage-bottom{position:relative;z-index:1}.stage-bottom p{font-size:clamp(1.2rem,2vw,1.72rem);font-weight:850;letter-spacing:-.04em;line-height:1.17;color:white;margin:0 0 26px}
+.stage-bottom strong{color:#ff917c}.stage-track{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#60809c;border:1px solid #60809c}
+.stage-track span{background:#132a47;padding:11px 8px;text-align:center;font-size:.6rem;font-weight:850;letter-spacing:.06em;color:#d6e5f5}
+.quick-links{margin:0 0 22px;gap:8px}.quick-links a{background:white;color:var(--dig-navy-900);border-color:#d2dbe3;border-radius:8px;font-size:.88rem;padding:12px 16px;box-shadow:none}
+.quick-links a:hover{background:#e5ecf4;text-decoration:none;border-color:#738db0}.quick-links a::after{content:" ↗";color:var(--dig-brand-red)}
+.preview-strip{background:#d7dfe5;border-color:#d7dfe5;border-radius:12px;margin-bottom:58px}
+.preview-strip div{background:white;padding:19px 22px;position:relative}.preview-strip div::before{content:"";display:block;width:24px;height:3px;background:var(--dig-brand-red);margin-bottom:14px}
+.preview-strip strong{font-size:1.03rem}.preview-strip span{color:#4c6276}
+.tour-heading{max-width:900px}.tour-heading h2{font-size:clamp(2rem,4vw,3.4rem);line-height:1.08;max-width:760px;font-weight:850;letter-spacing:-.055em}
+.eyebrow{color:#b42b13;font-size:.72rem;letter-spacing:.14em;font-weight:850}
+.tour-heading>p:last-child{max-width:700px;color:#4c5e6e}
+.tour-grid{gap:16px;margin:28px 0 64px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{border-radius:var(--dig-rad);border-color:var(--dig-hairline);box-shadow:var(--dig-shadow);padding:clamp(20px,2.5vw,30px);margin:13px 0;background:white}
+.tour-card{border-top:5px solid var(--dig-brand-red);padding:clamp(20px,2.4vw,30px)}
+.tour-card h2{font-size:clamp(1.45rem,2vw,1.85rem);font-weight:850;letter-spacing:-.045em}
+.tour-card .eyebrow{margin-top:0}.tour-card .status{border-radius:3px;border-left-color:var(--dig-brand-red)}
+#ntc-tour{background:var(--dig-navy-900);color:#f5f8fb;border-color:#1c3455}
+#ntc-tour h2,#ntc-tour h3{color:#fff}#ntc-tour p:not(.eyebrow),#ntc-tour .subtle{color:#c9d9ea}
+#ntc-tour strong{color:white}#ntc-tour .eyebrow{color:#ffa28f}
+#ntc-tour .status{background:#243b59;color:#eff6ff;border-color:#ff917c}
+#ntc-tour .activity-timeline{border-color:#536987}#ntc-tour .activity-timeline li::before{background:#ff927e;border-color:var(--dig-navy-900);box-shadow:0 0 0 2px #56708c}
+#ntc-tour button:not(:disabled):not(.primary){background:#173252;color:#fff;border-color:#547696}
+#ntc-tour button:not(:disabled):hover{filter:brightness(1.15)}
+#ntc-tour button:disabled{background:#1a2c46;color:#93a5b9;border-color:#3e536e;opacity:1}
+button{border-radius:8px;border:1.5px solid var(--dig-navy-700);color:var(--dig-navy-700);font-weight:750;min-height:46px;transition:background .2s,box-shadow .2s,transform .2s}
+button.primary{background:var(--dig-navy-700);border-color:var(--dig-navy-700);color:white;box-shadow:none}
+button.primary:hover{background:#314c78;border-color:#314c78}
+button:focus-visible{outline-color:var(--dig-focus-ring)}
+button:not(:disabled):active{transform:translateY(1px)}
+.status{background:#edf3fa;border-color:var(--dig-electric);color:#16344f}
+.stats div{background:#f1f5f8;border-color:#d4dfe7;border-radius:10px}
+.stats strong{font-size:1.38rem}
+input:focus,select:focus{border-color:var(--dig-electric);outline:2px solid #9dc5ff;outline-offset:2px}
+#join{border-top:6px solid var(--dig-brand-red);padding:clamp(25px,4vw,52px)}
+#join h2{font-size:clamp(2rem,3.5vw,3.1rem);letter-spacing:-.055em;font-weight:850}
+#join form{margin-top:30px;max-width:780px}
+#join form button{justify-self:start;padding:13px 25px}
+#dashboard>.card:first-child{background:linear-gradient(135deg,var(--dig-navy-900),#23416b);color:#fff;padding:36px;border:0}
+#dashboard>.card:first-child h2,#dashboard>.card:first-child strong{color:white}
+#dashboard>.card:first-child .eyebrow{color:#ffae9d}
+.tab-nav{background:#e4eaf0;border:1px solid #c6d3df;padding:6px;border-radius:12px}
+.tab-nav button.current{background:var(--dig-navy-700);color:#fff}
+.sample{background:#edf3f9;border-color:#cbd9e6}
+footer{background:var(--dig-navy-900);border-top:5px solid var(--dig-brand-red);font-size:.85rem;color:#cbd8e8}
+@media(min-width:801px){.intro{min-height:620px}.intro .hero-copy{align-self:center}}
+@media(max-width:1000px){.tour-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#ntc-tour{grid-column:1/-1}.hero-stage{min-height:500px}}
+@media(max-width:760px){
+ header{padding:14px 20px}.header-actions{gap:10px}.brand small{display:none}
+ .intro{grid-template-columns:1fr}.hero-copy{padding:52px 0 15px}
+ .intro h1{font-size:clamp(3.1rem,11.8vw,5.3rem)}
+ .hero-actions{margin:25px 0 32px}.hero-footnote{margin:0 0 25px!important}
+ .hero-stage{min-height:255px;padding:20px 24px;display:grid;grid-template-columns:.75fr 1fr;gap:10px}
+ .stage-top{grid-column:1/-1}.stage-orbit{grid-row:2;grid-column:1;min-width:0;width:180px;max-width:100%}
+ .stage-orbit::before{box-shadow:0 0 0 15px #e6331220,0 0 0 26px #e6331209}
+ .stage-orbit::after{border-width:11px}
+ .orbit-center{font-size:2.5rem}.stage-bottom{grid-row:2;grid-column:2;align-self:center}
+ .stage-bottom p{font-size:1.13rem;margin-bottom:15px}.stage-track{grid-template-columns:1fr 1fr}
+ .stage-track span{font-size:.48rem;padding:7px 4px}
+ .tour-grid{grid-template-columns:1fr}#ntc-tour{grid-column:auto}
+ .quick-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .quick-links a{font-size:.78rem;padding:11px 9px}.preview-strip{grid-template-columns:1fr}
+}
+@media(max-width:440px){main{padding-inline:18px}.hero-actions a{width:100%;justify-content:space-between}
+ .header-actions{width:100%;justify-content:space-between}.notice-more{margin-left:auto}
+ .intro{padding-inline:18px}.intro h1{font-size:clamp(2.7rem,12.2vw,4.25rem)}
+ .hero-stage{grid-template-columns:1fr;min-height:230px}.stage-orbit{display:none}
+ .stage-bottom{grid-column:1}.stage-bottom p{font-size:1.38rem}
+ .stage-track{grid-template-columns:repeat(4,1fr)}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <a href="#main" class="skip">Skip to main content</a>
-<header><div class="brand"><strong>DIG</strong> Deaf in Government</div><div class="demo">OFFLINE DEMO · SYNTHETIC DATA</div></header>
-<div class="notice"><a href="./atlas.html">Explore the visual systems atlas (online; uses third-party visualization libraries)</a> · <strong>DIG Nexus interactive prototype, not a live membership service.</strong> No backend calls, real emails, real sign-in, Neon connection, payments, ticket issuance, or persistent records. Use invented names and example.test addresses only.</div>
+<header><div class="brand"><strong>DIG</strong><span>Deaf in Government<small>NEXUS / THE CIVIC MEMBER PLATFORM</small></span></div><div class="header-actions"><a href="./atlas.html" class="atlas-link">Systems atlas <span aria-hidden="true">↗</span></a><div class="demo">OFFLINE DEMO · SYNTHETIC DATA</div></div></header>
+<details class="notice"><summary><span class="notice-marker" aria-hidden="true">●</span> Independent interactive prototype <strong>· No live member data</strong><span class="notice-more">Read demo boundaries</span></summary><div class="notice-details"><a href="./atlas.html">Explore the visual systems atlas (online; uses third-party visualization libraries)</a> · <strong>DIG Nexus interactive prototype, not a live membership service.</strong> No backend calls, real emails, real sign-in, Neon connection, payments, ticket issuance, or persistent records. Use invented names and example.test addresses only.</div></details>
 <main id="main">
-<div class="intro"><p class="eyebrow">DIG Nexus · Membership · NTC · Association · Communications</p><h1>One place for DIG to connect</h1><p>Explore an offline walkthrough of the member journey, DC27 conference operations, staff records, and consent-first newsletters. These are examples—not connected services. Nothing leaves this browser tab.</p></div>
+<section class="intro" aria-labelledby="hero-title"><div class="hero-copy"><p class="eyebrow">Deaf in Government / Introducing DIG Nexus</p><h1 id="hero-title">Built for people.<br><em>Designed for access.</em></h1><p>One civic home for membership, DC27 conference operations, staff relationships, and consent-first communications. Explore every journey with fictional data. Nothing leaves this browser tab.</p><div class="hero-actions"><a class="hero-cta" href="#join">Explore member journey <span aria-hidden="true">↗</span></a><a class="hero-secondary" href="#ntc-tour">Explore NTC / DC27 <span aria-hidden="true">→</span></a></div><p class="hero-footnote">01 / FOUR CONNECTED WORKSTREAMS · ONE INDEPENDENT PLATFORM</p></div><aside class="hero-stage" aria-label="The four DIG Nexus workstreams"><div class="stage-top"><span>01 / DIG NEXUS</span><span>CONCEPT / 2026</span></div><div class="stage-orbit" aria-hidden="true"><span class="orbit-center">DIG</span></div><div class="stage-bottom"><p>OUR COMMUNITY.<br>OUR GOVERNMENT.<br><strong>OUR FUTURE.</strong></p><div class="stage-track"><span>MEMBERS</span><span>NTC / DC27</span><span>OPERATIONS</span><span>COMMS</span></div></div></aside></section>
 <nav class="quick-links" aria-label="Explore DIG Nexus">
 <a href="#join">Member journey</a><a href="#ntc-tour">NTC / DC27</a>
 <a href="#association-tour">Association operations</a><a href="#newsletter-tour">Newsletters</a>
@@ -95,7 +214,7 @@ footer{border-top:3px solid #64c6d8}
 <div><strong>Explicit consent</strong><span>Membership does not opt in to email</span></div>
 </section>
 <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-<div class="tour-heading"><p class="eyebrow">Explore the working concepts</p><h2>See how the pieces fit together</h2>
+<div class="tour-heading"><p class="eyebrow">02 / The platform in motion</p><h2>Four journeys. One connected experience.</h2>
 <p>Every example below uses fictional data and local state. Buttons simulate decisions; they do not contact Zeffy, MailerSend, DIG, or any identity provider.</p></div>
 <div class="tour-grid">
 <section id="ntc-tour" class="card tour-card" aria-labelledby="ntc-title">
@@ -144,7 +263,7 @@ footer{border-top:3px solid #64c6d8}
  <p class="subtle">A real one-click unsubscribe requires an explicit POST; merely opening a link must not unsubscribe anyone. Real MailerSend delivery is separately disabled.</p>
 </section>
 </div>
-<section class="card" id="join"><p class="eyebrow">Step 1 of 2</p><h2>Join DIG</h2><p>Use a fictional identity. This does not send a membership application.</p>
+<section class="card" id="join"><p class="eyebrow">03 / Membership begins here · Step 1 of 2</p><h2>Your community starts here.</h2><p>Use a fictional identity. This does not send a membership application.</p>
 <form id="join-form">
 <div class="row"><label>First name<input name="firstName" maxlength="40" value="Alex" autocomplete="off"></label><label>Last name (required)<input name="lastName" maxlength="80" required value="Example" autocomplete="off"></label></div>
 <label>Email (required)<input name="email" type="email" maxlength="80" required value="alex@example.test" autocomplete="off"></label>

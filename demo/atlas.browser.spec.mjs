@@ -14,7 +14,7 @@ test('systems atlas stays readable without chart libraries or app APIs', async (
       appRequests.push(request.url());
   });
   await page.goto(atlas);
-  await expect(page.getByRole('heading',{name:'One platform. Clear boundaries.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'One community. Clear boundaries.'})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Four journeys. Different permissions.'})).toBeVisible();
   for (const heading of ['Purchase is not admission','Role-scoped staff follow-ups','Consent before campaign queue'])
     await expect(page.getByRole('heading',{name:heading})).toBeVisible();
