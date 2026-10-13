@@ -10,15 +10,15 @@ on:
       - 'nexus/docker/**'
       - 'nexus/cloud-run/**'
       - 'nexus/api/**'
-      - 'nexus/schema-009-jobs.sql'
-      - 'nexus/schema-010-ntc-checkin.sql'
+      - 'nexus/schema-009-ticketing.sql'
+      - 'nexus/schema-010-jobs.sql'
       - 'nexus/jobs/**'
       - 'release/**'
+      - 'tests/browser/**'
+      - 'playwright.config.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/dig-nexus-docker.yml'
-      - 'tests/browser/**'
-      - 'playwright.config.mjs'
   pull_request:
     paths:
       - 'compose.yaml'
@@ -29,15 +29,15 @@ on:
       - 'nexus/docker/**'
       - 'nexus/cloud-run/**'
       - 'nexus/api/**'
-      - 'nexus/schema-009-jobs.sql'
-      - 'nexus/schema-010-ntc-checkin.sql'
+      - 'nexus/schema-009-ticketing.sql'
+      - 'nexus/schema-010-jobs.sql'
       - 'nexus/jobs/**'
       - 'release/**'
+      - 'tests/browser/**'
+      - 'playwright.config.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/dig-nexus-docker.yml'
-      - 'tests/browser/**'
-      - 'playwright.config.mjs'
 permissions:
   contents: read
 
@@ -60,6 +60,9 @@ jobs:
           : > deploy/secrets/database_url
           : > deploy/secrets/google_client_secret
           : > deploy/secrets/google_session_secret
+          : > deploy/secrets/zeffy_api_key
+          : > deploy/secrets/zeffy_webhook_secret
+          : > deploy/secrets/mailersend_api_token
           openssl rand -hex 32 > deploy/secrets/proxy_token
           cat > .env <<EOV
           NEXUS_SITE_ADDRESS=http://localhost:18080
@@ -84,7 +87,9 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' "$base/portal.css")" = 200
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/enroll")" = 503
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/register")" = 503
-          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/checkin/ntc-2027")" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/ticketing/ntc/issue")" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/zeffy/webhook")" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/api/ticketing/ntc/checkin")" = 503
           # Browser-supplied proxy headers cannot bypass Caddy's overwrite.
           test "$(curl -s -o /dev/null -w '%{http_code}' \
             -H 'X-Dig-Nexus-Proxy-Token: fake' \
@@ -142,16 +147,17 @@ jobs:
             nexus/schema-003-identities.sql nexus/schema-004-registration.sql \
             nexus/schema-005-conference.sql nexus/schema-006-organizer.sql \
             nexus/schema-007-attendee.sql nexus/schema-008-cloud-run-state.sql \
-            nexus/schema-009-jobs.sql nexus/schema-010-ntc-checkin.sql; do
+            nexus/schema-009-ticketing.sql nexus/schema-010-jobs.sql; do
             psql -v ON_ERROR_STOP=1 -f "$file" > /dev/null
           done
-      - name: Verify independent job and manager-only check-in contracts
-        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/jobs-and-checkin-integration.sql
+      - name: Verify clean-room jobs and ticketing contracts
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/jobs-integration.sql
       - name: Verify existing event lifecycle and privacy contracts
         run: |
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f nexus/tests/conference-integration.sql
           psql -v ON_ERROR_STOP=1 -f nexus/tests/organizer-integration.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/tests/ticketing-integration.sql
 
   publish:
     needs: [docker, browser, postgres]

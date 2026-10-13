@@ -26,9 +26,9 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts
       - name: Run isolated unit tests (no credentials)
-        run: node --test nexus/*.test.mjs nexus/api/worker.test.mjs nexus/api/agenda-db.test.mjs nexus/api/agenda-http.test.mjs nexus/api/agenda-page.test.mjs nexus/api/organizer-db.test.mjs nexus/api/organizer.test.mjs nexus/api/organizer-http.test.mjs nexus/api/organizer-page.test.mjs nexus/api/registration.test.mjs nexus/api/registration-http.test.mjs nexus/api/registration-db.test.mjs nexus/api/oidc.test.mjs nexus/api/database.test.mjs nexus/api/member-http.test.mjs nexus/api/google-auth.test.mjs nexus/api/conference-db.test.mjs nexus/api/conference-http.test.mjs nexus/api/conference-page.test.mjs nexus/api/checkin-api.test.mjs nexus/api/member-journey.test.mjs newsletter/*.test.mjs
+        run: node --test nexus/*.test.mjs nexus/api/worker.test.mjs nexus/api/agenda-db.test.mjs nexus/api/agenda-http.test.mjs nexus/api/agenda-page.test.mjs nexus/api/organizer-db.test.mjs nexus/api/organizer.test.mjs nexus/api/organizer-http.test.mjs nexus/api/organizer-page.test.mjs nexus/api/registration.test.mjs nexus/api/registration-http.test.mjs nexus/api/registration-db.test.mjs nexus/api/oidc.test.mjs nexus/api/database.test.mjs nexus/api/member-http.test.mjs nexus/api/google-auth.test.mjs nexus/api/conference-db.test.mjs nexus/api/conference-http.test.mjs nexus/api/conference-page.test.mjs nexus/api/ticketing.test.mjs nexus/api/member-journey.test.mjs newsletter/*.test.mjs
 
-      - name: Durable job queue unit tests
+      - name: Background queue unit tests
         run: node --test nexus/jobs/*.test.mjs
 
       - name: Cloud Run Node adapter tests

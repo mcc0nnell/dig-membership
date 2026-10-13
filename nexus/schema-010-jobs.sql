@@ -1,5 +1,5 @@
 -- DIG Nexus clean-room Postgres job lease primitive.
--- Apply only AFTER schema 008, first on an isolated Neon staging branch.
+-- Apply only AFTER schema 009 ticketing, first on an isolated Neon staging branch.
 -- No newsletter, external messages, or payments are authorized by this queue.
 CREATE TABLE nexus_background_jobs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

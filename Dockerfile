@@ -11,4 +11,4 @@ COPY nexus/jobs/ ./nexus/jobs/
 ENV NODE_ENV=production
 USER node
 EXPOSE 8080
-CMD ["node","nexus/cloud-run/server.mjs"]
+CMD ["node","nexus/docker/server.mjs"]

@@ -3,7 +3,8 @@
   "private": true,
   "dependencies": {
     "@neondatabase/serverless": "1.0.2",
-    "jose": "6.1.0"
+    "jose": "6.1.0",
+    "qrcode": "1.5.4"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

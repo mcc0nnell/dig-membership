@@ -97,7 +97,7 @@ Run `docker compose up --build --wait -d` and validate the HTTPS portal. The sta
 
 ## Routine updates: no Dockerfile edits required
 
-CI tests Docker Compose on localhost with synthetic secrets, plus Chromium accessibility and PostgreSQL 17 operating-contract checks. The publication job attaches BuildKit SBOM/provenance and signs the immutable image digest using GitHub OIDC. A host update requires a valid signature under the expected workflow identity (Node.js 22+ and Cosign must be installed on the server). After merging into GitHub `main`, it automatically builds and publishes an image at:
+CI tests Docker Compose on localhost with synthetic secrets. After merging into GitHub `main`, it automatically builds and publishes an image at:
 
 ```text
 ghcr.io/mcc0nnell/dig-nexus:sha-FULL_COMMIT_SHA
@@ -132,6 +132,62 @@ This source-build path does not use the image-pinning/rollback script. Build a p
 
 **No real member onboarding, ticket payments, elections, or newsletter sending should be activated until those gates pass.**
 
-## Current clean-room quality tracks
+## NTC ticketing — Zeffy and MailerSend
 
-See [CLEANROOM-OPERATIONS.md](CLEANROOM-OPERATIONS.md) for the independent PostgreSQL cleanup queue, Chromium/axe accessibility checks, signed immutable release policy, and **disabled** NTC manual check-in. These are not evidence of a live membership service.
+Migration `nexus/schema-009-ticketing.sql` extends the attendee model with
+organizer-configured Zeffy campaign and rate IDs, verified reconciliation,
+a transactional mail outbox, and hashed QR bearer credentials. No money can
+be charged inside Nexus. Checkout is hosted by Zeffy; each completed or updated
+payment webhook has its **raw-body HMAC signature validated**, then the current
+payment is re-fetched using Zeffy's read API. Only the configured campaign,
+rate, single-ticket line amount, verified buyer email, USD currency and online
+purchase may credit a registered attendee. A return redirect is never proof.
+Refunds and disputes revoke new ticket eligibility.
+
+The private attendee page provides the Zeffy hosted link and a QR-generation
+button. The check-in screen at `/checkin/:event` supports manual code entry and
+an optional QR camera scanner using browsers with `BarcodeDetector`. Staff must
+be provisioned separately in `nexus_conference_checkin_staff`; every successful
+check-in is attributed and repeated scans are idempotent. QR values are returned
+only to the attendee, and only hashes persist in PostgreSQL.
+
+MailerSend transactional confirmations are **not newsletters**. Registration
+and verified-payment notifications enter a DB outbox; an optional Docker mailer
+container claims jobs atomically. Unknown send results go to manual review to
+avoid duplicate sends. Use `docker compose --profile mailer run --rm mailer` for
+one job, or enable `MAILER_MODE=loop` for a long-running opt-in sidecar.
+Zeffy may send its own receipts, so coordinate duplicate confirmation policy.
+
+### Additional secret files and switches
+
+Create mode-0600 files owned by `NEXUS_UID:NEXUS_GID`:
+`deploy/secrets/zeffy_api_key`, `deploy/secrets/zeffy_webhook_secret`, and
+`deploy/secrets/mailersend_api_token`. Empty placeholders are allowed **only
+while the corresponding flag is off**. Do not include these in Git.
+
+The Compose definition keeps `NTC_TICKETING_ENABLED`, `NTC_TICKETS_ENABLED`,
+`NTC_CHECKIN_ENABLED`, `NTC_ZEFFY_WEBHOOK_ENABLED` and
+`DIG_TRANSACTIONAL_EMAIL_ENABLED` set to `false` until the individual approvals.
+
+**Hard release gate:** coordinate capacity in two systems. Nexus registers and
+reserves event places, while Zeffy has its own ticket inventory. Until there
+is a reviewed abandoned-reservation expiry and refund/oversubscription policy,
+no public paid registrations may be enabled. Organizer must confirm the actual
+Zeffy campaign ID, single ticket rate and URL, approved ticket price, verified
+webhook examples, trusted domain, and TLS before flipping any flag. Guests and
+dependent registrations remain unsupported: each QR credential belongs to one
+verified attendee. Do not expose private accommodations in Zeffy, receipts or
+QR payloads. No production or real Zeffy data is touched by this milestone.
+
+
+## Clean-room quality checks and optional background worker
+
+See [CLEANROOM-OPERATIONS.md](CLEANROOM-OPERATIONS.md) for real Chromium
+accessibility checks, separately gated PostgreSQL background cleanup, signed
+OCI release verification and the existing Zeffy/QR check-in integration gates.
+The `jobs` Compose profile is off by default and does **not** activate cleanup
+when selected; the operator must configure an isolated Neon staging branch and
+explicitly approve `NEXUS_JOB_WORKER_ENABLED=true` in a separate override.
+Any live email and ticket/payment operations remain behind their existing flags.
+Node 22+ and Cosign on the operator's host are required for the fail-closed
+image-upgrade verification.

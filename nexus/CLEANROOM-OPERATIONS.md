@@ -18,7 +18,7 @@ CI installs the required Linux browser dependencies. The tested organizer identi
 
 ## 2. Background work without another database
 
-[SQL 009](schema-009-jobs.sql) and [the job queue](jobs/queue.mjs) provide an original Postgres job lease with:
+[SQL 010](schema-010-jobs.sql) and [the job queue](jobs/queue.mjs) provide an original Postgres job lease with:
 - single-query atomic `FOR UPDATE SKIP LOCKED` claim;
 - expiring 90-second lease and random fencing token (stale workers cannot acknowledge a newer job);
 - retry with bounded backoff, max attempts, and dead-letter terminal state;
@@ -27,7 +27,7 @@ CI installs the required Linux browser dependencies. The tested organizer identi
 
 Only old, expired OAuth tokens and rate-limit buckets can be deleted by the current worker. It cannot send messages, generate consent, approve memberships, issue refunds, or touch accommodation requests.
 
-Operational prerequisites: apply schema 009 **after 008** to an isolated Neon branch; use a restricted database role; define a unique hour/day deduplication key for each scheduled cleanup; monitor retries/dead jobs; set job worker flag only after review. The job service is not running by default. To confirm the fail-closed profile, `docker compose --profile jobs config` does not require database credentials but still requires configured local file paths.
+Operational prerequisites: apply schema 010 **after 009 (ticketing)** to an isolated Neon branch; use a restricted database role; define a unique hour/day deduplication key for each scheduled cleanup; monitor retries/dead jobs; set job worker flag only after review. The job service is not running by default. To confirm the fail-closed profile, `docker compose --profile jobs config` does not require database credentials but still requires configured local file paths.
 
 ## 3. Signed, immutable container releases
 
@@ -42,25 +42,21 @@ The [upgrade script](../deploy/upgrade.sh) refuses to replace a container when i
 
 This verifies artifact identity and a signed CI publication claim. **It does not prove independent reproducibility, source-to-binary equivalence, or software security.** A complete WindAnvil Assurance Record requires independent provenance/SBOM semantics and its own trusted policy; do not label ordinary CI a WindAnvil PASS.
 
-## 4. NTC operations: original manual check-in
+## 4. NTC operations: review and extend the already-merged clean-room ticketing path
 
-The existing DIG Nexus attendee functions already serialize event/workshop capacity, waitlists and cancellations in PostgreSQL. [Schema 010](schema-010-ntc-checkin.sql) adds **manager-only, idempotent manual check-in**, and the [HTTP route](api/checkin-api.mjs) is `POST /api/checkin/:slug` behind `NTC_CHECKIN_ENABLED=false`.
+The concurrently merged [NTC ticketing implementation](ATTENDEE-REGISTRATION.md) in #24 already contains original DIG Nexus Zeffy reconciliation, hashed QR bearer issuance, staffed QR check-in, and separately authorized transactional MailerSend delivery. We **preserve and validate it** rather than introducing an incompatible second check-in system.
 
-The route requires verified staff identity, exact same-origin request, intentional custom action header, a valid confirmation reference, and a rate limit. PostgreSQL re-verifies event manager status, locks the event row to serialize with cancellation, rejects waitlisted/cancelled registrations, and audits successful check-ins without duplicating the audit on repeated submissions.
+The ticketing implementation remains **disabled by default** under `NTC_TICKETING_ENABLED`, `NTC_TICKETS_ENABLED`, `NTC_CHECKIN_ENABLED`, and `NTC_ZEFFY_WEBHOOK_ENABLED`. A webhook claim alone is not proof of payment: its code requires an HMAC-verified raw event and an independent provider payment read, then checks configured campaign, rate, amount, currency and matching registration. QR bearer material is not stored as plaintext.
 
-Request format for *future staging only*:
+Separate PostgreSQL integration and unit tests verify idempotency, event scope, paid-ticket constraints, registration and privacy; Chromium tests cover the attendee and organizer surfaces. The clean-room references remain behavioral inspiration only—no pretix/Hi.Events/listmonk/Tendenci code was imported.
 
-```json
-{"reference":"32-lowercase-hex-character-reference","method":"manual"}
-```
-
-The confirmation reference is **not a paid ticket, QR secret, or proof of payment**. A future scanning flow needs a separate expiring/signed bearer credential, revocation and replay model, scanner staff access rules, and real device tests. Payment provider reconciliation, refunds, tax/ticketing law, financial controls, export authorization, and event-specific accommodation fulfillment remain **not implemented**. Do not activate this route until DIG authorizes a staffed, privacy-reviewed rehearsal.
+**Not yet proven:** live Zeffy webhook authenticity against documented current-provider fixtures, privacy-approved DIG billing rules and refunds, real-device QR scanning, accessibility accommodations on-site, real transactional mail delivery, and venue connectivity. Do not interpret synthetic evidence as provider certification.
 
 ## Evidence and release gate
 
-- Node tests: `node --test nexus/jobs/*.test.mjs nexus/api/checkin-api.test.mjs release/*.test.mjs`
+- Node tests: `node --test nexus/jobs/*.test.mjs nexus/api/ticketing.test.mjs release/*.test.mjs`
 - Chromium: `npx playwright test -c playwright.config.mjs`
-- PostgreSQL 17: apply ordered schemas 001–010 to a disposable database; run `nexus/tests/jobs-and-checkin-integration.sql` (synthetic, transaction rolled back).
+- PostgreSQL 17: apply ordered schemas 001–010 to a disposable database; run `nexus/tests/jobs-integration.sql` and existing `nexus/tests/ticketing-integration.sql` (synthetic, transaction rolled back).
 - Docker Compose: `docker compose config`; web writes stay disabled in every tested image.
 - GitHub Actions: the Docker image publishes **only after** Docker, browser, and PostgreSQL checks all succeed.
 
