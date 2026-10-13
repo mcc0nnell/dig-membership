@@ -17,7 +17,7 @@ test('systems atlas contains valid browser-side JavaScript', () => {
 test('gallery explicitly isolates fictional fixtures from real member information', () => {
   assert.match(atlas, /Development preview · synthetic examples only/);
   assert.match(atlas, /not DIG statistics/);
-  assert.match(atlas, /not the DC27 schedule/);
+  assert.match(atlas, /Invented workshop fixtures; paid intents do not hold seats/);
   assert.match(atlas, /not DIG records, Neon queries/);
   assert.doesNotMatch(atlas, /\bfetch\s*\(|XMLHttpRequest|localStorage|sessionStorage|document\.cookie/);
   assert.doesNotMatch(atlas, /Salesforce\s+connection/i);
