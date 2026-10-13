@@ -25,8 +25,8 @@ jobs:
         run: node --test cf/membership-site/test/*.test.mjs
       - name: Read-only Salesforce email limit monitor tests
         run: node --test scripts/check-email-limits.test.mjs
-      - name: Offline member experience demo tests
-        run: node --test demo/offline.test.cjs
+      - name: Offline member experience and systems atlas tests
+        run: node --test demo/*.test.cjs
       - name: Build installable WordPress ZIP
         run: cd wordpress && zip -qr dig-membership.zip dig-membership -x '*/tests/*'
       - uses: actions/upload-artifact@v4
