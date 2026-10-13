@@ -3,8 +3,7 @@
 This DIG Nexus implementation was written from original DIG/NTC needs and public
 behavioral descriptions of event software. No Summit Events App or Salesforce
 source code, data model, Apex classes, markup, or templates were copied.
-The runtime is Cloudflare Workers + Neon PostgreSQL, with a possible WordPress
-presentation layer. It is not a Salesforce port or a production conference site.
+**Selected runtime: Docker Compose + Caddy HTTPS + Neon PostgreSQL**, with optional WordPress website navigation. Earlier Worker references below are historical design notes, not a deployment requirement. No real conference site or ticket sale has been launched. For the implemented verified-paid admission/capacity extension, see [PAID-INVENTORY.md](PAID-INVENTORY.md).
 
 ## NTC 2027 use case
 

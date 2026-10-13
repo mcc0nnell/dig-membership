@@ -1,37 +1,28 @@
-# DIG Nexus Newsletter
+# DIG Nexus Newsletter — consent-first communications
 
-**Prototype only. No sending is enabled.** WordPress is the campaign editor, Neon is the system of record, Cloudflare Workers/Queues handle scheduling and retries, and a configurable transactional/bulk email provider delivers messages.
+**Development only; no marketing emails or automatic newsletter worker are enabled.** The selected DIG Nexus runtime is Docker Compose + Caddy + Neon PostgreSQL, with MailerSend as an optional outbound provider. This is original Nexus code informed by common mailing-list behavior, not a listmonk deployment or source import.
 
-## Model
-- `schema.sql` defines subscribers, drafts and per-recipient delivery state. Run it only against a **dedicated DIG database**, never a shared Neon project.
-- Consent is explicit: `pending` is not subscribed; imports must not imply permission.
-- Every outgoing message needs List-Unsubscribe and List-Unsubscribe-Post headers, a functional one-click unsubscribe endpoint, organization identification, and a text/plain alternative.
-- Unsubscribes, hard bounces and complaints are durable suppressions; re-subscription requires fresh verification.
-- Segment targeting and authorization must be enforced server-side; no browser-held database or provider credentials.
-- Campaign sends require a preview, test email, explicit staff approval, idempotent queue jobs, throttling, webhook signature verification, and a kill switch.
-- Never count open tracking pixels as engagement by default. Report deliveries, failures and opt-outs.
-- Keep emails accessible: descriptive links, semantic HTML, captioned video links and readable text.
+## Current model
 
-## Next integration steps
-1. Choose an email delivery provider and confirm its nonprofit quota, bulk-mail policy, sender-domain verification, and bounce/complaint webhook capabilities.
-2. Build WordPress admin screens behind `manage_options` or a narrower DIG capability.
-3. Implement signed Cloudflare gateway endpoints and verified subscriber opt-in/unsubscribe.
-4. Test against a disposable Neon database using only `example.test` addresses and a mocked provider.
-5. Verify SPF/DKIM/DMARC, unsubscribe and suppression behavior before any real campaign.
+- `schema.sql` defines subscriber state, campaigns and delivery records. Apply schemas 002–004 in order, **only** on a disposable PostgreSQL 17 database or isolated approved Neon staging branch.
+- List membership, DIG membership, committee roles, NTC attendance and constituent affiliation never confer newsletter consent. `pending` is not `subscribed`; an explicitly consented subscriber is required before approval can queue a delivery.
+- Restricted staff APIs expose **audience counts, not addresses**, with an explicit queue-approval step and immutable approved campaign content. The browser [association staff workspace](../nexus/ASSOCIATION-OPERATIONS.md) also requires verified staff authorization.
+- The opt-out endpoint uses a hashed opaque token, GET confirmation screen and atomic POST redemption; unsubscribe/bounce/complaint states suppress queued mail.
+- `dispatch.mjs` implements a single-recipient claim, a second consent preflight immediately before provider transport, and separate provider API receipt acknowledgement; ambiguous results are **not retried automatically**.
+- `mailersend.mjs` adds visible unsubscribe URLs to HTML/text and the provider's `list_unsubscribe` parameter, but requires verified one-click plan support and explicit launch gates.
+- Provider API acceptance is **not** evidence of recipient inbox delivery.
 
-The existing WordPress membership plugin is Salesforce-oriented and should not be treated as a deployed Neon integration.
+## Still blocked
 
-## Clean-room list and campaign operations
+Real sending depends on a verified sender domain, DIG consent policy, actual MailerSend account plan/webhook authenticity, unsubscribe proof, per-recipient idempotency, approved staff permissions, retention/support procedures, and a restricted runtime worker. No automatic marketing job, production recipient import, complaint webhook consumer, or live dispatch is present.
 
-DIG Nexus includes original listmonk-inspired functions, without importing listmonk source or deploying it. See [association operations](../nexus/ASSOCIATION-OPERATIONS.md) for the consented list model, staff-only campaign audience previews, approvals, queued deliveries, suppression triggers, and rollout limits.
+**All sending flags remain off.** The separate selected-runtime deployment and exact gates are documented in [newsletter implementation](IMPLEMENTATION.md), [association operations](../nexus/ASSOCIATION-OPERATIONS.md), and [Docker deployment](../nexus/DOCKER.md).
 
-These are staging-only functions; a queued campaign **never** bypasses the existing disabled MailerSend marketing gate.
+## Tests
 
+```bash
+node --test newsletter/*.test.mjs nexus/api/newsletter-unsubscribe.test.mjs
+node --test demo/offline.test.cjs
+```
 
-### Safeguarded one-click and delivery claims
-
-A new, separately disabled one-click endpoint and claim-only dispatch
-primitive are documented in [DIG Nexus association operations](../nexus/ASSOCIATION-OPERATIONS.md).
-The legacy `sendNewsletter` adapter now requires a verified provider plan
-and an enabled HTTPS one-click URL, and inserts MailerSend's documented
-`list_unsubscribe` parameter. No automatic newsletter worker is enabled.
+GitHub also validates synthetic PostgreSQL consent/one-click/claim/preflight behavior. Never test mailing against real member addresses or the production database without separate explicit authorization.

@@ -1,5 +1,7 @@
 # NTC attendee registration — development milestone
 
+> **Current development status (October 13, 2026):** The initial registration/waitlist milestone described below has been extended by [NTC paid inventory](PAID-INVENTORY.md), [magic-link and payment recovery](MAGIC-PAYMENT-RECOVERY.md), and the selected [Docker/Caddy runtime](DOCKER.md). Paid `pending_payment` requests do not reserve Zeffy inventory or confer admission; independently verified payment plus an available confirmed seat is required. Earlier worker-related terminology below is historical. All live paid-event gates remain disabled.
+
 This is an original, Salesforce-free DIG Nexus conference registration implementation.
 It is designed for DC27/NTC (April 28–30, 2027), and future events. It is **not
 live**, does **not** send email, does **not** charge money, and does **not** issue
