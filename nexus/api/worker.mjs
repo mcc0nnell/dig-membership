@@ -1,3 +1,4 @@
+export {AuthState} from "./auth-state.mjs";
 import {registerMember} from "./registration.mjs";
 import {createOidcVerifier} from "./oidc.mjs";
 import {createRegistrationDb} from "./registration-db.mjs";
@@ -13,7 +14,7 @@ export default {
   if(url.pathname==='/portal-client.mjs'&&request.method==='GET')return portalClient();
   if(url.pathname==='/auth/google/start'&&request.method==='GET')return startGoogleLogin(request,env);
   if(url.pathname==='/auth/google/callback'&&request.method==='GET')return finishGoogleLogin(request,env);
-  if(url.pathname==='/auth/logout')return request.method==='POST'?logoutGoogle(request):json({error:'method_not_allowed'},405);
+  if(url.pathname==='/auth/logout')return request.method==='POST'?await logoutGoogle(request,env):json({error:'method_not_allowed'},405);
   if(request.method==="GET"&&url.pathname==="/api/health")return json({service:"dig-nexus",status:"ok"},200);
   if(url.pathname==="/api/me") {
    if(request.method!=="GET")return json({error:"method_not_allowed"},405);

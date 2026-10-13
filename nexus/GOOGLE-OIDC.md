@@ -5,11 +5,11 @@
 ## Architecture
 
 - WordPress `[dig_nexus_portal]` links to the Cloudflare Worker `/auth/google/start`; WordPress never receives Google tokens or database credentials.
-- Worker creates cryptographically random state, nonce and PKCE S256 verifier/challenge. The five-minute OAuth transaction is stored in an encrypted, Secure, HttpOnly, SameSite=Lax, host-only cookie.
+- Worker creates cryptographically random state, nonce and PKCE S256 verifier/challenge. The five-minute OAuth transaction is stored in an encrypted, Secure, HttpOnly, SameSite=Lax, host-only cookie, with one-time state tracked in a Cloudflare Durable Object.
 - Google Authorization Code flow redirects to `/auth/google/callback`; Worker exchanges the code directly with Google's token endpoint, validates Google's ID token signature against Google JWKS using `jose`, checks Google issuer, client audience, nonce, and verified email.
 - Worker issues a one-hour encrypted, Secure, HttpOnly, SameSite=Lax host-only session cookie; redirects to `/portal`. No Google access or refresh token is persisted.
 - `/portal` reads `/api/me` on the same Worker origin, rendering the member status using `textContent`, never trusting HTML from the database. The Worker queries Neon by `(issuer, sub)`; email is not used for account linking. Sign-in does not activate or enroll members.
-- POST `/auth/logout` requires a same-origin `Origin` header and expires the browser session cookie. **This is not server-side session revocation:** a stolen cookie remains valid until expiration. Session encryption uses A256GCM and a secret derived from `GOOGLE_SESSION_SECRET`.
+- POST `/auth/logout` requires a same-origin `Origin` header, revokes the session ID in a Durable Object, and expires the browser session cookie. Session encryption uses A256GCM and a secret derived from `GOOGLE_SESSION_SECRET`.
 - Portal JavaScript is served as a same-origin module with CSP `script-src 'self'`; no inline script exception.
 
 ## Google Cloud setup (operator action required)
@@ -34,7 +34,9 @@ Run `npm ci`, `node --test nexus/api/google-auth.test.mjs nexus/api/member-http.
 
 ## Security work still required before public launch
 
-- Introduce server-side session IDs and revocation storage (prefer Durable Objects or a transactional database), so logout invalidates a captured cookie and session rotation can be enforced. Current logout only clears the browser cookie.
-- Consume OAuth transaction state atomically in server-side storage to prevent reuse; Google's code is single-use, but the encrypted OAuth state cookie alone is not a one-time record.
+- Validate Durable Object SQLite migration and atomic state consumption in a deployed non-production environment. Current unit tests use a synthetic store; production Durable Object behavior is not yet proven.
+- Review session lifecycle policies, cross-device revocation, and key rotation; current revocation is per session ID and key rotation requires an explicit migration plan.
 - Test with a real Google OAuth client and browser, including cookie behavior, account switching, Google error responses, logout CSRF, session expiration, and assistive technology.
 - Keep `/api/register` disabled. It still expects a verified bearer token and has not been connected to the Google cookie session. Do not silently allow cookie-authenticated registration without CSRF protections and explicit consent semantics.
+
+**Deployment requirement:** Wrangler now declares an `AUTH_STATE` SQLite-backed Durable Object binding and `auth-state-v1` migration. The auth flow fails closed without this binding. Do not remove the binding or deploy a Worker without migrating the class.
