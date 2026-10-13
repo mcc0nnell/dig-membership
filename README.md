@@ -14,7 +14,7 @@ DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deaf
 
 **NTC conference foundation (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. The [organizer console deployment guide](nexus/ORGANIZER-DEPLOYMENT.md) covers staff permissions, editing, previews, and publication. The [attendee registration guide](nexus/ATTENDEE-REGISTRATION.md) documents the membership-free individual registration, atomic workshop waitlists, authenticated confirmation references and restricted accommodations workflow. Events default to draft; no real conference has been published or deployed.
 
-**[Explore the offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Security policy](SECURITY.md)**
+**[Explore the offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Visual systems atlas](https://mcc0nnell.github.io/dig-nexus/atlas.html)** · **[Mermaid architecture maps](docs/architecture/system-maps.md)** · **[Implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Security policy](SECURITY.md)**
 
 ## What we're building
 
@@ -32,21 +32,17 @@ These are development milestones, not a claim that DIG has replaced its existing
 
 ## The platform architecture
 
-```text
-  WordPress experience / DIG website
-                 |
-                 v
-  Caddy HTTPS → DIG Nexus Docker container
-      |                         |
-      |                 Neon-backed state
-      |               (OAuth state and
-      |                session revocation)
-      v
-  Neon PostgreSQL
-  (members, terms, events, governance, consent)
-      |
-      +-- Planned delivery integration --> MailerSend
-      +-- Optional staff CRM experiment -> Twenty (not required)
+```mermaid
+flowchart LR
+  W["WordPress portal"] --> C["Caddy / HTTPS"]
+  C --> A["DIG Nexus Node API"]
+  A --> N[("Neon PostgreSQL<br/>members · events · consent")]
+  G["Google OIDC<br/>development"] -. "identity" .-> A
+  L["Magic links<br/>development"] -. "identity" .-> A
+  Z["Zeffy hosted checkout"] -->|signed webhook| A
+  A -. "gated delivery" .-> M["MailerSend adapter"]
+  classDef core fill:#145974,color:#fff,stroke:#42ddc2,stroke-width:2px
+  class C,A,N core
 ```
 
 - **WordPress** is the website-facing integration. The `[dig_nexus_portal]` shortcode is a development candidate. It directs members to the Nexus service; no database credentials or authorization logic belong in WordPress.
