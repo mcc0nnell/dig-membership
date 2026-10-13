@@ -19,16 +19,8 @@ DO $$
 DECLARE v jsonb; v_notice jsonb;
 BEGIN
  PERFORM nexus_conference_register('ticket-test','https://accounts.google.com','ticketbuyer','ticketbuyer@fixture.invalid','Synthetic Buyer');
- IF (SELECT count(*) FROM nexus_conference_notifications n JOIN nexus_conference_enrollments en ON en.id=n.enrollment_id JOIN nexus_events ev ON ev.id=en.event_id WHERE ev.slug='ticket-test' AND n.kind='registration')<>1
- THEN RAISE EXCEPTION 'registration mail not enqueued'; END IF;
- v_notice=nexus_conference_claim_mail();
- IF v_notice->>'email'<>'ticketbuyer@fixture.invalid' OR v_notice->>'kind'<>'registration'
- THEN RAISE EXCEPTION 'outbox claim incorrect'; END IF;
- IF nexus_conference_claim_mail() IS NOT NULL THEN RAISE EXCEPTION 'mail double claim'; END IF;
- IF NOT nexus_conference_complete_mail((v_notice->>'notificationId')::uuid,true,'synthetic-accepted-id')
- THEN RAISE EXCEPTION 'mail completion failed'; END IF;
- IF nexus_conference_complete_mail((v_notice->>'notificationId')::uuid,true,'duplicate') IS NOT NULL
- THEN RAISE EXCEPTION 'mail completion replay succeeded'; END IF;
+ IF (SELECT count(*) FROM nexus_conference_notifications n JOIN nexus_conference_enrollments en ON en.id=n.enrollment_id JOIN nexus_events ev ON ev.id=en.event_id WHERE ev.slug='ticket-test')<>0
+ THEN RAISE EXCEPTION 'unpaid request generated confirmation email'; END IF;
  v=nexus_conference_payment_link('ticket-test','https://accounts.google.com','ticketbuyer');
  IF v->>'provider'<>'zeffy' OR v->>'amountCents'<>'2500' THEN RAISE EXCEPTION 'wrong hosted link'; END IF;
  BEGIN
@@ -51,6 +43,16 @@ BEGIN
  '20000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000003',
  'ticketbuyer@fixture.invalid',2500,'usd','succeeded','online','none',false);
  IF v->>'status'<>'paid' THEN RAISE EXCEPTION 'verified payment not credited'; END IF;
+ IF (SELECT count(*) FROM nexus_conference_notifications n JOIN nexus_conference_enrollments en ON en.id=n.enrollment_id JOIN nexus_events ev ON ev.id=en.event_id WHERE ev.slug='ticket-test' AND n.kind='registration')<>1
+ THEN RAISE EXCEPTION 'registration mail not enqueued after verification'; END IF;
+ v_notice=nexus_conference_claim_mail();
+ IF v_notice->>'email'<>'ticketbuyer@fixture.invalid' OR v_notice->>'kind'<>'registration'
+ THEN RAISE EXCEPTION 'outbox claim incorrect'; END IF;
+ IF NOT nexus_conference_complete_mail((v_notice->>'notificationId')::uuid,true,'synthetic-accepted-id')
+ THEN RAISE EXCEPTION 'mail completion failed'; END IF;
+ IF nexus_conference_complete_mail((v_notice->>'notificationId')::uuid,true,'duplicate') IS NOT NULL
+ THEN RAISE EXCEPTION 'mail completion replay succeeded'; END IF;
+
  IF nexus_conference_zeffy_reconcile('event-paid-000000001','50000000-0000-4000-8000-000000000005',
  '20000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000003',
  'ticketbuyer@fixture.invalid',2500,'usd','succeeded','online','none',false)->>'status'<>'already_processed'
@@ -79,8 +81,8 @@ BEGIN
  v=nexus_conference_zeffy_reconcile('event-refund-000001','50000000-0000-4000-8000-000000000005',
  '20000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000003',
  'ticketbuyer@fixture.invalid',2500,'usd','succeeded','online','full',false);
- IF v->>'status'<>'refunded' THEN RAISE EXCEPTION 'refund not recorded'; END IF;
- IF (SELECT status FROM nexus_conference_payment_orders LIMIT 1)<>'refunded'
+ IF v->>'status'<>'manual_review' THEN RAISE EXCEPTION 'refund not routed to manual review'; END IF;
+ IF (SELECT o.status FROM nexus_conference_payment_orders o JOIN nexus_conference_enrollments en ON en.id=o.enrollment_id JOIN nexus_events e ON e.id=en.event_id WHERE e.slug='ticket-test')<>'refunded'
  THEN RAISE EXCEPTION 'paid state not reversed'; END IF;
 END $$;
 ROLLBACK;

@@ -57,6 +57,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/schema-010-jobs.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-011-magic-links.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-012-constituents.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-013-paid-inventory.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-003-operations.sql
@@ -87,6 +88,14 @@ jobs:
         env:
           CONFERENCE_TEST_DATABASE: '1'
         run: bash nexus/tests/conference-concurrency.sh
+
+      - name: Verify paid admission inventory and Zeffy reversal safety
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/paid-inventory-integration.sql
+
+      - name: Verify concurrent paid payments never overbook last place
+        env:
+          CONFERENCE_TEST_DATABASE: '1'
+        run: bash nexus/tests/paid-inventory-concurrency.sh
 
       - name: Verify one-use email login and purchaser-verified payment recovery
         run: psql -v ON_ERROR_STOP=1 -f nexus/tests/magic-recovery-integration.sql

@@ -40,3 +40,13 @@ test('no jobs and expired/fenced worker leases are not marked done',async()=>{
  });
  assert.equal(result.kind,'lease_lost');
 });
+
+test('paid-intent expiry jobs use the existing fenced queue without sending money or mail',async()=>{
+ let touched=false;
+ const queue={claim:async()=>({id:'j',task:'conference_intent_expiry',payload:{},lease_token:'l'}),
+  cleanupExpired:async()=>{throw Error('wrong runtime cleanup');},
+  expireConferenceIntents:async()=>{touched=true;return {expired:2};},
+  complete:async()=>true,fail:async()=>{throw Error('should not fail');}};
+ const result=await executeNext(queue);
+ assert.equal(result.kind,'completed');assert.equal(result.counts.expired,2);assert.equal(touched,true);
+});

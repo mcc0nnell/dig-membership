@@ -109,3 +109,13 @@ opaque QR credentials, and staff check-in. See [DOCKER.md](DOCKER.md) for the
 current Docker/Neon deployment target and every live-enablement gate. Zeffy
 collects money on its own hosted campaign: returning to Nexus does not prove
 payment, and a receipt reference cannot be presented as a QR credential.
+
+## Paid admission lifecycle (migration 013)
+
+**The original immediate `registered` result now applies to free events only.**
+For a paid Zeffy-configured event, attendee registration creates a
+`pending_payment` request with no held seat. Only a verified settled Zeffy
+payment can atomically confirm admission. The optional existing Docker jobs
+worker can close expired intents; refunds, late charges, capacity mismatches
+and paid cancellations are reviewed manually. Read
+[PAID-INVENTORY.md](PAID-INVENTORY.md) before enabling ticket sales.
