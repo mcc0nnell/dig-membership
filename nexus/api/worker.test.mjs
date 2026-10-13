@@ -8,5 +8,5 @@ test("health responds without member data",async()=>{
 });
 test("member endpoint does not trust supplied headers",async()=>{
  const r=await worker.fetch(new Request("https://example.invalid/api/me",{headers:{"x-member-id":"1","x-role":"admin"}}));
- assert.equal(r.status,501);
+ assert.equal(r.status,503);
 });
