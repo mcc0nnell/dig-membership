@@ -43,6 +43,7 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f nexus/schema.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-002-lifecycle.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-003-identities.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
       - name: Verify tables and constraints
