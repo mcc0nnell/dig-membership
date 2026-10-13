@@ -8,7 +8,7 @@ DECLARE v_id uuid; v_existing_email text;
 BEGIN
  IF p_issuer IS NULL OR p_issuer !~ '^https://[^[:space:]/]+' OR length(p_issuer)>512
  OR p_subject IS NULL OR length(btrim(p_subject))=0 OR length(p_subject)>512
- OR p_email IS NULL OR length(p_email)>254 OR p_email !~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+$'
+ OR p_email IS NULL OR length(p_email)>254 OR p_email !~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'
  OR p_display_name IS NULL OR length(btrim(p_display_name))=0 OR length(p_display_name)>120
  THEN RAISE EXCEPTION 'invalid registration arguments' USING ERRCODE='22023'; END IF;
  -- Serialize requests for the same identity AND normalized email in this transaction.
