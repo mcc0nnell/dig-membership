@@ -131,3 +131,50 @@ This source-build path does not use the image-pinning/rollback script. Build a p
 - HTTPS certificates and renewal, host OS patching, secrets rotation, monitoring, backup/restore, incident response and a monthly cost budget.
 
 **No real member onboarding, ticket payments, elections, or newsletter sending should be activated until those gates pass.**
+
+## NTC ticketing — Zeffy and MailerSend
+
+Migration `nexus/schema-009-ticketing.sql` extends the attendee model with
+organizer-configured Zeffy campaign and rate IDs, verified reconciliation,
+a transactional mail outbox, and hashed QR bearer credentials. No money can
+be charged inside Nexus. Checkout is hosted by Zeffy; each completed or updated
+payment webhook has its **raw-body HMAC signature validated**, then the current
+payment is re-fetched using Zeffy's read API. Only the configured campaign,
+rate, single-ticket line amount, verified buyer email, USD currency and online
+purchase may credit a registered attendee. A return redirect is never proof.
+Refunds and disputes revoke new ticket eligibility.
+
+The private attendee page provides the Zeffy hosted link and a QR-generation
+button. The check-in screen at `/checkin/:event` supports manual code entry and
+an optional QR camera scanner using browsers with `BarcodeDetector`. Staff must
+be provisioned separately in `nexus_conference_checkin_staff`; every successful
+check-in is attributed and repeated scans are idempotent. QR values are returned
+only to the attendee, and only hashes persist in PostgreSQL.
+
+MailerSend transactional confirmations are **not newsletters**. Registration
+and verified-payment notifications enter a DB outbox; an optional Docker mailer
+container claims jobs atomically. Unknown send results go to manual review to
+avoid duplicate sends. Use `docker compose --profile mailer run --rm mailer` for
+one job, or enable `MAILER_MODE=loop` for a long-running opt-in sidecar.
+Zeffy may send its own receipts, so coordinate duplicate confirmation policy.
+
+### Additional secret files and switches
+
+Create mode-0600 files owned by `NEXUS_UID:NEXUS_GID`:
+`deploy/secrets/zeffy_api_key`, `deploy/secrets/zeffy_webhook_secret`, and
+`deploy/secrets/mailersend_api_token`. Empty placeholders are allowed **only
+while the corresponding flag is off**. Do not include these in Git.
+
+The Compose definition keeps `NTC_TICKETING_ENABLED`, `NTC_TICKETS_ENABLED`,
+`NTC_CHECKIN_ENABLED`, `NTC_ZEFFY_WEBHOOK_ENABLED` and
+`DIG_TRANSACTIONAL_EMAIL_ENABLED` set to `false` until the individual approvals.
+
+**Hard release gate:** coordinate capacity in two systems. Nexus registers and
+reserves event places, while Zeffy has its own ticket inventory. Until there
+is a reviewed abandoned-reservation expiry and refund/oversubscription policy,
+no public paid registrations may be enabled. Organizer must confirm the actual
+Zeffy campaign ID, single ticket rate and URL, approved ticket price, verified
+webhook examples, trusted domain, and TLS before flipping any flag. Guests and
+dependent registrations remain unsupported: each QR credential belongs to one
+verified attendee. Do not expose private accommodations in Zeffy, receipts or
+QR payloads. No production or real Zeffy data is touched by this milestone.

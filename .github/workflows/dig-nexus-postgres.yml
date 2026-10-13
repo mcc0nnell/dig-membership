@@ -53,6 +53,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/schema-006-organizer.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-007-attendee.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-008-cloud-run-state.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-009-ticketing.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
       - name: Verify tables and constraints
@@ -82,6 +83,9 @@ jobs:
         env:
           CONFERENCE_TEST_DATABASE: '1'
         run: bash nexus/tests/conference-concurrency.sh
+
+      - name: Verify Zeffy reconciliation, ticket replay and notification outbox
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/ticketing-integration.sql
 
       - name: Verify attendee capacity, promotions, consent and privacy
         run: psql -v ON_ERROR_STOP=1 -f nexus/tests/conference-integration.sql

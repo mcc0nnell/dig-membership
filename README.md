@@ -4,6 +4,8 @@
 
 DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deafingov.org/): a single home for member profiles, conference programs, committees, governance, and communications. The selected deployment is **Docker Compose + Caddy + Neon PostgreSQL**, with WordPress as the website-facing layer. The same application image can also run on other container hosts. DIG Nexus owns its membership data and does not depend on an external CRM.
 
+**NTC ticketing extension (development):** [Zeffy payments, attendee QR and confidential check-in](nexus/DOCKER.md#ntc-ticketing-zeffy-and-mailersend) are implemented behind disabled-by-default flags, without a separate payment processor.
+
 **Project status: active development — not a live membership service.** The repository contains working components, synthetic tests, database schemas, and an offline demo. It does **not** establish that Google sign-in, Neon-backed registration, newsletters, payments, or elections are available to real members. Production launch requires DIG policy approval, security and accessibility review, and a staged deployment.
 
 **NTC conference foundation (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. The [organizer console deployment guide](nexus/ORGANIZER-DEPLOYMENT.md) covers staff permissions, editing, previews, and publication. The [attendee registration guide](nexus/ATTENDEE-REGISTRATION.md) documents the membership-free individual registration, atomic workshop waitlists, authenticated confirmation references and restricted accommodations workflow. Events default to draft; no real conference has been published or deployed.
