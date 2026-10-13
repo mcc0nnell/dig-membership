@@ -18,14 +18,17 @@ async function api(path,method='GET',data){
 const run=async(task)=>{try{await task();}catch(e){say(e.message);}};
 function render(){
  const status=byId('enrollment-status');status.replaceChildren();
- const active=self&&['registered','waitlisted'].includes(self.status);
- if(self){status.append(el('p','Status: '+self.status),el('p','Confirmation reference: '+self.confirmationReference),el('p','Verified email: '+self.email));}
+ const active=self&&['registered','waitlisted','pending_payment'].includes(self.status);
+ if(self){status.append(el('p','Status: '+(self.status==='pending_payment'?'Awaiting verified Zeffy payment (no seat held)':self.status==='paid_review'?'Payment requires organizer review — no admission':self.status)),el('p','Confirmation reference: '+self.confirmationReference),el('p','Verified email: '+self.email));
+  if(self.status==='pending_payment'&&self.paymentDueAt)status.append(el('p','This Nexus payment request expires at '+new Date(self.paymentDueAt).toLocaleString()+'. This is not a Zeffy reservation.'));
+  if(self.paymentStatus==='paid'&&self.status==='registered')status.append(el('p','Admission confirmed after Zeffy payment.'));
+ }
  else status.append(el('p','No conference registration is associated with this signed-in identity.'));
  byId('register-form').hidden=!!active;
- byId('cancel-event').hidden=!active;
+ byId('cancel-event').hidden=!active||(self?.paymentRequired&&self?.paymentStatus==='paid');
  byId('access-form').hidden=!active;
- byId('create-qr').hidden=self?.status!=='registered';
- byId('payment-recovery').hidden=self?.status!=='registered';
+ byId('create-qr').hidden=self?.status!=='registered'||(self.paymentRequired&&self.paymentStatus!=='paid');
+ byId('payment-recovery').hidden=!self?.paymentRequired||!['registered','pending_payment'].includes(self?.status);
  const note=byId('access-note');note.value=self?.accessibilityRequest??'';
  const workshops=byId('workshops');workshops.replaceChildren();
  const booked=new Map((self?.workshops||[]).map(w=>[w.slug,w.status]));
@@ -49,7 +52,14 @@ async function reload(){
 }
 async function ticketingStatus(){
  const link=byId('zeffy-payment');link.hidden=true;
- if(self?.status!=='registered')return;
+ if(self?.status==='paid_review'){
+  byId('ticket-message').textContent='Payment requires organizer review. No admission is currently granted.';return;
+ }
+ if(self?.status==='waitlisted'&&self?.paymentRequired){
+  byId('ticket-message').textContent='No paid place is available. You are waitlisted; do not purchase another ticket until contacted by the organizers.';return;
+ }
+ if(!['pending_payment','registered'].includes(self?.status))return;
+ if(self?.paymentRequired===false){byId('ticket-message').textContent='Free admission confirmed. Generate your QR credential.';return;}
  try{
   const r=await fetch('/api/ticketing/'+encodeURIComponent(slug)+'/payment-link',{credentials:'same-origin'});
   if(!r.ok)return;
@@ -78,7 +88,7 @@ byId('payment-recovery').addEventListener('submit',e=>{e.preventDefault();run(as
   body:JSON.stringify({paymentId})});
  const data=await r.json();
  if(!r.ok){say(data.error==='buyer_email_mismatch'?'The purchase email does not match this signed-in email. Contact an NTC organizer for manual review.':'Payment could not be verified ('+(data.error||r.status)+').');return;}
- await ticketingStatus();say('Zeffy payment verification: '+data.payment.status+'.');
+ await reload();say('Zeffy payment verification: '+data.payment.status+'.');
 });});
 byId('create-qr').addEventListener('click',()=>run(async()=>{
  if(!confirm('Generate a QR credential? This replaces any previous unused credential.'))return;
@@ -96,10 +106,10 @@ byId('create-qr').addEventListener('click',()=>run(async()=>{
 byId('register-form').addEventListener('submit',e=>{e.preventDefault();run(async()=>{
  const displayName=byId('display-name').value.trim();
  const {result}=await api('/register','POST',{displayName});await reload();
- say('Conference registration '+result.status+'. Your confirmation reference is displayed below.');
+ say(result.status==='pending_payment'?'Registration request saved. Your place is not confirmed until Zeffy verifies payment.': 'Conference registration '+result.status+'. Your reference is displayed below.');
 });});
 byId('cancel-event').addEventListener('click',()=>run(async()=>{
- if(!confirm('Cancel your conference place and all workshop reservations?'))return;
+ if(!confirm(self?.status==='pending_payment'?'Cancel this Nexus registration request? This does not cancel any Zeffy payment in progress.':'Cancel your conference place and all workshop reservations?'))return;
  await api('/cancel','POST',{});await reload();say('Conference registration cancelled.');
 }));
 byId('access-form').addEventListener('submit',e=>{e.preventDefault();run(async()=>{

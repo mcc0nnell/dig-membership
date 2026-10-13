@@ -15,6 +15,10 @@ export function createJobQueue(client){
     RETURNING id,state`,[key]);
    return result.rows[0];
   },
+  async expireConferenceIntents(){
+   const result=await query('SELECT nexus_conference_expire_due_intents() AS count');
+   return {expired:result.rows[0].count};
+  },
   async claim(){
    const result=await query(`
     WITH chosen AS (
@@ -64,9 +68,9 @@ export async function executeNext(queue,{onResult}={}){
  const job=await queue.claim();
  if(!job)return {kind:'idle'};
  try{
-  if(job.task!=='runtime_expiry_cleanup'||JSON.stringify(job.payload)!=='{}')
+  if(!['runtime_expiry_cleanup','conference_intent_expiry'].includes(job.task)||JSON.stringify(job.payload)!=='{}')
    throw Error('unsupported_job');
-  const counts=await queue.cleanupExpired();
+  const counts=job.task==='conference_intent_expiry'?await queue.expireConferenceIntents():await queue.cleanupExpired();
   if(!await queue.complete(job)) return {kind:'lease_lost'};
   onResult?.({kind:'completed',task:job.task,counts});
   return {kind:'completed',counts};

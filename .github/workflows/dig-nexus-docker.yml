@@ -14,6 +14,9 @@ on:
       - 'nexus/schema-009-ticketing.sql'
       - 'nexus/schema-010-jobs.sql'
       - 'nexus/schema-012-constituents.sql'
+      - 'nexus/schema-013-paid-inventory.sql'
+      - 'nexus/tests/paid-inventory-*.sql'
+      - 'nexus/tests/paid-inventory-*.sh'
       - 'nexus/jobs/**'
       - 'release/**'
       - 'tests/browser/**'
@@ -35,6 +38,9 @@ on:
       - 'nexus/schema-009-ticketing.sql'
       - 'nexus/schema-010-jobs.sql'
       - 'nexus/schema-012-constituents.sql'
+      - 'nexus/schema-013-paid-inventory.sql'
+      - 'nexus/tests/paid-inventory-*.sql'
+      - 'nexus/tests/paid-inventory-*.sh'
       - 'nexus/jobs/**'
       - 'release/**'
       - 'tests/browser/**'
@@ -155,7 +161,8 @@ jobs:
             nexus/schema-005-conference.sql nexus/schema-006-organizer.sql \
             nexus/schema-007-attendee.sql nexus/schema-008-cloud-run-state.sql \
             nexus/schema-009-ticketing.sql nexus/schema-010-jobs.sql \
-            nexus/schema-011-magic-links.sql nexus/schema-012-constituents.sql; do
+            nexus/schema-011-magic-links.sql nexus/schema-012-constituents.sql \
+            nexus/schema-013-paid-inventory.sql; do
             psql -v ON_ERROR_STOP=1 -f "$file" > /dev/null
           done
       - name: Apply newsletter schema and verify subscriber separation
@@ -173,6 +180,12 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/tests/conference-integration.sql
           psql -v ON_ERROR_STOP=1 -f nexus/tests/organizer-integration.sql
           psql -v ON_ERROR_STOP=1 -f nexus/tests/ticketing-integration.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/tests/magic-recovery-integration.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/tests/paid-inventory-integration.sql
+      - name: Concurrent verified payments must never overbook
+        env:
+          CONFERENCE_TEST_DATABASE: '1'
+        run: bash nexus/tests/paid-inventory-concurrency.sh
 
   publish:
     needs: [docker, browser, postgres]

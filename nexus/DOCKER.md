@@ -209,3 +209,13 @@ No native Google Cloud runtime or Salesforce account is required.
 ## Association and campaign operations
 
 See [ASSOCIATION-OPERATIONS.md](ASSOCIATION-OPERATIONS.md) for original CiviCRM/listmonk-inspired modules, explicit newsletter consent and staff access controls. The `CONSTITUENTS_ENABLED` and `CAMPAIGNS_ENABLED` flags are hard-disabled in the checked-in Docker configuration. These are not replacements for a live mailing compliance workflow.
+## NTC paid admission inventory and expiry jobs
+
+See [PAID-INVENTORY.md](PAID-INVENTORY.md) for the Zeffy-authoritative stock
+policy, 24-hour **non-holding** Nexus payment intents, atomic confirmed-seat
+assignment, overflow/refund review and opt-in background expiry jobs. Migration
+013 follows migration 012 (constituents) on a disposable PostgreSQL 17 or isolated Neon
+staging branch. A paid event requires **finite capacity** and complete Zeffy
+campaign/rate/form mapping before registration. Operators must separately
+verify actual Zeffy stock for each date/occurrence. No stock reservation or
+automatic refund exists across Zeffy and Nexus.
