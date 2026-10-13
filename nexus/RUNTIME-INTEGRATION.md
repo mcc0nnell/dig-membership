@@ -7,7 +7,7 @@
 - WordPress accessible portal shell: explicitly indicates login is unavailable until a provider and session integration are configured.
 
 ## Required before real sign-in
-1. Select and configure an OIDC provider, client ID, callback URL, and authorization-code + PKCE login flow with HttpOnly Secure SameSite cookies and CSRF protections. **Bearer token verification is not a browser login flow.**
+1. Google OpenID Connect is the chosen provider. Follow [`GOOGLE-OIDC.md`](GOOGLE-OIDC.md) to provision its web client, callback URL, authorization-code + PKCE login, nonce/state, HttpOnly Secure SameSite session cookies, and CSRF protections. **Bearer token verification is not a browser login flow.**
 2. Provision Neon credentials as a Cloudflare secret (`DATABASE_URL`), not in Wrangler vars or WordPress. Use least-privilege database role and verify connection and function grants in a non-production database.
 3. Configure trusted `OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_JWKS_URL` and `REGISTRATION_ALLOWED_ORIGIN`; confirm JWKS URL is same-origin with issuer.
 4. Configure frontend-to-Worker authenticated session and CORS/CSRF policy. The WordPress shortcode intentionally does not solicit bearer tokens or store them in JavaScript.
