@@ -8,6 +8,7 @@ COPY nexus/api/ ./nexus/api/
 COPY nexus/cloud-run/ ./nexus/cloud-run/
 COPY nexus/docker/ ./nexus/docker/
 COPY nexus/jobs/ ./nexus/jobs/
+COPY newsletter/ ./newsletter/
 ENV NODE_ENV=production
 USER node
 EXPOSE 8080

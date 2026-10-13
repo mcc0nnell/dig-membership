@@ -61,6 +61,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-003-operations.sql
+          psql -v ON_ERROR_STOP=1 -f newsletter/schema-004-unsubscribe-redemption.sql
       - name: Verify tables and constraints
         run: |
           set -euo pipefail
@@ -139,3 +140,7 @@ jobs:
 
       - name: Verify consent-scoped campaign operations and constituent authorization
         run: psql -v ON_ERROR_STOP=1 -f nexus/tests/constituent-operations-integration.sql
+
+
+      - name: Verify one-click unsubscribe, consent recheck and single-send claim
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/newsletter-dispatch-integration.sql

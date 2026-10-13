@@ -26,3 +26,12 @@ The existing WordPress membership plugin is Salesforce-oriented and should not b
 DIG Nexus includes original listmonk-inspired functions, without importing listmonk source or deploying it. See [association operations](../nexus/ASSOCIATION-OPERATIONS.md) for the consented list model, staff-only campaign audience previews, approvals, queued deliveries, suppression triggers, and rollout limits.
 
 These are staging-only functions; a queued campaign **never** bypasses the existing disabled MailerSend marketing gate.
+
+
+### Safeguarded one-click and delivery claims
+
+A new, separately disabled one-click endpoint and claim-only dispatch
+primitive are documented in [DIG Nexus association operations](../nexus/ASSOCIATION-OPERATIONS.md).
+The legacy `sendNewsletter` adapter now requires a verified provider plan
+and an enabled HTTPS one-click URL, and inserts MailerSend's documented
+`list_unsubscribe` parameter. No automatic newsletter worker is enabled.
