@@ -17,7 +17,7 @@ export default {
    catch{return json({error:"unauthorized"},401);}
    if(!identity?.verified||!identity.emailVerified)return json({error:"unauthorized"},401);
    try {
-    const db=env.memberDb||(env.pgClient?createMemberDb(env.pgClient):env.DATABASE_URL?createMemberDb(createNeonClient(env)):null);
+    const db=env.memberDb||(env.pgClient?createMemberDb(env.pgClient):env.DATABASE_URL?createMemberDb(await createNeonClient(env)):null);
     if(!db)return json({error:"membership_unavailable"},503);
     const member=await db.findByIdentity(identity);
     return member?json({member},200):json({member:null},200);
@@ -44,7 +44,7 @@ export default {
    const verifyIdentity=typeof env.verifyIdentity==="function"?env.verifyIdentity:
     env.OIDC_ISSUER&&env.OIDC_AUDIENCE&&env.OIDC_JWKS_URL?
     createOidcVerifier({issuer:env.OIDC_ISSUER,audience:env.OIDC_AUDIENCE,jwksUrl:env.OIDC_JWKS_URL}):null;
-   const registrationDb=env.registrationDb||(env.pgClient?createRegistrationDb(env.pgClient):null)||(env.DATABASE_URL?createRegistrationDb(createNeonClient(env)):null);
+   const registrationDb=env.registrationDb||(env.pgClient?createRegistrationDb(env.pgClient):null)||(env.DATABASE_URL?createRegistrationDb(await createNeonClient(env)):null);
    if(!verifyIdentity||!registrationDb)return json({error:"registration_unavailable"},503);
    let identity;
    try {identity=await verifyIdentity(request);} catch {return json({error:"unauthorized"},401);}
