@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: DIG Nexus Portal
- * Description: Accessible member portal shell. Authentication and enrollment remain gated.
- * Version: 0.2.0
+ * Description: Accessible member portal linking to secure Google OIDC sign-in.
+ * Version: 0.3.0
  */
 if (!defined('ABSPATH')) { exit; }
 add_shortcode('dig_nexus_portal', function () {
@@ -12,5 +12,6 @@ add_shortcode('dig_nexus_portal', function () {
  if (!$api || !str_starts_with($api, 'https://')) {
   return $html . '<p role="status">' . esc_html__('Membership sign-in is not configured yet.', 'dig-nexus') . '</p></section>';
  }
- return $html . '<p role="status">' . esc_html__('Secure sign-in is being configured. Registration is not yet open.', 'dig-nexus') . '</p></section>';
+ $url = esc_url(rtrim($api, '/') . '/auth/google/start');
+ return $html . '<p>' . esc_html__('Sign in with Google to access the secure DIG portal. Signing in does not grant membership.', 'dig-nexus') . '</p><p><a href="' . $url . '">' . esc_html__('Continue with Google', 'dig-nexus') . '</a></p><p>' . esc_html__('Membership registration is not yet open.', 'dig-nexus') . '</p></section>';
 });

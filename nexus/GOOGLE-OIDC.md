@@ -1,0 +1,32 @@
+# DIG Nexus: Google OpenID Connect sign-in
+
+**Status:** Implementation and synthetic tests only. Not deployed. No real Google OAuth client or production secrets have been configured. Registration remains disabled.
+
+## Architecture
+
+- WordPress `[dig_nexus_portal]` links to the Cloudflare Worker `/auth/google/start`; WordPress never receives Google tokens or database credentials.
+- Worker creates cryptographically random state, nonce and PKCE S256 verifier/challenge. The five-minute OAuth transaction is stored in an encrypted, Secure, HttpOnly, SameSite=Lax, host-only cookie.
+- Google Authorization Code flow redirects to `/auth/google/callback`; Worker exchanges the code directly with Google's token endpoint, validates Google's ID token signature against Google JWKS using `jose`, checks Google issuer, client audience, nonce, and verified email.
+- Worker issues a one-hour encrypted, Secure, HttpOnly, SameSite=Lax host-only session cookie; redirects to `/portal`. No Google access or refresh token is persisted.
+- `/portal` reads `/api/me` on the same Worker origin, rendering the member status using `textContent`, never trusting HTML from the database. The Worker queries Neon by `(issuer, sub)`; email is not used for account linking. Sign-in does not activate or enroll members.
+- POST `/auth/logout` expires the session cookie. Session encryption uses A256GCM and a secret derived from `GOOGLE_SESSION_SECRET`.
+
+## Google Cloud setup (operator action required)
+
+1. Create/select a Google Cloud project. Configure Google Auth Platform consent screen, application name, support email, authorized domains, and publishing/test users as appropriate.
+2. Create an **OAuth Client ID** of type **Web application**. Add the exact HTTPS Worker callback URL, e.g. `https://nexus.example.org/auth/google/callback`, under authorized redirect URIs.
+3. Set Worker `GOOGLE_CLIENT_ID` (non-secret config), `GOOGLE_REDIRECT_URI` (exact callback URI), `GOOGLE_CLIENT_SECRET` and `GOOGLE_SESSION_SECRET` as Worker secrets. Generate the latter using at least 32 random bytes, encoded as a long secret. Never commit credentials.
+4. Set the WordPress `dig_nexus_api_url` option to the HTTPS Worker origin only. Use a domain you control, TLS, and verify it matches the Google redirect URI origin.
+5. Provision Neon `DATABASE_URL` as a Worker secret with least-privilege permissions; apply schemas 001–004 to a non-production branch and validate database grants.
+6. Verify OAuth code exchange, state/nonce replay prevention, cookie handling, login/logout, member lookup and accessibility with synthetic Google test accounts. Set `REGISTRATION_ENABLED` only after separate registration security and operations review.
+
+## Local validation
+
+Run `npm ci`, `node --test nexus/api/google-auth.test.mjs nexus/api/member-http.test.mjs`, and `npx wrangler deploy --dry-run --config nexus/wrangler.jsonc`. CI additionally runs Deno and isolated Node suites. Tests mock Google's token exchange and must not use real user credentials.
+
+## Operational limitations
+
+- No production deployment, client registration, Neon secret, or actual Google login is complete.
+- No email-based automatic account linking, roles, membership approval, newsletter consent, or payment processing.
+- `/api/register` still requires its existing explicit origin, rate-limit and enablement gates; it does **not** accept the browser session cookie as registration authorization. This avoids silently changing registration evidence semantics.
+- The portal is deliberately simple; complete keyboard/screen-reader, ASL and captions UX review before public release.
