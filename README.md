@@ -14,7 +14,7 @@ DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deaf
 
 **NTC conference foundation (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. The [organizer console deployment guide](nexus/ORGANIZER-DEPLOYMENT.md) covers staff permissions, editing, previews, and publication. The [attendee registration guide](nexus/ATTENDEE-REGISTRATION.md) documents the membership-free individual registration, atomic workshop waitlists, authenticated confirmation references and restricted accommodations workflow. Events default to draft; no real conference has been published or deployed.
 
-**[Try the interactive offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Visual systems atlas](https://mcc0nnell.github.io/dig-nexus/atlas.html)** · **[Mermaid system maps](docs/architecture/system-maps.md)** · **[DIG brand tokens](docs/architecture/brand-system.md)** · **[Latest implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Docker deployment](nexus/DOCKER.md)** · **[Security](SECURITY.md)**
+**[Try the interactive offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Nexus Pulse ECharts studio](https://mcc0nnell.github.io/dig-nexus/pulse.html)** · **[Visual systems atlas](https://mcc0nnell.github.io/dig-nexus/atlas.html)** · **[Mermaid system maps](docs/architecture/system-maps.md)** · **[DIG brand tokens](docs/architecture/brand-system.md)** · **[Latest implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Docker deployment](nexus/DOCKER.md)** · **[Security](SECURITY.md)**
 
 ## What we're building
 
@@ -72,6 +72,7 @@ flowchart LR
 | [`docs/architecture/experience-demo.md`](docs/architecture/experience-demo.md) | Four offline demo walkthroughs and browser-test contract |
 | [`docs/architecture/system-maps.md`](docs/architecture/system-maps.md) | Mermaid maps of runtime, membership, NTC paid admission, staff constituents, and newsletter consent |
 | [`demo/atlas.html`](demo/atlas.html) | Separate online Mermaid/ECharts systems atlas; original four-journey demo stays offline |
+| [`demo/pulse.html`](demo/pulse.html) | ECharts synthetic scenario laboratory with eight coordinated visualizations, native controls, table fallbacks and explicit privacy boundaries |
 | [`demo/dig-brand-tokens.json`](demo/dig-brand-tokens.json) and [`docs/architecture/brand-system.md`](docs/architecture/brand-system.md) | Brand palette and styling contract extracted from prior DIG source ZIP, with no legacy runtime dependency |
 | [`nexus/PAID-INVENTORY.md`](nexus/PAID-INVENTORY.md) | NTC non-holding paid intent, verified admission and inventory boundary |
 | [`nexus/jobs/`](nexus/jobs/) | Original PostgreSQL job leases and fail-closed optional cleanup worker |

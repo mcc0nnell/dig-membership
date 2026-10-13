@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Nexus Pulse · DIG Nexus</title>
+<meta name="description" content="ECharts interactive synthetic DIG Nexus membership, DC27 and communication scenario explorer. Not DIG production analytics.">
+<style>
+:root{
+ color-scheme:dark;
+ --navy:#0a1628;--navy2:#1a2d4d;--blue:#3b82f6;--red:#e63312;--red-soft:#ff8d79;--white:#ffffff;
+ --ink:#f5f7ff;--muted:#bbcbdf;--line:#3b4b67;--panel:#162743;--panel2:#213454;
+ --gold:#ffc980;--teal:#71d9d3;--focus:#f9b13d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:30px}
+body{margin:0;background:var(--navy);font:16px/1.55 "Instrument Sans",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink);overflow-x:hidden}
+a{color:#b5d2ff}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--focus)!important;outline-offset:4px}
+.skip{position:absolute;left:18px;top:-100px;z-index:20;background:var(--white);color:var(--navy);padding:12px}.skip:focus{top:10px}
+.site-header{display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;padding:18px max(24px,calc((100vw - 1290px)/2));border-bottom:3px solid var(--red);background:#081221}
+.brand{color:var(--white);text-decoration:none;font-weight:900;letter-spacing:.03em;display:flex;gap:12px;align-items:center}
+.brand b{display:grid;place-items:center;background:var(--red);padding:11px 12px;min-width:57px;border-radius:9px;color:white;letter-spacing:-.07em;font-size:1.26rem}
+.brand span{font-size:.93rem}.brand small{display:block;color:#9fbad9;letter-spacing:.13em;font-size:.62rem;margin-top:2px}
+.site-nav{display:flex;flex-wrap:wrap;align-items:center;gap:9px 22px}.site-nav a{font-size:.87rem;font-weight:700;color:#d1dded;text-decoration:none}.site-nav a:hover{text-decoration:underline}
+.site-nav .special{color:var(--red-soft)}
+main{max-width:1320px;margin:0 auto;padding:0 24px 95px}
+.hero{position:relative;isolation:isolate;padding:clamp(54px,7vw,108px) 0 45px;min-height:465px;overflow:hidden}
+.hero:before{content:"";position:absolute;width:min(67vw,740px);aspect-ratio:1;right:-15%;top:-55%;border:2px solid #e6331255;border-radius:50%;box-shadow:0 0 0 65px #e6331218,0 0 0 145px #e6331208;z-index:-1;pointer-events:none}
+.hero:after{content:"";position:absolute;right:8%;top:25%;width:170px;aspect-ratio:1;transform:rotate(27deg);background:repeating-linear-gradient(0deg,#e6331228 0 1px,transparent 1px 13px);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);z-index:-1}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.16em;font-weight:850;color:var(--red-soft);margin:0 0 14px}
+h1{font-size:clamp(3.75rem,8.5vw,8.75rem);line-height:.89;letter-spacing:-.085em;max-width:1000px;margin:0 0 33px;font-weight:900}
+h1 em{display:block;color:var(--red-soft);font-style:normal}
+.lead{max-width:720px;color:#ccdaea;font-size:clamp(1rem,1.5vw,1.26rem);margin:0 0 29px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.hero-actions a{border:1px solid #667d9d;border-radius:8px;color:#f0f5ff;padding:11px 16px;text-decoration:none;font-weight:800;font-size:.88rem}
+.hero-actions a:first-child{background:#b92b12;border-color:#b92b12;color:white}
+.truth{display:flex;gap:12px;align-items:start;background:#1c2c46;border-left:4px solid var(--gold);padding:14px 20px;border-radius:2px 10px 10px 2px;color:#f5e1ba;font-size:.9rem;margin:0 0 28px}
+.truth strong{color:#ffe7b2}
+.truth p{margin:0}
+.control-room{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.44fr);gap:20px;background:linear-gradient(135deg,#182b4a,#0f213b);border:1px solid #446087;border-radius:17px;padding:clamp(20px,3vw,32px);margin:0 0 24px;box-shadow:0 18px 65px #0004}
+.control-room h2{font-size:clamp(1.35rem,2.3vw,2rem);letter-spacing:-.05em;margin:0 0 8px}
+.control-room p{color:var(--muted);font-size:.91rem;margin:0 0 16px}
+.scenario-buttons{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 14px}
+button{font:inherit;min-height:44px;cursor:pointer;border-radius:8px;font-weight:800;transition:background .18s,transform .18s;border:1px solid #547093;color:#f2f6ff;background:#203758;padding:9px 16px}
+button:hover{background:#314c71}
+button:active{transform:translateY(1px)}
+button[aria-pressed="true"]{background:#b92b12;border-color:#b92b12;color:white}
+.range-label{font-size:.85rem;display:block;font-weight:750;margin:18px 0 9px}
+input[type="range"]{width:min(100%,470px);accent-color:var(--red);cursor:pointer;min-height:29px;display:block}
+.control-side{border-left:1px solid #48617f;padding-left:24px;display:flex;flex-direction:column;justify-content:center}
+.control-side .signal{font-size:clamp(3.2rem,6vw,6rem);font-weight:900;line-height:1;letter-spacing:-.08em;color:var(--red-soft)}
+.control-side p{margin:7px 0 12px}
+.control-side .readout{display:block;border:1px solid #57708d;border-radius:8px;padding:12px;font-size:.83rem;color:#e0ebf8}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:46px}
+.metric{border:1px solid #415775;background:#162943;border-radius:14px;padding:21px 20px;position:relative;overflow:hidden;min-height:146px}
+.metric:before{content:"";width:42px;height:3px;position:absolute;top:0;left:20px;background:var(--red)}
+.metric p{font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;font-weight:850;color:#b2c6dd;margin:0 0 9px}
+.metric strong{font-size:clamp(2.1rem,4vw,3.4rem);line-height:1.1;letter-spacing:-.06em;display:block;color:var(--white)}
+.metric small{font-size:.8rem;color:#b3c7dc;display:block;margin-top:8px}
+.section-title{margin:42px 0 21px;display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.section-title h2{font-weight:900;letter-spacing:-.055em;font-size:clamp(2rem,4vw,3.6rem);margin:0;line-height:1.05}
+.section-title p{max-width:530px;color:var(--muted);font-size:.92rem;margin:0}
+.dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.card{background:linear-gradient(145deg,#1b3150,#13253e);border:1px solid #3d577b;border-radius:18px;min-width:0;overflow:hidden;padding:clamp(19px,2.7vw,29px);box-shadow:0 20px 50px #0002}
+.card.wide{grid-column:1/-1}
+.card.dark{background:#101e34}
+.card-head{display:flex;align-items:start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+.card-head h3{font-size:clamp(1.35rem,2.2vw,1.95rem);letter-spacing:-.04em;line-height:1.15;margin:0 0 8px}
+.card-head p{font-size:.87rem;color:#bad0e8;margin:0;max-width:580px}
+.card-index{color:#fa9e8b;font-size:.74rem;letter-spacing:.14em;font-weight:850;white-space:nowrap}
+.chart{height:350px;max-width:100%;position:relative;display:flex;align-items:center;justify-content:center}
+.chart.tall{height:420px}
+.chart-fallback{color:#ffe0ac;background:#24354e;border:1px dashed #a68b6d;padding:24px;border-radius:9px;max-width:460px;text-align:center;font-size:.9rem}
+.insight{background:#203a57;border-left:3px solid var(--teal);border-radius:0 7px 7px 0;padding:10px 13px;color:#dbe8f8;font-size:.86rem;margin:13px 0}
+.insight strong{color:var(--white)}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.chip-row button{font-size:.78rem;min-height:37px;padding:6px 11px}
+.chip-row button[aria-pressed="true"]{background:#b92b12}
+details.data{border-top:1px solid #3c5371;padding-top:13px;margin-top:14px}
+details.data summary{cursor:pointer;font-size:.84rem;color:#caddf4;text-decoration:underline;text-underline-offset:3px;font-weight:800;padding:4px 0;display:list-item}
+table{width:100%;border-collapse:collapse;margin:12px 0 0;font-size:.85rem;color:#e7f0fb}
+caption{font-weight:750;text-align:left;color:#f8e5c4;padding-bottom:8px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid #425675}
+th{font-weight:800;color:white}td{color:#cfdeef}
+.table-wrap{overflow-x:auto}
+.axis-note{font-size:.78rem;color:#abc1d9;margin:9px 0 0}
+.story{margin-top:48px;border:1px solid #50688a;background:linear-gradient(115deg,#182e4c,#122239);border-radius:18px;padding:clamp(22px,4vw,42px);display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.story h2{font-size:clamp(1.9rem,3.5vw,3rem);line-height:1.04;letter-spacing:-.05em;margin:0 0 17px}
+.story p{font-size:.95rem;color:#c7d7e8}
+.story ul{margin:0;padding-left:22px;color:#dce8f8}
+.story li{margin-bottom:14px}
+footer{border-top:3px solid var(--red);padding:27px max(24px,calc((100vw - 1290px)/2));color:#aabfd7;font-size:.84rem}
+footer a{color:#d7e9ff}
+@media(max-width:930px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.control-room{grid-template-columns:1fr}.control-side{border-left:0;border-top:1px solid #48617f;padding:18px 0 0;display:grid;grid-template-columns:auto 1fr;column-gap:22px;align-items:center}.control-side .readout{grid-column:1/-1}}
+@media(max-width:720px){main{padding-inline:17px}.site-header{padding:13px 17px}.site-nav{gap:10px 16px}.dashboard-grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.hero{min-height:unset;padding:56px 0 33px}.hero:after{display:none}.hero:before{right:-65%;top:-35%}.hero h1{font-size:clamp(3.7rem,13vw,5.8rem)}.lead{font-size:1.02rem}.metrics{gap:9px}.metric{min-height:128px;padding:19px 15px}.metric p{font-size:.66rem}.metric strong{font-size:2.45rem}.metric small{font-size:.72rem}.chart{height:290px}.chart.tall{height:350px}.story{grid-template-columns:1fr;gap:5px}}
+@media(max-width:390px){.metrics{grid-template-columns:1fr 1fr}.metric strong{font-size:2.05rem}.scenario-buttons button{font-size:.82rem;padding:8px 11px}.hero h1{font-size:3.45rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the scenario controls</a>
+<header class="site-header">
+ <a class="brand" href="./"><b>DIG</b><span>NEXUS PULSE<small>SYNTHETIC OPERATIONS STUDIO</small></span></a>
+ <nav class="site-nav" aria-label="Nexus navigation"><a href="#studio">Scenario controls</a><a href="#signals">Charts</a><a href="#boundaries">Trust boundaries</a><a href="./atlas.html">Systems atlas ↗</a><a class="special" href="./">Member demo ↗</a></nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="pulse-title">
+ <p class="eyebrow">DIG / Nexus Pulse / Scenario laboratory / October 2026</p>
+ <h1 id="pulse-title">See the whole <em>picture.</em></h1>
+ <p class="lead">Eight connected ECharts exhibits. One place to explore membership, DC27 admissions, operational trust boundaries, and consent-first communications. Every number here is fictional; nothing is connected to DIG systems.</p>
+ <div class="hero-actions"><a href="#studio">Enter scenario studio ↗</a><a href="#signals">Explore the eight exhibits →</a></div>
+</section>
+<div class="truth" role="note"><span aria-hidden="true">◆</span><p><strong>Development visualization · synthetic data only.</strong> No real DIG members, NTC tickets, registrations, payments, MailerSend deliveries, Neon queries, or live APIs are involved. Scenarios run entirely in this browser; ECharts is fetched from a pinned third-party CDN. This is not an operational dashboard.</p></div>
+<section id="studio" class="control-room" aria-labelledby="studio-heading">
+ <div>
+  <p class="eyebrow">00 / Interactive scenario engine</p>
+  <h2 id="studio-heading">Change the situation. Keep the rules.</h2>
+  <p>Simulate a rise in <strong>unverified payment requests</strong> or revoke newsletter consent. Neither action creates a paid seat, sends an email, or modifies a real record.</p>
+  <div class="scenario-buttons" role="group" aria-label="Synthetic scenarios">
+   <button data-scenario="baseline" aria-pressed="true" type="button">Baseline</button>
+   <button data-scenario="surge" aria-pressed="false" type="button">Request surge</button>
+   <button data-scenario="revoked" aria-pressed="false" type="button">Consent revoked</button>
+  </div>
+  <label class="range-label" for="request-slider">Unverified, non-holding NTC payment requests: <output id="request-output" for="request-slider">12</output></label>
+  <input id="request-slider" type="range" min="0" max="60" step="6" value="12" aria-describedby="request-description">
+  <p id="request-description">Requests never subtract from verified admission or available workshop capacity.</p>
+ </div>
+ <div class="control-side">
+  <output class="signal" id="surge-value" aria-label="Simulated pending requests">12</output>
+  <p>Non-holding payment requests<br><strong>No seats allocated</strong></p>
+  <span id="scenario-narrative" class="readout" role="status" aria-live="polite" aria-atomic="true">Baseline illustration. 12 fictional, unverified requests. Verified admission is unchanged.</span>
+ </div>
+</section>
+<section class="metrics" aria-label="Synthetic scenario summary">
+ <div class="metric"><p>Illustrative members</p><strong>2,000</strong><small>Invented 1,775 active · 65 pending · 160 lapsed</small></div>
+ <div class="metric"><p>Verified seats · sample</p><strong id="verified-count">84</strong><small>Across three invented workshops · unchanged by pending requests</small></div>
+ <div class="metric"><p>Open seats · sample</p><strong id="open-count">46</strong><small>130 synthetic places total · no stock held by intents</small></div>
+ <div class="metric"><p>Eligible subscribers</p><strong id="eligible-count">1</strong><small><span id="consent-word">One opted in; one pending</span> · 0 messages sent</small></div>
+</section>
+<section id="signals" aria-labelledby="signals-heading">
+ <div class="section-title"><div><p class="eyebrow">01 / Explore the signals</p><h2 id="signals-heading">Eight views. No blind spots.</h2></div><p>Hover and select visual marks to inspect fictional cases. The corresponding tables and buttons keep the facts accessible without charts, pointers, or external libraries.</p></div>
+ <div class="dashboard-grid">
+  <article class="card" aria-labelledby="mix-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 01 / Membership</p><h3 id="mix-title">A community in states.</h3><p>Illustrative 2,000-person membership mix, not DIG records.</p></div><span class="card-index">RING / STATE</span></div>
+   <div class="chart" id="mix-chart" role="img" aria-label="Fictional membership states: 1,775 active, 65 pending, 160 lapsed."><p class="chart-fallback">ECharts unavailable. Expand the data table for the exact member-state counts.</p></div>
+   <p class="insight">Identity verification <strong>does not</strong> automatically approve membership.</p>
+   <details class="data"><summary>View exact invented membership data</summary><div class="table-wrap"><table><caption>Illustrative membership status counts</caption><thead><tr><th scope="col">State</th><th scope="col">Members</th></tr></thead><tbody><tr><td>Active</td><td>1,775</td></tr><tr><td>Pending</td><td>65</td></tr><tr><td>Lapsed</td><td>160</td></tr><tr><td>Total</td><td>2,000</td></tr></tbody></table></div></details>
+  </article>
+  <article class="card" aria-labelledby="funnel-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 02 / Member onboarding</p><h3 id="funnel-title">Verification ≠ approval.</h3><p>Independent fictional batch of 120 membership requests.</p></div><span class="card-index">FUNNEL / AUTH</span></div>
+   <div class="chart" id="funnel-chart" role="img" aria-label="Illustrative separate batch: 120 requests, 98 verified identities, 72 staff-approved memberships."><p class="chart-fallback">ECharts unavailable. The request-to-approval batch is available in the table.</p></div>
+   <p class="insight">The 72 approvals are <strong>staff-authorized example decisions</strong>, not automatically granted by email verification.</p>
+   <details class="data"><summary>View onboarding batch data</summary><div class="table-wrap"><table><caption>Separate invented membership request batch</caption><thead><tr><th scope="col">Step</th><th scope="col">People</th></tr></thead><tbody><tr><td>Requests received</td><td>120</td></tr><tr><td>Identity verified</td><td>98</td></tr><tr><td>Staff-approved active</td><td>72</td></tr><tr><td>Still awaiting identity</td><td>22</td></tr><tr><td>Verified, still pending review</td><td>26</td></tr></tbody></table></div></details>
+  </article>
+  <article class="card wide" aria-labelledby="capacity-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 03 / NTC · DC27</p><h3 id="capacity-title">A request is not a reservation.</h3><p>Three illustrative workshops. Only separately verified admission claims a place.</p></div><span class="card-index">STACK / VERIFIED INVENTORY</span></div>
+   <div class="chip-row" role="group" aria-label="Choose a fictional workshop">
+    <button type="button" data-workshop="0" aria-pressed="true">Workshop A</button>
+    <button type="button" data-workshop="1" aria-pressed="false">Workshop B</button>
+    <button type="button" data-workshop="2" aria-pressed="false">Workshop C</button>
+   </div>
+   <div class="chart tall" id="capacity-chart" role="img" aria-label="Sample A: 24 verified 16 open; B: 42 verified 8 open; C: 18 verified 22 open. Unverified requests never hold seats."><p class="chart-fallback">ECharts unavailable. The capacity data and workshop selector remain usable.</p></div>
+   <p class="insight" id="workshop-selection" role="status" aria-live="polite">Workshop A: 24 verified admissions, 16 unallocated places. Pending payment requests hold zero seats.</p>
+   <details class="data"><summary>View exact workshop inventory</summary><div class="table-wrap"><table><caption>Invented capacity fixtures; no actual DC27 bookings</caption><thead><tr><th scope="col">Workshop</th><th scope="col">Verified</th><th scope="col">Unallocated</th><th scope="col">Total</th></tr></thead><tbody><tr><td>Sample A</td><td>24</td><td>16</td><td>40</td></tr><tr><td>Sample B</td><td>42</td><td>8</td><td>50</td></tr><tr><td>Sample C</td><td>18</td><td>22</td><td>40</td></tr></tbody></table></div></details>
+  </article>
+  <article class="card" aria-labelledby="heat-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 04 / Hypothetical conference</p><h3 id="heat-title">The room, as a grid.</h3><p>Fictional relative room-demand index. Not an agenda or DC27 forecast.</p></div><span class="card-index">HEATMAP / EXAMPLE ONLY</span></div>
+   <div class="chart" id="heat-chart" role="img" aria-label="Invented three-day room demand indexes on three topical tracks; values range from 35 to 88, not actual conference attendance."><p class="chart-fallback">ECharts unavailable. See the fictional day-by-track demand table.</p></div>
+   <p class="axis-note">Index is an arbitrary teaching scale (0–100), not capacity, registration, or accessibility quality.</p>
+   <details class="data"><summary>View invented heatmap indexes</summary><div class="table-wrap"><table><caption>Fictional teaching fixture, not NTC schedule</caption><thead><tr><th scope="col">Track</th><th scope="col">Apr 28</th><th scope="col">Apr 29</th><th scope="col">Apr 30</th></tr></thead><tbody><tr><td>Accessibility</td><td>65</td><td>88</td><td>76</td></tr><tr><td>Policy</td><td>42</td><td>71</td><td>55</td></tr><tr><td>Technology</td><td>35</td><td>82</td><td>61</td></tr></tbody></table></div></details>
+  </article>
+  <article class="card" aria-labelledby="requests-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 05 / Scenario dynamics</p><h3 id="requests-title">Demand without authority.</h3><p>Illustrative distribution of <strong id="request-card-total">12</strong> unverified requests across six time buckets.</p></div><span class="card-index">AREA / REACTIVE</span></div>
+   <div class="chart" id="requests-chart" role="img" aria-label="Simulated incoming non-holding request counts over six periods; change the scenario slider for new values."><p class="chart-fallback">ECharts unavailable. The computed counts update in the table.</p></div>
+   <p class="insight">Adjusting the scenario changes <strong>unverified requests only</strong>, never the 84 verified admissions or 46 open seats.</p>
+   <details class="data"><summary>View request simulation by time bucket</summary><div class="table-wrap"><table><caption>Local request distribution, updated by controls</caption><thead><tr><th scope="col">Bucket</th><th scope="col">Unverified</th></tr></thead><tbody id="request-rows"><tr><td>0–10 min</td><td>1</td></tr><tr><td>10–20 min</td><td>1</td></tr><tr><td>20–30 min</td><td>2</td></tr><tr><td>30–40 min</td><td>3</td></tr><tr><td>40–50 min</td><td>3</td></tr><tr><td>50–60 min</td><td>2</td></tr></tbody></table></div></details>
+  </article>
+  <article class="card" aria-labelledby="consent-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 06 / Communications</p><h3 id="consent-title">Consent. Then communication.</h3><p>The offline example starts with one consenting and one pending identity.</p></div><span class="card-index">BAR / SCOPE</span></div>
+   <div class="chart" id="consent-chart" role="img" aria-label="Baseline: 1 opted-in eligible, 1 pending excluded, 0 sent. Scenario can revoke the opt-in."><p class="chart-fallback">ECharts unavailable. Consent counts update in the table.</p></div>
+   <p class="insight" id="consent-story" role="status" aria-live="polite">One explicitly opted-in example identity is eligible; one pending identity is excluded. No messages were sent.</p>
+   <details class="data"><summary>View exact consent-scoped counts</summary><div class="table-wrap"><table><caption>Two fictional people; no delivery activity</caption><thead><tr><th scope="col">Consent state</th><th scope="col">Identities</th><th scope="col">Eligible</th></tr></thead><tbody><tr><td>Explicit opt-in</td><td id="consent-opting">1</td><td id="consent-eligible">1</td></tr><tr><td>Pending / not opted-in</td><td>1</td><td>0</td></tr><tr><td>Revoked / suppressed</td><td id="consent-revoked">0</td><td>0</td></tr><tr><td>Actual messages sent</td><td>0</td><td>0</td></tr></tbody></table></div></details>
+  </article>
+  <article class="card" aria-labelledby="sankey-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 07 / Membership authority</p><h3 id="sankey-title">The decision paths.</h3><p>Separate example batch showing what still needs identity or review.</p></div><span class="card-index">SANKEY / GOVERNANCE</span></div>
+   <div class="chart" id="sankey-chart" role="img" aria-label="120 fictional requests split into 98 verified and 22 awaiting identity. Of verified, 72 staff approved, 26 pending review."><p class="chart-fallback">ECharts unavailable. The authority splits are in the data table.</p></div>
+   <p class="insight">Review queues are not a shortcut to authority. <strong>Verified email ≠ active membership.</strong></p>
+   <details class="data"><summary>View authority path counts</summary><div class="table-wrap"><table><caption>Fictional, independently generated request cohort</caption><thead><tr><th scope="col">From</th><th scope="col">To</th><th scope="col">Count</th></tr></thead><tbody><tr><td>Requests</td><td>Verified identity</td><td>98</td></tr><tr><td>Requests</td><td>Awaiting verification</td><td>22</td></tr><tr><td>Verified identity</td><td>Staff-approved</td><td>72</td></tr><tr><td>Verified identity</td><td>Pending staff review</td><td>26</td></tr><tr><td>Staff-approved</td><td>Active</td><td>72</td></tr></tbody></table></div></details>
+  </article>
+  <article class="card dark" aria-labelledby="network-title">
+   <div class="card-head"><div><p class="eyebrow">Signal 08 / System topology</p><h3 id="network-title">Where trust begins and ends.</h3><p>Conceptual integration graph. Lines describe boundaries, not live traffic.</p></div><span class="card-index">GRAPH / ARCHITECTURE</span></div>
+   <div class="chart" id="network-chart" role="img" aria-label="Conceptual network linking member portal, Nexus API, Neon, staff access, Zeffy, consent, and MailerSend. Connections are not active services."><p class="chart-fallback">ECharts unavailable. Use the boundary chooser and table.</p></div>
+   <div class="chip-row" role="group" aria-label="Explore a system boundary">
+    <button type="button" data-boundary="identity" aria-pressed="true">Identity</button>
+    <button type="button" data-boundary="payment" aria-pressed="false">Payment</button>
+    <button type="button" data-boundary="mail" aria-pressed="false">Newsletter</button>
+   </div>
+   <p class="insight" id="boundary-story" role="status" aria-live="polite">Identity: a sign-in only establishes identity. Membership activation requires a separate, authorized decision.</p>
+   <details class="data"><summary>View system edges as text</summary><div class="table-wrap"><table><caption>Conceptual gates; no runtime requests</caption><thead><tr><th scope="col">Connection</th><th scope="col">Gate</th></tr></thead><tbody><tr><td>Member → Portal → Nexus</td><td>Verified identity / session</td></tr><tr><td>Nexus → Neon</td><td>Server-side authorization</td></tr><tr><td>Zeffy → Nexus</td><td>Verified signed payment notification</td></tr><tr><td>Staff → Nexus</td><td>Independently verified staff role</td></tr><tr><td>Consent → MailerSend</td><td>Explicit consent + staff approval + delivery gate (off)</td></tr></tbody></table></div></details>
+  </article>
+ </div>
+</section>
+<section class="story" id="boundaries" aria-labelledby="boundaries-title">
+ <div><p class="eyebrow">02 / Trust is the product</p><h2 id="boundaries-title">The visualizations move. The boundaries don't.</h2><p>This presentation is built to explain policy-sensitive operations to people, not turn fictional numbers into official statistics.</p></div>
+ <div><ul><li><strong>Membership:</strong> verified identity and active membership are distinct authorization outcomes.</li><li><strong>NTC / DC27:</strong> non-holding requests do not reserve stock or issue tickets. Only verified, server-authorized admissions allocate capacity.</li><li><strong>Communications:</strong> revoked or pending consent is never eligible for simulated delivery; all actual sends remain at zero.</li><li><strong>Access:</strong> all essential values are available in labeled tables and native keyboard-operated controls, with reduced-motion support.</li></ul></div>
+</section>
+</main>
+<footer>DIG Nexus / Pulse · Independent synthetic demonstration · <a href="./atlas.html">Architecture atlas</a> · <a href="./">Offline member demo</a> · <a href="https://github.com/mcc0nnell/dig-nexus">Source</a> · No real personal information or services</footer>
+<script>
+(() => {
+  'use strict';
+  // Every number is an invented educational fixture. No API, storage or cookies.
+  const workshops = Object.freeze([
+    {name:'Sample A',verified:24,open:16},
+    {name:'Sample B',verified:42,open:8},
+    {name:'Sample C',verified:18,open:22}
+  ]);
+  const MEMBERS = Object.freeze({active:1775,pending:65,lapsed:160});
+  const REQUEST_WEIGHTS = Object.freeze([1,1,2,3,3,2]);
+  const periods = ['0–10m','10–20m','20–30m','30–40m','40–50m','50–60m'];
+  const state = {requests:12,revoked:false,workshop:0,boundary:'identity',scenario:'baseline'};
+  const $ = id => document.getElementById(id);
+  const charts = {};
+  const css = getComputedStyle(document.documentElement);
+  const c = key => css.getPropertyValue('--'+key).trim();
+  const colors = {red:c('red-soft'),navy:c('navy'),blue:c('blue'),teal:c('teal'),gold:c('gold'),
+    muted:c('muted'),text:c('ink'),line:c('line'),panel:c('panel'),soft:'#7896ba'};
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const base = {
+    backgroundColor:'transparent',
+    animation:!reduced,animationDuration:620,animationEasing:'cubicOut',
+    textStyle:{fontFamily:'Instrument Sans, system-ui, sans-serif',color:colors.text},
+    tooltip:{backgroundColor:'#091525',borderColor:'#557399',textStyle:{color:'#fff',fontSize:13}},
+    aria:{enabled:true,decal:{show:true}}
+  };
+  const sample = (value) => String(value)+' synthetic';
+  function distribute(total) {
+    const raw = REQUEST_WEIGHTS.map(w => total*w/12);
+    const amounts = raw.map(Math.floor);
+    let remainder = total - amounts.reduce((a,b)=>a+b,0);
+    const order = raw.map((v,i)=>({fraction:v-Math.floor(v),i}))
+      .sort((a,b)=>b.fraction-a.fraction || a.i-b.i);
+    for (let i=0; i<remainder; i++) amounts[order[i].i]++;
+    return amounts;
+  }
+  const sources = [
+    {name:'Requests',itemStyle:{color:colors.blue}},
+    {name:'Verified identity',itemStyle:{color:colors.teal}},
+    {name:'Awaiting identity',itemStyle:{color:colors.gold}},
+    {name:'Staff approved',itemStyle:{color:colors.red}},
+    {name:'Pending review',itemStyle:{color:colors.gold}},
+    {name:'Active example',itemStyle:{color:colors.teal}}
+  ];
+  const boundaryText = {
+    identity:'Identity: a sign-in only establishes identity. Membership activation requires a separate, authorized decision.',
+    payment:'Payment: a Zeffy payment notification must be verified, then capacity allocated atomically; non-holding intents never reserve stock.',
+    mail:'Newsletter: explicit opt-in, staff approval, unsubscribe suppression and a separate delivery gate are required. Sending is disabled.'
+  };
+  function setBoundary(boundary) {
+    state.boundary=boundary;
+    document.querySelectorAll('[data-boundary]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.boundary===boundary)));
+    $('boundary-story').textContent=boundaryText[boundary];
+    if(charts.network){
+      const name={identity:'Nexus API',payment:'Zeffy',mail:'MailerSend'}[boundary];
+      charts.network.dispatchAction({type:'downplay',seriesIndex:0});
+      charts.network.dispatchAction({type:'highlight',seriesIndex:0,name});
+    }
+  }
+  function setWorkshop(index){
+    if(!Number.isInteger(index)||index<0||index>=workshops.length) return;
+    state.workshop=index;
+    const item=workshops[index];
+    document.querySelectorAll('[data-workshop]').forEach(button => button.setAttribute('aria-pressed',String(Number(button.dataset.workshop)===index)));
+    $('workshop-selection').textContent='Workshop '+['A','B','C'][index]+': '+item.verified+' verified admissions, '+item.open+' unallocated places. Pending payment requests hold zero seats.';
+    if(charts.capacity) renderCapacity();
+  }
+  function renderCapacity() {
+    charts.capacity.setOption({...base,
+      color:[colors.red,colors.teal],
+      grid:{left:95,right:29,top:24,bottom:35},
+      xAxis:{type:'value',max:50,axisLabel:{color:colors.muted},splitLine:{lineStyle:{color:'#354763'}}},
+      yAxis:{type:'category',inverse:true,data:workshops.map(w=>w.name),axisLabel:{color:colors.text,fontWeight:700},axisTick:{show:false},axisLine:{show:false}},
+      tooltip:{...base.tooltip,trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:sample},
+      legend:{top:0,right:8,textStyle:{color:colors.muted},data:['Verified seats','Unallocated']},
+      series:[
+        {name:'Verified seats',type:'bar',stack:'seats',barMaxWidth:56,
+          itemStyle:{borderRadius:[5,0,0,5]},
+          data:workshops.map((w,i)=>({value:w.verified,itemStyle:{color:i===state.workshop?colors.red:'#94554f'}})),
+          label:{show:true,position:'inside',color:'#fff',fontWeight:'bold'}},
+        {name:'Unallocated',type:'bar',stack:'seats',barMaxWidth:56,
+          itemStyle:{borderRadius:[0,5,5,0]},
+          data:workshops.map((w,i)=>({value:w.open,itemStyle:{color:i===state.workshop?colors.teal:'#52777f'}})),
+          label:{show:true,position:'inside',color:'#081d2b',fontWeight:'bold'}}
+      ]
+    },true);
+  }
+  function renderRequests() {
+    const dist=distribute(state.requests);
+    const fragment=document.createDocumentFragment();
+    dist.forEach((value,i)=>{
+      const row=document.createElement('tr');
+      const name=document.createElement('td');name.textContent=periods[i];
+      const count=document.createElement('td');count.textContent=String(value);
+      row.append(name,count);fragment.append(row);
+    });
+    $('request-rows').replaceChildren(fragment);
+    $('request-card-total').textContent=String(state.requests);
+    if(charts.requests) charts.requests.setOption({...base,
+      grid:{left:40,right:20,top:25,bottom:48},
+      tooltip:{...base.tooltip,trigger:'axis',valueFormatter:sample},
+      xAxis:{type:'category',boundaryGap:false,data:periods,axisLabel:{color:colors.muted,fontSize:10},axisLine:{lineStyle:{color:'#526687'}}},
+      yAxis:{type:'value',min:0,minInterval:1,axisLabel:{color:colors.muted},splitLine:{lineStyle:{color:'#344966'}}},
+      series:[{name:'Non-holding requests',type:'line',data:dist,smooth:.36,symbol:'circle',symbolSize:9,
+        lineStyle:{width:4,color:colors.red},
+        itemStyle:{color:colors.red,borderWidth:2,borderColor:colors.text},
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[
+          {offset:0,color:'rgba(255,141,121,.46)'},{offset:1,color:'rgba(255,141,121,.025)'}])},
+        markLine:{symbol:'none',silent:true,lineStyle:{type:'dashed',color:'#8396af'},data:[]}}]
+    },true);
+    $('requests-chart').setAttribute('aria-label', 'Invented non-holding request totals per ten minutes: '+dist.join(', ')+'. Total '+state.requests+'. No seat inventory changes.');
+  }
+  function renderConsent() {
+    const eligible=state.revoked?0:1,revoked=state.revoked?1:0;
+    $('eligible-count').textContent=String(eligible);
+    $('consent-word').textContent=state.revoked?'Opt-in revoked; one pending':'One opted in; one pending';
+    $('consent-opting').textContent=String(eligible);
+    $('consent-eligible').textContent=String(eligible);
+    $('consent-revoked').textContent=String(revoked);
+    $('consent-story').textContent=state.revoked
+      ?'The fictional subscriber withdrew consent: zero eligible, one pending excluded, one revoked/suppressed. No email sent.'
+      :'One explicitly opted-in example identity is eligible; one pending identity is excluded. No messages were sent.';
+    $('consent-chart').setAttribute('aria-label','Illustrative people: '+eligible+' opted in eligible, 1 pending excluded, '+revoked+' revoked suppressed, 0 messages sent.');
+    if(charts.consent) charts.consent.setOption({...base,
+      grid:{left:160,right:32,top:27,bottom:40},
+      tooltip:{...base.tooltip,trigger:'axis',axisPointer:{type:'shadow'}},
+      xAxis:{type:'value',max:1,minInterval:1,axisLabel:{color:colors.muted},splitLine:{lineStyle:{color:'#354864'}}},
+      yAxis:{type:'category',inverse:true,data:['Eligible','Pending','Revoked','Sent'],axisLabel:{color:colors.text},axisLine:{show:false},axisTick:{show:false}},
+      series:[{name:'Fictional identities',type:'bar',barWidth:32,data:[
+        {value:eligible,itemStyle:{color:colors.teal}},
+        {value:1,itemStyle:{color:colors.gold}},
+        {value:revoked,itemStyle:{color:colors.red}},
+        {value:0,itemStyle:{color:colors.soft}}
+      ],label:{show:true,position:'right',color:colors.text,formatter:params=>String(params.value)}}]
+    },true);
+  }
+  function renderScenario() {
+    $('request-slider').value=String(state.requests);
+    $('request-output').textContent=String(state.requests);
+    $('surge-value').textContent=String(state.requests);
+    const word=state.scenario==='surge'?'Request surge':state.scenario==='revoked'?'Consent revoked':state.scenario==='custom'?'Custom request load':'Baseline';
+    $('scenario-narrative').textContent=word+' illustration: '+state.requests+' unverified, non-holding requests. '+(state.revoked?'Consent revoked: zero newsletter recipients eligible. ':'One synthetic newsletter identity eligible. ')+'Verified seats remain 84; open seats remain 46. No message sent.';
+    document.querySelectorAll('[data-scenario]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.scenario===state.scenario)));
+    renderRequests();renderConsent();
+  }
+  function applyScenario(name) {
+    if (name==='baseline') Object.assign(state,{requests:12,revoked:false,scenario:'baseline'});
+    if (name==='surge') Object.assign(state,{requests:48,revoked:false,scenario:'surge'});
+    if (name==='revoked') Object.assign(state,{requests:12,revoked:true,scenario:'revoked'});
+    renderScenario();
+  }
+  document.querySelectorAll('[data-scenario]').forEach(button=>button.addEventListener('click',()=>applyScenario(button.dataset.scenario)));
+  document.querySelectorAll('[data-workshop]').forEach(button=>button.addEventListener('click',()=>setWorkshop(Number(button.dataset.workshop))));
+  document.querySelectorAll('[data-boundary]').forEach(button=>button.addEventListener('click',()=>setBoundary(button.dataset.boundary)));
+  $('request-slider').addEventListener('input',event=>{state.requests=Number(event.target.value);state.scenario='custom';renderScenario();});
+  function initCharts() {
+    if (!window.echarts) {
+      document.querySelectorAll('details.data').forEach(details=>{details.open=true});
+      $('scenario-narrative').textContent+=' ECharts could not load; all synthetic values and scenario controls remain available in the tables.';
+      return;
+    }
+    const names=['mix','funnel','capacity','heat','requests','consent','sankey','network'];
+    try {
+      for(const name of names)charts[name]=echarts.init($(name+'-chart'),null,{renderer:'svg'});
+      charts.mix.setOption({...base,
+        color:[colors.teal,colors.gold,colors.red],
+        tooltip:{...base.tooltip,trigger:'item',formatter:p=>p.name+': '+p.value+' invented members ('+p.percent+'%)'},
+        legend:{bottom:0,textStyle:{color:colors.muted},itemWidth:12,itemHeight:12},
+        series:[{name:'Member state',type:'pie',radius:['51%','76%'],center:['50%','44%'],minAngle:3,avoidLabelOverlap:true,
+          itemStyle:{borderColor:colors.panel,borderWidth:5,borderRadius:5},
+          label:{show:true,color:colors.text,fontWeight:'bold',formatter:'{d}%'},labelLine:{lineStyle:{color:'#a5bedc'}},
+          data:[{name:'Active',value:MEMBERS.active},{name:'Pending',value:MEMBERS.pending},{name:'Lapsed',value:MEMBERS.lapsed}]}]
+      });
+      charts.funnel.setOption({...base,
+        tooltip:{...base.tooltip,trigger:'item',formatter:p=>p.name+': '+sample(p.value)},
+        series:[{type:'funnel',left:'14%',top:25,bottom:22,width:'75%',sort:'descending',gap:7,
+          min:0,max:120,minSize:'28%',maxSize:'95%',
+          label:{show:true,position:'inside',color:'#fff',fontSize:13,fontWeight:'bold',formatter:'{b}\n{c}'},
+          itemStyle:{borderColor:colors.panel,borderWidth:3,borderRadius:6},
+          data:[{name:'Requests',value:120,itemStyle:{color:colors.blue}},
+            {name:'Identity verified',value:98,itemStyle:{color:'#317b9b'}},
+            {name:'Staff-approved',value:72,itemStyle:{color:colors.red}}]}]
+      });
+      renderCapacity();
+      charts.capacity.on('click',params=>{
+        if(params.componentType==='series'&&Number.isInteger(params.dataIndex))setWorkshop(params.dataIndex);
+      });
+      charts.heat.setOption({...base,
+        tooltip:{...base.tooltip,position:'top',formatter:p=>p.marker+p.name+': '+p.value[2]+' invented index points'},
+        grid:{left:108,right:24,top:28,bottom:63},
+        xAxis:{type:'category',data:['Wed 28','Thu 29','Fri 30'],axisLabel:{color:colors.muted},splitArea:{show:true},axisLine:{show:false},axisTick:{show:false}},
+        yAxis:{type:'category',data:['Technology','Policy','Accessibility'],axisLabel:{color:colors.muted},splitArea:{show:true},axisLine:{show:false},axisTick:{show:false}},
+        visualMap:{min:0,max:100,calculable:false,orient:'horizontal',left:'center',bottom:0,
+          itemWidth:15,itemHeight:115,text:['Higher','Lower'],textStyle:{color:colors.muted},
+          inRange:{color:['#1e395d',colors.blue,colors.red]}},
+        series:[{name:'Illustrative index',type:'heatmap',data:[
+          [0,2,65],[1,2,88],[2,2,76],
+          [0,1,42],[1,1,71],[2,1,55],
+          [0,0,35],[1,0,82],[2,0,61]
+        ],label:{show:true,fontWeight:'bold',color:'#fff',fontSize:17},
+          itemStyle:{borderColor:'#1b2e48',borderWidth:6,borderRadius:10}}]
+      });
+      charts.sankey.setOption({...base,
+        tooltip:{...base.tooltip,trigger:'item'},
+        series:[{type:'sankey',left:20,top:22,right:127,bottom:24,
+          nodeWidth:19,nodeGap:24,emphasis:{focus:'adjacency'},
+          label:{color:colors.text,fontSize:11,fontWeight:'bold',width:115,overflow:'break'},
+          lineStyle:{color:'gradient',curveness:.55,opacity:.55},
+          data:sources,
+          links:[{source:'Requests',target:'Verified identity',value:98},
+            {source:'Requests',target:'Awaiting identity',value:22},
+            {source:'Verified identity',target:'Staff approved',value:72},
+            {source:'Verified identity',target:'Pending review',value:26},
+            {source:'Staff approved',target:'Active example',value:72}]
+        }]
+      });
+      const graphNodes=[
+        {name:'Member',x:60,y:140,symbolSize:51,category:0},
+        {name:'Portal',x:180,y:140,symbolSize:61,category:0},
+        {name:'Nexus API',x:330,y:140,symbolSize:93,category:1},
+        {name:'Neon',x:490,y:100,symbolSize:57,category:1},
+        {name:'Staff',x:320,y:10,symbolSize:52,category:2},
+        {name:'Zeffy',x:490,y:225,symbolSize:55,category:2},
+        {name:'Consent',x:180,y:280,symbolSize:55,category:2},
+        {name:'MailerSend',x:330,y:300,symbolSize:58,category:2}
+      ];
+      charts.network.setOption({...base,
+        tooltip:{...base.tooltip,formatter:p=>p.dataType==='edge'?p.data.source+' → '+p.data.target+' (conceptual gate)':p.name+' / example boundary'},
+        series:[{type:'graph',layout:'none',roam:false,
+          data:graphNodes,links:[{source:'Member',target:'Portal'},{source:'Portal',target:'Nexus API'},
+            {source:'Staff',target:'Nexus API'},{source:'Nexus API',target:'Neon'},
+            {source:'Zeffy',target:'Nexus API'},{source:'Consent',target:'Nexus API'},
+            {source:'Nexus API',target:'MailerSend'}],
+          categories:[{name:'Entry'},{name:'Core'},{name:'Gated provider'}],
+          label:{show:true,position:'inside',fontSize:10,fontWeight:'bold',color:'#fff'},
+          edgeSymbol:['none','arrow'],edgeSymbolSize:[4,10],
+          lineStyle:{color:'#7e9bbc',width:2,opacity:.7,curveness:.1},
+          itemStyle:{borderColor:'#ecf2ff',borderWidth:1},
+          emphasis:{focus:'adjacency'},
+          color:[colors.blue,colors.red,'#4a8c8d']
+        }]
+      });
+      charts.network.on('click',p=>{
+        const n=p?.name||'';
+        if(n==='Zeffy')setBoundary('payment');
+        else if(n==='MailerSend'||n==='Consent')setBoundary('mail');
+        else if(n==='Member'||n==='Portal'||n==='Nexus API')setBoundary('identity');
+      });
+      renderScenario();
+      setBoundary(state.boundary);
+      for(const name of names) {
+        $(name+'-chart').querySelector('.chart-fallback')?.remove();
+        $(name+'-chart').dataset.rendered='true';
+      }
+      let raf=0;
+      window.addEventListener('resize',()=>{
+        cancelAnimationFrame(raf);
+        raf=requestAnimationFrame(()=>{for(const name of names)charts[name].resize()});
+      });
+    } catch(error) {
+      console.error('Optional chart rendering failed; data tables remain available.',error);
+      document.querySelectorAll('details.data').forEach(details=>{details.open=true});
+    }
+  }
+  renderScenario();
+  window.addEventListener('load',initCharts);
+})();
+</script>
+</body>
+</html>

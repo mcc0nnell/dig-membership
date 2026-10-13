@@ -29,6 +29,7 @@ jobs:
           mkdir -p _site
           cp demo/offline.html _site/index.html
           cp demo/atlas.html _site/atlas.html
+          cp demo/pulse.html _site/pulse.html
           touch _site/.nojekyll
-          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 3
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 4
           ! grep -Eq '<script[^>]+src=|fetch\(|XMLHttpRequest|localStorage|sessionStorage' _site/index.html
