@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<title>Systems Atlas · DIG Nexus</title>
+<meta name="description" content="Synthetic architecture and operations visualizations for DIG Nexus. No production data.">
+<style>
+:root{color-scheme:dark;--bg:#071b29;--panel:#0d2a3c;--panel2:#103348;--ink:#ecf8fb;--muted:#abc9d5;--mint:#62e7cf;--gold:#ffd087;--line:#31546a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 80% 0,#175369 0,transparent 38%),var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:#8aefe0}a:hover{text-decoration-thickness:2px}a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+.skip{position:absolute;left:14px;top:-70px;background:#fff;color:#102d42;padding:10px;z-index:10}.skip:focus{top:12px}
+header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:19px max(24px,calc((100vw - 1180px)/2));border-bottom:1px solid var(--line);background:#061a29df;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;font-size:1.04rem;font-weight:750;letter-spacing:.015em;text-decoration:none;color:var(--ink)}.brand b{background:var(--mint);color:#08283b;padding:8px 12px;border-radius:9px;font-weight:900}
+nav{display:flex;gap:18px;flex-wrap:wrap}nav a{font-size:.9rem;color:var(--muted);text-decoration:none}
+main{max-width:1180px;margin:auto;padding:24px 24px 72px}.hero{padding:56px 0 32px}.eyebrow{font-size:.79rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--mint)}
+h1{font-size:clamp(2.9rem,8vw,6.3rem);line-height:1.01;letter-spacing:-.065em;max-width:880px;margin:14px 0 22px}h1 em{font-style:normal;color:var(--mint)}
+h2{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 10px;letter-spacing:-.035em}h3{font-size:1.07rem;margin:0 0 12px}p{margin:10px 0;color:var(--muted)}
+.lead{max-width:730px;font-size:1.12rem}.tags{display:flex;flex-wrap:wrap;gap:9px;margin:26px 0}.tags span{border:1px solid var(--line);color:#d5edf4;border-radius:30px;padding:7px 13px;font-size:.83rem}
+.notice{border-left:4px solid var(--gold);background:#263342;color:#fff2d9;border-radius:0 12px 12px 0;padding:14px 18px;margin:25px 0 35px}.notice strong{color:var(--gold)}
+.section-head{margin:52px 0 20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px}.section-head p{max-width:730px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.card{min-width:0;background:linear-gradient(160deg,#103348,#0b2638);border:1px solid var(--line);border-radius:20px;padding:clamp(16px,2.5vw,29px);box-shadow:0 22px 55px #0002}.wide{grid-column:1/-1}
+.kicker{font-size:.75rem;text-transform:uppercase;letter-spacing:.11em;color:var(--mint);font-weight:750}.mermaid-wrap{overflow-x:auto;max-width:100%;margin-top:20px;padding:16px;border:1px solid #27485c;border-radius:13px;background:#071e2e}
+.mermaid{text-align:center;min-width:500px;white-space:pre-wrap;color:var(--ink)}.mermaid svg{max-width:100%!important;height:auto!important}.chart{width:100%;height:345px;position:relative}.chart-fallback{font-size:.9rem;color:var(--gold)}
+.table-wrap{overflow-x:auto;margin-top:16px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:9px 11px;border-bottom:1px solid #355367;text-align:left}th{color:#e1f6fb}td{color:#bddee9}caption{text-align:left;font-weight:750;color:var(--ink);margin-bottom:7px}
+.note{font-size:.87rem;margin-top:12px}footer{padding:26px max(24px,calc((100vw - 1180px)/2));border-top:1px solid var(--line);color:var(--muted)}
+@media(max-width:800px){.cards{grid-template-columns:1fr}.hero{padding-top:32px}.mermaid{min-width:470px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+<a class="brand" href="./"><b>DIG</b><span>NEXUS / SYSTEMS ATLAS</span></a>
+<nav aria-label="Page sections"><a href="#architecture">Architecture</a><a href="#boundaries">Trust boundaries</a><a href="#signals">Synthetic charts</a><a href="./">Offline member demo</a></nav>
+</header>
+<main id="main">
+<section class="hero">
+<p class="eyebrow">Engineering visualization / October 2026</p>
+<h1>One platform.<br><em>Clear boundaries.</em></h1>
+<p class="lead">An explorable map of DIG Nexus: how members reach services, where verified state lives, and why identity, consent, conference admissions and voting must stay separate.</p>
+<div class="tags"><span>Docker + Caddy</span><span>Neon PostgreSQL</span><span>NTC27 foundation</span><span>Accessible by design</span></div>
+<div class="notice"><strong>Development preview · synthetic examples only.</strong> The diagrams show intended architecture and guarded development routes. Charts use invented fixture values, not DIG records, Neon queries or real NTC registrations. This page loads only pinned Mermaid/ECharts libraries from a CDN; it makes no application API requests.</div>
+</section>
+<section id="architecture" aria-labelledby="architecture-heading">
+<div class="section-head"><div><p class="eyebrow">01 / Architecture</p><h2 id="architecture-heading">The runtime at a glance</h2></div><p>WordPress is the experience layer; authorization and domain state belong to the containerized Nexus API and Neon. Integrations are independent boundaries.</p></div>
+<div class="card"><p class="kicker">Platform topology / logical flow</p><div class="mermaid-wrap"><pre class="mermaid">
+flowchart LR
+    User["Member or attendee"] --> WP["WordPress portal"]
+    WP --> Caddy["Caddy / HTTPS"]
+    Caddy --> API["DIG Nexus / Node API"]
+    API --> DB[("Neon PostgreSQL<br/>member · event · consent")]
+    Google["Google OIDC<br/>development"] -. identity .-> API
+    Magic["Email magic links<br/>development"] -. identity .-> API
+    Zeffy["Zeffy hosted payments"] -->|verified webhook| API
+    API -. gated delivery .-> Mail["MailerSend adapter"]
+    Staff["Authorized organizers"] --> Caddy
+    classDef core fill:#145974,stroke:#62e7cf,color:#ffffff,stroke-width:2px
+    classDef ext fill:#1b354a,stroke:#92bcd0,color:#ffffff
+    class API,DB,Caddy core
+    class WP,Google,Magic,Zeffy,Mail,Staff,User ext
+</pre></div><p class="note">Dashed links represent development/gated integrations, not claims of live deployment. Signed payment webhooks can still require restricted manual review.</p></div>
+</section>
+<section id="boundaries" aria-labelledby="boundaries-heading">
+<div class="section-head"><div><p class="eyebrow">02 / Domain separation</p><h2 id="boundaries-heading">Verification isn't permission</h2></div><p>A verified identity is not an active membership, opt-in, election ballot or conference admission. These are separate decisions enforced server-side.</p></div>
+<div class="card"><p class="kicker">Member and attendee rules / independent paths</p><div class="mermaid-wrap"><pre class="mermaid">
+flowchart LR
+    Verified["Verified identity"] --> Pending["Pending membership request"]
+    Pending --> Review["Authorized policy approval"]
+    Review --> Active["Active member"]
+    Active --> Snapshot["Eligibility snapshot<br/>not ballot casting"]
+    Optin["Explicit newsletter consent"] --> Subscribed["Mailing eligibility"]
+    Directory["Separate directory opt-in"] --> Private["Scoped listing"]
+    Access["Accommodation request"] --> Restricted["Restricted event staff"]
+    Visitor["Nonmember attendee"] --> Event["NTC registration"]
+    Event --> Payment["Zeffy payment verification"]
+    Payment --> Checkin["Scoped admission / check-in"]
+    classDef protected fill:#174d68,stroke:#62e7cf,color:#fff
+    classDef separate fill:#4c3853,stroke:#ffd087,color:#fff
+    class Verified,Pending,Review,Active,Snapshot protected
+    class Optin,Subscribed,Directory,Private,Access,Restricted,Visitor,Event,Payment,Checkin separate
+</pre></div><p class="note">This is a logical policy diagram, not a claim that real-member enrollment, email, payment or check-in is enabled.</p></div>
+</section>
+<section id="signals" aria-labelledby="signals-heading">
+<div class="section-head"><div><p class="eyebrow">03 / Interactive exhibits</p><h2 id="signals-heading">What a dashboard could feel like</h2></div><p>ECharts-powered illustrations use static example values, include accessible tables, and contain no personally identifiable information.</p></div>
+<div class="cards">
+<article class="card" aria-labelledby="members-title"><p class="kicker">Synthetic membership states</p><h3 id="members-title">Illustrative member mix</h3><div id="members-chart" class="chart" role="img" aria-label="Illustrative sample of 2,000 invented members: 1,775 active, 65 pending, 160 lapsed."><p class="chart-fallback">Charts require the ECharts CDN; the table below always contains the values.</p></div><div class="table-wrap"><table><caption>Invented sample counts, not DIG statistics</caption><thead><tr><th scope="col">State</th><th scope="col">Count</th></tr></thead><tbody><tr><td>Active</td><td>1,775</td></tr><tr><td>Pending</td><td>65</td></tr><tr><td>Lapsed</td><td>160</td></tr></tbody></table></div></article>
+<article class="card" aria-labelledby="capacity-title"><p class="kicker">Synthetic workshop inventory</p><h3 id="capacity-title">Capacity without overselling</h3><div id="capacity-chart" class="chart" role="img" aria-label="Invented workshop A: 24 reserved and 16 available. B: 42 reserved and 8 available. C: 18 reserved and 22 available."><p class="chart-fallback">Charts require the ECharts CDN; the table below always contains the values.</p></div><div class="table-wrap"><table><caption>Fictional workshop fixtures, not the DC27 schedule</caption><thead><tr><th scope="col">Workshop</th><th scope="col">Reserved</th><th scope="col">Open</th></tr></thead><tbody><tr><td>Sample A</td><td>24</td><td>16</td></tr><tr><td>Sample B</td><td>42</td><td>8</td></tr><tr><td>Sample C</td><td>18</td><td>22</td></tr></tbody></table></div></article>
+</div><p class="note">For complete operational boundaries, read <a href="https://github.com/mcc0nnell/dig-nexus/blob/main/nexus/PAID-INVENTORY.md">paid inventory</a>, <a href="https://github.com/mcc0nnell/dig-nexus/blob/main/nexus/MAGIC-PAYMENT-RECOVERY.md">magic link recovery</a>, and <a href="https://github.com/mcc0nnell/dig-nexus/blob/main/nexus/DOCKER.md">Docker deployment</a>.</p>
+</section>
+</main>
+<footer>DIG Nexus · Architecture and product experience concept · <a href="https://github.com/mcc0nnell/dig-nexus">Source repository</a> · No live service or analytics</footer>
+<script>
+window.addEventListener('load', () => {
+  if (!window.echarts) return;
+  const common = {animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, textStyle: {color: '#e4f6fa', fontFamily: 'system-ui, sans-serif'}};
+  const members = echarts.init(document.getElementById('members-chart'), null, {renderer:'svg'});
+  members.setOption({...common, tooltip: {trigger:'item', formatter:'{b}: {c} sample members ({d}%)'},
+    color:['#62e7cf','#ffd087','#88a6ef'],
+    legend:{bottom:0,textStyle:{color:'#d7ebf2'}},
+    series:[{type:'pie', radius:['54%','76%'], center:['50%','44%'], avoidLabelOverlap:true,
+      label:{show:true,color:'#f1f9fc',formatter:'{d}%'}, labelLine:{lineStyle:{color:'#b6d6dd'}},
+      itemStyle:{borderColor:'#0d2a3c',borderWidth:5},
+      data:[{name:'Active',value:1775},{name:'Pending',value:65},{name:'Lapsed',value:160}]}]});
+  const capacity=echarts.init(document.getElementById('capacity-chart'),null,{renderer:'svg'});
+  capacity.setOption({...common,color:['#62e7cf','#ffd087'],
+    grid:{left:55,right:18,top:48,bottom:56},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    legend:{top:0,textStyle:{color:'#d7ebf2'}},
+    xAxis:{type:'category',data:['Sample A','Sample B','Sample C'],axisLabel:{color:'#d7ebf2',interval:0},axisLine:{lineStyle:{color:'#507286'}}},
+    yAxis:{type:'value',name:'Sample seats',nameTextStyle:{color:'#d7ebf2'},axisLabel:{color:'#d7ebf2'},splitLine:{lineStyle:{color:'#31546a'}}},
+    series:[{name:'Reserved',type:'bar',stack:'capacity',barMaxWidth:62,data:[24,42,18],itemStyle:{borderRadius:[0,0,4,4]}},
+            {name:'Open',type:'bar',stack:'capacity',barMaxWidth:62,data:[16,8,22],itemStyle:{borderRadius:[4,4,0,0]}}]});
+  for (const chart of [members, capacity]) chart.getDom().querySelector('.chart-fallback')?.remove();
+  let raf=0;
+  window.addEventListener('resize',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{members.resize();capacity.resize()})});
+});
+</script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+mermaid.initialize({startOnLoad:false,securityLevel:'strict',theme:'base',
+  themeVariables:{background:'#0a2639',primaryColor:'#145974',primaryTextColor:'#ffffff',
+    primaryBorderColor:'#62e7cf',lineColor:'#62e7cf',secondaryColor:'#1b354a',
+    tertiaryColor:'#102d42',clusterBkg:'#0b2b40',clusterBorder:'#527788',
+    edgeLabelBackground:'#071e2e',fontFamily:'system-ui, sans-serif'}});
+try { await mermaid.run({querySelector:'.mermaid'}); }
+catch (e) { console.warn('Diagram renderer unavailable; text sources remain visible.', e); }
+</script>
+</body>
+</html>
