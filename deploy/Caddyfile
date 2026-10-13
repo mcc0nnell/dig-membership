@@ -1,0 +1,12 @@
+{$NEXUS_SITE_ADDRESS} {
+  encode zstd gzip
+  request_body {
+    max_size 65536
+  }
+  reverse_proxy nexus:8080 {
+    # Ignore any browser-supplied proxy authorization or identity headers.
+    # Caddy is the only container allowed to reach the Nexus port.
+    header_up X-Dig-Nexus-Proxy-Token {$NEXUS_PROXY_TOKEN}
+    header_up X-Dig-Nexus-Client-IP {remote_host}
+  }
+}

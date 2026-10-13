@@ -16,3 +16,10 @@ manifest
 docs
 demo
 tests
+
+deploy/secrets/
+compose*.yaml
+deploy/state/
+
+**/*.test.mjs
+**/*.deno.test.mjs

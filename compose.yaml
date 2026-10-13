@@ -1,0 +1,91 @@
+name: dig-nexus
+services:
+  nexus:
+    # Match the host owner of chmod 0600 Compose secret files; do not run as root.
+    user: "${NEXUS_UID:?Set a non-root numeric UID}:${NEXUS_GID:?Set a non-root numeric GID}"
+    image: ${NEXUS_IMAGE:-dig-nexus:local}
+    build:
+      context: .
+    # Compose selects the hardened trusted-Caddy entry point.
+    command: ["node", "nexus/docker/server.mjs"]
+    environment:
+      PORT: "8080"
+      PUBLIC_ORIGIN: ${NEXUS_PUBLIC_ORIGIN:?Set NEXUS_PUBLIC_ORIGIN in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      DATABASE_URL_FILE: /run/secrets/database_url
+      GOOGLE_CLIENT_SECRET_FILE: /run/secrets/google_client_secret
+      GOOGLE_SESSION_SECRET_FILE: /run/secrets/google_session_secret
+      NEXUS_PROXY_TOKEN_FILE: /run/secrets/proxy_token
+      REGISTRATION_ENABLED: "false"
+      MEMBER_ENROLLMENT_ENABLED: "false"
+      ORGANIZER_ENABLED: "false"
+      CONFERENCE_REGISTRATION_ENABLED: "false"
+    secrets:
+      - database_url
+      - google_client_secret
+      - google_session_secret
+      - proxy_token
+    expose:
+      - "8080"
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 384m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "nexus/docker/healthcheck.mjs"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  caddy:
+    user: "${NEXUS_UID:?Set a non-root numeric UID}:${NEXUS_GID:?Set a non-root numeric GID}"
+    image: caddy:2.10.2-alpine
+    depends_on:
+      nexus:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/etc/caddy/entrypoint.sh"]
+    environment:
+      NEXUS_SITE_ADDRESS: ${NEXUS_SITE_ADDRESS:?Set NEXUS_SITE_ADDRESS in .env}
+    ports:
+      - "${NEXUS_HTTP_BIND:-80:80}"
+      - "${NEXUS_HTTPS_BIND:-443:443}"
+      - "${NEXUS_HTTPS_UDP_BIND:-443:443/udp}"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./deploy/caddy-entrypoint.sh:/etc/caddy/entrypoint.sh:ro
+      - ./deploy/state/caddy-data:/data
+      - ./deploy/state/caddy-config:/config
+    secrets:
+      - proxy_token
+    networks:
+      - backend
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+networks:
+  backend: {}
+
+secrets:
+  database_url:
+    file: ./deploy/secrets/database_url
+  google_client_secret:
+    file: ./deploy/secrets/google_client_secret
+  google_session_secret:
+    file: ./deploy/secrets/google_session_secret
+  proxy_token:
+    file: ./deploy/secrets/proxy_token
