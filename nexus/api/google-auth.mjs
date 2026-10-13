@@ -1,5 +1,6 @@
 import {EncryptJWT, jwtDecrypt, createRemoteJWKSet, jwtVerify} from 'jose';
 import {PORTAL_CLIENT} from './portal-client.mjs';
+import {authState} from './auth-state.mjs';
 
 const cookieName='__Host-dig_nexus_session';
 const flowCookie='__Host-dig_nexus_oauth';
@@ -33,6 +34,7 @@ export const googleAuthConfigured=configured;
 export async function startGoogleLogin(request,env){
  if(!configured(env)||!originAllowed(request,env))return new Response('Google sign-in unavailable',{status:503});
  const key=await secret(env),state=random(),verifier=random(),nonce=random();
+ if(!(await authState(env,'createFlow',state,300000)))return new Response('Sign-in unavailable',{status:503});
  const token=await seal({state,verifier,nonce},key,'5m');
  const url=new URL('https://accounts.google.com/o/oauth2/v2/auth');
  for(const [k,v] of Object.entries({client_id:env.GOOGLE_CLIENT_ID,redirect_uri:env.GOOGLE_REDIRECT_URI,response_type:'code',scope:'openid email profile',state,nonce,code_challenge:await digest(verifier),code_challenge_method:'S256',prompt:'select_account'}))url.searchParams.set(k,v);
@@ -46,13 +48,16 @@ export async function finishGoogleLogin(request,env,{fetcher=fetch,verifyToken}=
  try {
   const key=await secret(env),flow=await unseal(parseCookie(request,flowCookie),key);
   if(flow.state!==state||typeof flow.verifier!=='string'||typeof flow.nonce!=='string')throw Error('state mismatch');
+  if(!(await authState(env,'consumeFlow',state)))throw Error('flow already used');
   const tokenResponse=await fetcher('https://oauth2.googleapis.com/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:env.GOOGLE_REDIRECT_URI,client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,code_verifier:flow.verifier}),redirect:'error'});
   if(!tokenResponse.ok)throw Error('token exchange failed');
   const data=await tokenResponse.json();
   if(typeof data.id_token!=='string')throw Error('ID token missing');
   const payload=verifyToken?await verifyToken(data.id_token): (await jwtVerify(data.id_token,googleKeys,{issuer:['https://accounts.google.com','accounts.google.com'],audience:env.GOOGLE_CLIENT_ID,algorithms:['RS256'],requiredClaims:['sub','exp','iat']})).payload;
   if(!['https://accounts.google.com','accounts.google.com'].includes(payload.iss)||payload.aud!==env.GOOGLE_CLIENT_ID||payload.nonce!==flow.nonce||payload.email_verified!==true||typeof payload.sub!=='string'||!payload.sub||typeof payload.email!=='string'||!payload.email)throw Error('identity rejected');
-  const session=await seal({issuer:'https://accounts.google.com',subject:payload.sub,email:payload.email,emailVerified:true},key,'1h');
+  const sid=random();
+  if(!(await authState(env,'createSession',sid,3600000)))throw Error('session unavailable');
+  const session=await seal({sid,issuer:'https://accounts.google.com',subject:payload.sub,email:payload.email,emailVerified:true},key,'1h');
   const headers=new Headers({location:'/portal','cache-control':'no-store'});
   headers.append('set-cookie',cookie(cookieName,session,3600));
   headers.append('set-cookie',clear(flowCookie));
@@ -64,13 +69,15 @@ export async function sessionIdentity(request,env){
  const value=parseCookie(request,cookieName);
  if(!value)throw Error('no session');
  const payload=await unseal(value,await secret(env));
+ if(typeof payload.sid!=='string'||!(await authState(env,'checkSession',payload.sid)))throw Error('session revoked');
  if(payload.issuer!=='https://accounts.google.com'||typeof payload.subject!=='string'||!payload.subject||payload.emailVerified!==true||typeof payload.email!=='string')throw Error('invalid session');
  return {verified:true,emailVerified:true,issuer:payload.issuer,subject:payload.subject,email:payload.email};
 }
-export function logoutGoogle(request){
+export async function logoutGoogle(request,env){
  const origin=request.headers.get('origin');
  const target=new URL(request.url).origin;
  if(origin!==target)return new Response('Origin not allowed',{status:403,headers:{'cache-control':'no-store'}});
+ try {const token=parseCookie(request,cookieName);if(token){const payload=await unseal(token,await secret(env));if(typeof payload.sid==='string')await authState(env,'revokeSession',payload.sid);}}catch{return new Response('Logout unavailable',{status:503,headers:{'cache-control':'no-store'}});}
  return response('/portal',{'set-cookie':clear(cookieName)});
 }
 export function portalPage(){
