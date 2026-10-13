@@ -12,7 +12,7 @@ export function parseRegistration(body) {
  return {displayName:displayName.trim()};
 }
 export async function registerMember({identity,body,db}) {
- if (!identity?.verified || !identity.emailVerified || typeof identity.subject !== "string" || !identity.subject) return {status:401,error:"unauthorized"};
+ if (!identity?.verified || !identity.emailVerified || typeof identity.subject !== "string" || !identity.subject.trim() || identity.subject.length > 512 || typeof identity.issuer !== "string" || !/^https:\/\/[^\s/]+(?:\/[^\s]*)?$/.test(identity.issuer) || identity.issuer.length > 512) return {status:401,error:"unauthorized"};
  if (!db || typeof db.registerVerifiedIdentity !== "function") return {status:503,error:"registration_unavailable"};
  let data;
  try { data=parseRegistration(body); } catch { return {status:400,error:"invalid_registration"}; }
