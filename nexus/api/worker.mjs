@@ -9,6 +9,7 @@ import {requestMembership} from "./member-enrollment.mjs";
 import {PORTAL_STYLE} from "./portal-style.mjs";
 import {renderAgendaPage} from "./agenda-page.mjs";
 import {organizerRequest} from "./organizer.mjs";
+import {conferenceRequest} from "./conference-api.mjs";
 import {startGoogleLogin,finishGoogleLogin,sessionIdentity,logoutGoogle,portalPage,portalClient,googleAuthConfigured} from "./google-auth.mjs";
 const headers={"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"};
 const json=(value,status)=>new Response(JSON.stringify(value),{status,headers});
@@ -45,6 +46,8 @@ export default {
    }catch{return json({error:"agenda_unavailable"},503);}
   }
   if(url.pathname==="/api/enroll")return requestMembership(request,env);
+  const conference=await conferenceRequest(request,env,url.pathname);
+  if(conference)return conference;
   const organizer=await organizerRequest(request,env,url.pathname);
   if(organizer)return organizer;
   if(url.pathname==="/api/me") {

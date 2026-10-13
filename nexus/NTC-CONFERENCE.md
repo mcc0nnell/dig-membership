@@ -76,3 +76,11 @@ See [ORGANIZER-DEPLOYMENT.md](ORGANIZER-DEPLOYMENT.md). The restricted
 editing sessions, room labels, speaker profiles and session assignments, with
 manager-approved publication and metadata-only audit. This requires a working
 Google session and explicit event staff provisioning. It is off by default.
+
+## Attendee registration and workshop allocation milestone
+
+See [ATTENDEE-REGISTRATION.md](ATTENDEE-REGISTRATION.md) for the individual
+attendee sign-in contract, migration 007, confirmation references, waitlist
+promotion, cancellation semantics, and coordinator-restricted accessibility
+intake. It is disabled by default. No transactional emails, payments, check-in
+credentials, or guest registrations are enabled.

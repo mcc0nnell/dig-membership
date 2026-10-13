@@ -32,3 +32,7 @@ These are pure unit tests, not database or end-to-end tests.
 ## NTC conference milestone
 
 See [NTC-CONFERENCE.md](NTC-CONFERENCE.md) for the original product specification, migration 005, public agenda endpoints and the unpublished-by-default release gate.
+
+## Conference attendee registration (development)
+
+See [ATTENDEE-REGISTRATION.md](ATTENDEE-REGISTRATION.md). Registration is separate from DIG membership; authenticated attendee API, database migrations, and restricted coordinator read are disabled until the staging release gate.

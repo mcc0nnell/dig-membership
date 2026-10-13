@@ -6,7 +6,7 @@ DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deaf
 
 **Project status: active development — not a live membership service.** The repository contains working components, synthetic tests, database schemas, and an offline demo. It does **not** establish that Google sign-in, Neon-backed registration, newsletters, payments, or elections are available to real members. Production launch requires DIG policy approval, security and accessibility review, and a staged deployment.
 
-**NTC conference foundation (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. The [organizer console deployment guide](nexus/ORGANIZER-DEPLOYMENT.md) covers staff permissions, editing, previews, and publication. Events default to draft; no real conference has been published or deployed.
+**NTC conference foundation (development):** The [NTC conference specification](nexus/NTC-CONFERENCE.md) documents the independent published-only agenda API, multi-day accessible event view, and conference migration. The [organizer console deployment guide](nexus/ORGANIZER-DEPLOYMENT.md) covers staff permissions, editing, previews, and publication. The [attendee registration guide](nexus/ATTENDEE-REGISTRATION.md) documents the membership-free individual registration, atomic workshop waitlists, authenticated confirmation references and restricted accommodations workflow. Events default to draft; no real conference has been published or deployed.
 
 **[Explore the offline demo](https://mcc0nnell.github.io/dig-nexus/)** · **[Implementation status](nexus/IMPLEMENTATION-STATUS.md)** · **[Security policy](SECURITY.md)**
 
@@ -16,7 +16,7 @@ DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deaf
 | --- | --- | --- |
 | Membership | Sign in, request membership, see status, then eventually renew and manage a profile | Google OIDC/session code, explicit pending-request flow and Neon adapter; live onboarding disabled |
 | Member directory | Discover opted-in colleagues across government | Schema and privacy rules; no public directory |
-| Events | Register, manage capacity, and check in at DIG events, including DC27 | Published-only agenda prototype and lifecycle tests; no live registration |
+| Events | Register, manage capacity, and check in at DIG events, including DC27 | Published agenda, staff editor and isolated attendee registration/waitlists; live registration disabled |
 | Committees | Organize rosters, roles, and restricted documents | Model and authorization rules; no deployed staff portal |
 | Governance | Maintain terms, roles, election records, and eligible-voter snapshots | Schema and eligibility rules; **no ballot casting or counting** |
 | Communications | Manage explicit subscriptions, campaigns, and delivery outcomes | Newsletter schema and MailerSend adapter; **sending disabled** |
