@@ -6,7 +6,7 @@ Editable Mermaid sources for the [systems atlas](../../demo/atlas.html) and the 
 
 ## 1. Container runtime and integration edges
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
   subgraph UX["Experience layer"]
     W["WordPress / DIG website"]
@@ -31,13 +31,13 @@ flowchart LR
   classDef edge fill:#233e58,color:#fff,stroke:#90c2cf
   class C,A,N core
   class W,O,G,L,Z,M edge
-\`\`\`
+```
 
 **Reading guide:** Solid lines show architectural dependencies or trust boundaries; dashed lines indicate gated integration paths, *not production availability*. Signed webhook authentication does not itself establish a seat, payment reconciliation or admission.
 
 ## 2. Identity, enrollment, consent and governance
 
-\`\`\`mermaid
+```mermaid
 flowchart TB
   I["Verified identity"] --> P["Pending member enrollment"]
   P --> APPROVE{"Authorized policy<br/>approval?"}
@@ -51,13 +51,13 @@ flowchart TB
   classDef private fill:#4a385b,color:#fff,stroke:#efca83,stroke-width:2px
   class I,P,APPROVE,MEMBER,ELIG member
   class CONSENT,SUB,DIRECTORY,LIST,ACCESS,STAFF private
-\`\`\`
+```
 
 **No automatic edges:** sign-in does not approve membership, subscribe someone to communications, publish them in a directory, or authorize a binding vote. Real ballot casting/counting does not exist in Nexus.
 
 ## 3. Conference ticket and payment reconciliation
 
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
   autonumber
   actor Attendee
@@ -79,7 +79,7 @@ sequenceDiagram
     Neon-->>Nexus: Restricted manual review
     Nexus-->>Staff: Review outcome without leaking sensitive data
   end
-\`\`\`
+```
 
 **Important:** A Zeffy checkout success screen does not grant admission. Nexus must independently validate provider evidence and atomic inventory allocation; otherwise staff review is required. No card details or accommodation details belong in QR payloads.
 
