@@ -1,5 +1,7 @@
 # DIG Nexus registration deployment gate
 
+> **Deployment note (October 13, 2026):** The selected deployment is [Docker + Caddy + Neon](DOCKER.md). Cloudflare-specific rate-limit bindings, Durable Objects, Wrangler configuration and Worker secrets below describe a historical adapter; they are **not** required for Docker. The portable Node adapter uses its own configured rate limits and Neon-backed runtime state. `/api/register` (verified bearer identity) and explicit browser `/api/enroll` remain separately disabled by default. See [implementation status](IMPLEMENTATION-STATUS.md) for current launch blockers.
+
 **Status: disabled, not deployed.** `POST /api/register` defaults to HTTP 503 unless `REGISTRATION_ENABLED=true`. Separately, the new **explicit-request** `POST /api/enroll` defaults to 503 unless `MEMBER_ENROLLMENT_ENABLED=true`. Signing in is not a membership request or approval.
 
 ## Authentication paths are intentionally separate

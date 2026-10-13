@@ -1,6 +1,6 @@
 # DIG Nexus: Google OpenID Connect sign-in
 
-> **Current target:** Docker Compose + Caddy; see [DOCKER.md](DOCKER.md) for the deployed-runtime plan and Docker secret files. Cloudflare/Worker secret and Durable Object setup below documents the earlier implementation and is not the new hosting requirement. The Google OIDC/PKCE verification logic is reused by Cloud Run.
+> **Current target:** Docker Compose + Caddy; see [DOCKER.md](DOCKER.md) for the deployed-runtime plan and Docker secret files. Cloudflare/Worker secret and Durable Object setup below documents the earlier implementation and is not the new hosting requirement. The Google OIDC/PKCE verification logic is reused by the portable Node adapter. **Use Docker secret files and Neon-backed one-time state/session tables (migration 008) for the selected runtime**; instructions about Worker secrets, Durable Objects, Wrangler and Worker callbacks below are retained as a legacy adapter reference, not required Docker deployment steps.
 
 **Status:** Implementation and synthetic tests only. Not deployed. No real Google OAuth client or production secrets have been configured. Registration remains disabled.
 

@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
-<title>DIG Nexus — Offline Membership Experience Demo</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; form-action 'none'; base-uri 'none'">
+<title>DIG Nexus — Interactive Platform Preview (Offline)</title>
 <style>
 :root{--ink:#16344e;--blue:#165b88;--line:#cadbe6;--background:#f2f7fa}
 *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--background)}
@@ -58,15 +59,91 @@ footer{border-top:3px solid #64c6d8}
 
 .activity-timeline{list-style:none;padding:0 0 0 20px;margin:20px 0;border-left:2px solid #c7dce8}.activity-timeline li{position:relative;padding:0 0 18px 16px}.activity-timeline li::before{content:"";position:absolute;left:-27px;top:5px;width:10px;height:10px;background:#1679a0;border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #c7dce8}
 .community-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px;margin:20px 0}.community-cards article{background:#f3f8fb;border:1px solid #cbdfe9;border-radius:14px;padding:20px}.community-cards h4{margin:0 0 10px;color:#153c58}
+
+
+/* Offline platform explorer */
+.quick-links{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.1rem 0 1.7rem}
+.quick-links a{border:1px solid #b8d6e5;border-radius:99px;background:white;padding:.55rem .9rem;color:#174761;font-weight:700;text-decoration:none}
+.quick-links a:hover{text-decoration:underline;background:#e8f5fd}
+.preview-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:1px;background:#c3dce9;border:1px solid #c3dce9;border-radius:15px;overflow:hidden;margin:0 0 2.25rem}
+.preview-strip div{background:#e7f2f8;padding:1rem 1.2rem}.preview-strip strong,.preview-strip span{display:block}.preview-strip strong{font-weight:800}.preview-strip span{color:#426174;font-size:.89rem}
+.tour-heading{max-width:44rem}.tour-heading h2{font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.04em}
+.tour-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,286px),1fr));gap:1.1rem;margin:1.1rem 0 3rem;align-items:start}
+.tour-card{margin:0;height:100%;padding:clamp(18px,3vw,26px)}
+.tour-card h2{font-size:1.48rem;line-height:1.22}.tour-card p{margin:.8rem 0}
+.tour-card .actions button{flex:1 1 auto}.tour-card .status{font-size:.94rem;margin:1.2rem 0}
+.detail-list{display:grid;grid-template-columns:6rem minmax(0,1fr);gap:.45rem .65rem;font-size:.94rem;margin:1rem 0}.detail-list dt{font-weight:800}.detail-list dd{margin:0;overflow-wrap:anywhere}
+.tour-card .stats{grid-template-columns:repeat(3,minmax(0,1fr))}.tour-card .stats div{padding:.7rem;min-height:80px}.tour-card .stats strong{font-size:1.2rem}
+.tour-card .stats span{font-size:.78rem}
+.tour-card .check{font-size:.94rem}.tour-card [disabled]{cursor:not-allowed;opacity:.55}
+@media(max-width:480px){.tour-card .stats{grid-template-columns:1fr}.tour-card .stats div{min-height:unset}.detail-list{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <a href="#main" class="skip">Skip to main content</a>
 <header><div class="brand"><strong>DIG</strong> Deaf in Government</div><div class="demo">OFFLINE DEMO · SYNTHETIC DATA</div></header>
-<div class="notice"><strong>DIG Nexus interactive prototype, not a live membership service.</strong> No Salesforce connection, no real email, no real identity provider, Neon connection, payment, or persistent records. Use invented names and example.test addresses only.</div>
+<div class="notice"><strong>DIG Nexus interactive prototype, not a live membership service.</strong> No backend calls, real emails, real sign-in, Neon connection, payments, ticket issuance, or persistent records. Use invented names and example.test addresses only.</div>
 <main id="main">
-<div class="intro"><p class="eyebrow">DIG Nexus · Membership experience</p><h1>A better way to belong</h1><p>Explore simulated identity verification, membership terms, independent newsletter consent, DC27, and the member workspace. Nothing leaves this browser tab.</p></div>
+<div class="intro"><p class="eyebrow">DIG Nexus · Membership · NTC · Association · Communications</p><h1>One place for DIG to connect</h1><p>Explore an offline walkthrough of the member journey, DC27 conference operations, staff records, and consent-first newsletters. These are examples—not connected services. Nothing leaves this browser tab.</p></div>
+<nav class="quick-links" aria-label="Explore DIG Nexus">
+<a href="#join">Member journey</a><a href="#ntc-tour">NTC / DC27</a>
+<a href="#association-tour">Association operations</a><a href="#newsletter-tour">Newsletters</a>
+</nav>
+<section class="preview-strip" aria-label="Demonstration boundaries">
+<div><strong>100% offline</strong><span>No API calls or tracking</span></div>
+<div><strong>Original DIG Nexus</strong><span>Docker · Caddy · Neon architecture</span></div>
+<div><strong>Explicit consent</strong><span>Membership does not opt in to email</span></div>
+</section>
 <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+<div class="tour-heading"><p class="eyebrow">Explore the working concepts</p><h2>See how the pieces fit together</h2>
+<p>Every example below uses fictional data and local state. Buttons simulate decisions; they do not contact Zeffy, MailerSend, DIG, or any identity provider.</p></div>
+<div class="tour-grid">
+<section id="ntc-tour" class="card tour-card" aria-labelledby="ntc-title">
+ <p class="eyebrow">NTC · DC27</p><h2 id="ntc-title">Registration to check-in</h2>
+ <p>April 28–30, 2027 · Washington, DC · The Now and the Possible.</p>
+ <p>Paid registration does <strong>not</strong> reserve a Zeffy ticket or grant admission. Only a separately verified payment can move a pending request to confirmed admission.</p>
+ <p id="ntc-status" role="status" aria-live="polite" class="status">Not requested · no ticket or entitlement</p>
+ <ol id="ntc-timeline" class="activity-timeline"><li>Choose an action to explore the paid-admission boundary.</li></ol>
+ <div class="actions"><button id="ntc-request" class="primary" type="button">Simulate registration request</button>
+ <button id="ntc-verify" type="button" disabled>Simulate verified Zeffy payment</button>
+ <button id="ntc-checkin" type="button" disabled>Simulate staff QR check-in</button>
+ <button id="ntc-refund" type="button" disabled>Simulate refund / dispute</button>
+ <button id="ntc-reset" type="button">Reset NTC example</button></div>
+ <p class="subtle">No QR code, paid seat, real payment, refund, inventory reservation, or credential is issued here.</p>
+</section>
+<section id="association-tour" class="card tour-card" aria-labelledby="association-title">
+ <p class="eyebrow">Constituents · clean room</p><h2 id="association-title">Staff relationship view</h2>
+ <p>Inspired by association-management workflows, implemented independently in DIG Nexus. Real access requires verified DIG officer or administrator authorization.</p>
+ <div class="actions"><button class="primary" id="staff-load" type="button">Open fictional member record</button></div>
+ <div id="staff-record" hidden>
+ <h3>Case file · EXAMPLE-001</h3><dl class="detail-list">
+ <dt>Name</dt><dd>Jordan Example</dd><dt>Agency</dt><dd>Example Federal Office</dd>
+ <dt>Term</dt><dd>Sample active member</dd><dt>Committee</dt><dd>Conference planning</dd>
+ <dt>Open cases</dt><dd>1 — administrative follow-up</dd></dl>
+ <form id="staff-note-form"><label for="staff-note">Add fictional activity (not saved)</label>
+ <input id="staff-note" maxlength="120" placeholder="e.g. Sent session information" required autocomplete="off">
+ <button type="submit">Record simulated follow-up</button></form>
+ <ul id="staff-activity" class="activity-timeline"></ul>
+ </div>
+ <p id="staff-status" class="status" role="status" aria-live="polite">No record opened.</p>
+ <p class="subtle">This preview is not an authenticated staff console. No private member details are loaded.</p>
+</section>
+<section id="newsletter-tour" class="card tour-card" aria-labelledby="newsletter-title">
+ <p class="eyebrow">Communications · consent first</p><h2 id="newsletter-title">Campaign approval</h2>
+ <p>List assignment never implies opt-in. Only people with explicit consent qualify for queued deliveries; queueing does not send.</p>
+ <div class="stats">
+ <div><span>Consented sample</span><strong id="news-eligible">1</strong></div>
+ <div><span>Pending (excluded)</span><strong>1</strong></div>
+ <div><span>Messages actually sent</span><strong>0</strong></div></div>
+ <p id="news-status" class="status" role="status" aria-live="polite">Draft · no campaign approved</p>
+ <div class="actions"><button id="news-preview" class="primary" type="button">Preview eligible audience</button></div>
+ <label class="check"><input id="news-confirm" type="checkbox" disabled> Confirm this synthetic, consent-scoped audience</label>
+ <div class="actions"><button id="news-queue" type="button" disabled>Simulate campaign queue</button>
+ <button id="news-optout" type="button">Simulate unsubscribe</button>
+ <button id="news-reset" type="button">Reset campaign example</button></div>
+ <p class="subtle">A real one-click unsubscribe requires an explicit POST; merely opening a link must not unsubscribe anyone. Real MailerSend delivery is separately disabled.</p>
+</section>
+</div>
 <section class="card" id="join"><p class="eyebrow">Step 1 of 2</p><h2>Join DIG</h2><p>Use a fictional identity. This does not send a membership application.</p>
 <form id="join-form">
 <div class="row"><label>First name<input name="firstName" maxlength="40" value="Alex" autocomplete="off"></label><label>Last name (required)<input name="lastName" maxlength="80" required value="Example" autocomplete="off"></label></div>
@@ -80,10 +157,10 @@ footer{border-top:3px solid #64c6d8}
 <p class="eyebrow">DIG Nexus · Engineering preview</p>
 <h2 id="nexus-progress-title">What's connected — and what's simulated</h2>
 <div class="stats">
-<div><span>PostgreSQL schema</span><strong>Validated</strong><small>Separate Neon development database</small></div>
-<div><span>Node + Deno tests</span><strong>Passing</strong><small>Worker HTTP compatibility</small></div>
-<div><span>Identity registration</span><strong>Prototype</strong><small>Verified-identity contract; no live OIDC</small></div>
-<div><span>Member services</span><strong>Offline only</strong><small>No account or payment is created</small></div>
+<div><span>Data model</span><strong>Tested</strong><small>Synthetic PostgreSQL 17 validation</small></div>
+<div><span>Container platform</span><strong>Docker + Caddy</strong><small>Neon is the planned system of record</small></div>
+<div><span>NTC admission</span><strong>Default off</strong><small>Verified payment required for paid admission</small></div>
+<div><span>Member services</span><strong>Offline only</strong><small>No account, email or payment is created</small></div>
 </div>
 <p>Identity, membership terms, communication consent, and election eligibility are separate. A verified email does not automatically activate membership, subscribe to newsletters, or confer voting rights.</p>
 </section>
@@ -101,22 +178,22 @@ footer{border-top:3px solid #64c6d8}
 <p id="nexus-flow-result" class="status" role="status" aria-live="polite">No scenario evaluated yet.</p>
 <p><small>Newsletter: pending, not subscribed · Directory: private · Membership: pending · Election eligibility: not granted.</small></p>
 </section>
-<section id="dashboard" hidden><div class="card"><p class="eyebrow">Your member workspace · demo</p><h2 id="welcome"></h2><p>Sample identifier: DEMO-001 · <strong>Active sample membership</strong></p></div>
+<section id="dashboard" hidden><div class="card"><p class="eyebrow">Your member workspace · demo</p><h2 id="welcome"></h2><p>Sample identifier: DEMO-001 · <strong>Illustrative active membership only</strong> · New real applicants remain pending until authorized approval.</p></div>
 <nav class="tab-nav" aria-label="Membership demo sections">
 <button data-tab="overview" class="current" aria-current="page">Overview</button><button data-tab="profile">Profile</button><button data-tab="preferences">Preferences</button><button data-tab="renewal">Renewal</button><button data-tab="emails">Emails</button><button data-tab="community">Community</button><button data-tab="staff">Staff preview</button>
 </nav>
-<section class="card panel" data-panel="overview"><h3>Membership overview</h3><div class="sample" aria-label="Sample digital membership card"><p class="eyebrow">DIG / Digital member card · Demo</p><h2 id="card-name"></h2><p>Member ID: DEMO-001 · Active sample membership</p><p>Valid through <strong id="card-expiry"></strong></p></div><div class="stats"><div><span>Status</span><strong>Active (demo)</strong></div><div><span>Membership level</span><strong>WEBSITE_FREE (sample)</strong></div><div><span>Term ends</span><strong id="end-date"></strong></div></div><div class="actions"><button type="button" data-go="profile">Edit profile</button><button type="button" data-go="preferences">Access preferences</button><button type="button" data-go="community">Explore DIG</button></div><h3>Recent events</h3><ol id="history" class="activity-timeline"></ol></section>
+<section class="card panel" data-panel="overview"><h3>Membership overview</h3><div class="sample" aria-label="Sample digital membership card"><p class="eyebrow">DIG / Digital member card · Demo</p><h2 id="card-name"></h2><p>Member ID: DEMO-001 · Illustrative active membership</p><p>Valid through <strong id="card-expiry"></strong></p></div><div class="stats"><div><span>Status</span><strong>Active (demo)</strong></div><div><span>Membership level</span><strong>WEBSITE_FREE (sample)</strong></div><div><span>Term ends</span><strong id="end-date"></strong></div></div><div class="actions"><button type="button" data-go="profile">Edit profile</button><button type="button" data-go="preferences">Access preferences</button><button type="button" data-go="community">Explore DIG</button></div><h3>Recent events</h3><ol id="history" class="activity-timeline"></ol></section>
 <section class="card panel" data-panel="profile" hidden><h3>Member profile</h3><p>Verified email is read-only. Changing a real email address will require a separate verification process.</p>
 <form id="profile-form"><div class="row"><label>First name<input name="firstName" maxlength="40"></label><label>Last name<input name="lastName" required maxlength="80"></label></div><label>Verified email<input name="email" disabled></label><label>Agency (optional)<input name="agency" maxlength="100"></label><label>Job title (optional)<input name="title" maxlength="100"></label><button class="primary">Save sample profile</button></form></section>
 <section class="card panel" data-panel="preferences" hidden><h3>Communication and access</h3><p>Newsletters and event notifications default to unchecked.</p>
 <form id="preferences-form"><fieldset><legend>Optional email subscriptions</legend><label class="check"><input type="checkbox" name="news"> DIG news and updates</label><label class="check"><input type="checkbox" name="events"> Conferences and events</label></fieldset>
 <label>Accessibility preference<select name="access"><option>ASL</option><option>Captioned video</option><option>Text only</option><option>No preference</option></select></label><label>Email format<select name="format"><option>Plain text</option><option>HTML</option></select></label><button class="primary">Save sample preferences</button></form></section>
-<section class="card panel" data-panel="renewal" hidden><h3>Membership renewal</h3><p>Sample membership ends: <strong id="renew-date"></strong>.</p><p>This demo extends the sample term by one year without payment or Salesforce activity.</p><button class="primary" id="renew">Simulate renewal</button><h3>History</h3><ol id="renew-history" class="activity-timeline"></ol></section>
+<section class="card panel" data-panel="renewal" hidden><h3>Membership renewal</h3><p>Sample membership ends: <strong id="renew-date"></strong>.</p><p>This local simulation extends an example term by one year. No payment or membership renewal occurs.</p><button class="primary" id="renew">Simulate renewal</button><h3>History</h3><ol id="renew-history" class="activity-timeline"></ol></section>
 <section class="card panel" data-panel="emails" hidden><h3>Sample email content</h3><p>Preview only; no message can be sent from this page.</p><label>Choose template<select id="template"><option value="verify">Verification</option><option value="welcome">Welcome</option><option value="renew30">30-day reminder</option><option value="renew7">7-day reminder</option></select></label><div class="sample"><p>Subject: <strong id="subject"></strong></p><pre id="email-body"></pre></div></section>
-<section class="card panel" data-panel="community" hidden><h3>DIG community · Preview</h3><p>Explore opportunities to connect, learn, and participate. These are informational previews, not live registration or voting tools.</p><div class="community-cards"><article><h4>DC27 National Training Conference</h4><p>The Now and the Possible · Washington, DC · April 28–30, 2027.</p><p><a href="https://deafingov.org/">Visit DIG website</a></p></article><article><h4>Governance and leadership</h4><p>Future member access to governance information, volunteer opportunities, and eligible voting processes.</p><p>Voting is not available in this demo.</p></article><article><h4>Communication access</h4><p>Review your ASL, captioning, and email format preferences in the Preferences section.</p></article></div></section><section class="card panel" data-panel="staff" hidden><h3>Staff operations preview</h3><p><strong>Illustrative figures only.</strong> Not real DIG statistics, and not an admin login or authorization system.</p><div class="stats"><div><span>Sample total</span><strong>2,000</strong></div><div><span>Sample active</span><strong>1,775</strong></div><div><span>Sample pending</span><strong>65</strong></div><div><span>Sample lapsed</span><strong>160</strong></div></div><p>Production use requires Salesforce-enforced permissions, audited actions, member-data privacy, opt-out enforcement and role-scoped queries.</p></section>
+<section class="card panel" data-panel="community" hidden><h3>DIG community · Preview</h3><p>Explore opportunities to connect, learn, and participate. These are informational previews, not live registration or voting tools.</p><div class="community-cards"><article><h4>DC27 National Training Conference</h4><p>The Now and the Possible · Washington, DC · April 28–30, 2027.</p><p>Official DIG event information is managed separately from this offline preview.</p></article><article><h4>Governance and leadership</h4><p>Future member access to governance information, volunteer opportunities, and eligible voting processes.</p><p>Voting is not available in this demo.</p></article><article><h4>Communication access</h4><p>Review your ASL, captioning, and email format preferences in the Preferences section.</p></article></div></section><section class="card panel" data-panel="staff" hidden><h3>Staff operations preview</h3><p><strong>Illustrative figures only.</strong> Not real DIG statistics, and not an admin login or authorization system.</p><div class="stats"><div><span>Sample total</span><strong>2,000</strong></div><div><span>Sample active</span><strong>1,775</strong></div><div><span>Sample pending</span><strong>65</strong></div><div><span>Sample lapsed</span><strong>160</strong></div></div><p>The actual DIG Nexus staff API independently verifies staff identity and role on the server; this offline tab has no login or authority.</p></section>
 <div class="actions"><button id="reset">Reset demo</button></div>
 </section></main>
-<footer>Deaf in Government · Membership UX prototype. No production data is loaded.</footer>
+<footer>Deaf in Government · Membership UX prototype. No production data is loaded. Synthetic examples reset on reload.</footer>
 <script>
 (() => {
   'use strict';
@@ -161,7 +238,7 @@ footer{border-top:3px solid #64c6d8}
     if(!pending||pending.used||Date.now()>pending.expires)return msg('Sample link is invalid, expired or used.',true);
     pending.used=true;const today=date(Date.now());
     sample={...pending,agency:'',title:'',end:nextYear(today)};
-    events.push(today+' — Demo enrollment');view('dashboard');render();msg('Sample member activated; no Salesforce record created.');
+    events.push(today+' — Demo enrollment');view('dashboard');render();msg('Example profile activated locally. Actual DIG enrollment requires an explicit pending request and approval.');
     document.querySelector('[data-tab="overview"]').focus();
   });
   $('expire').addEventListener('click',()=>{if(pending)pending.expires=0;msg('Sample link expired. Start again to regenerate it.',true);});
@@ -213,6 +290,88 @@ else if(scenario==='conflict') message='409 Identity conflict — matching email
 else message='201 Created (simulation) — member identity pending; newsletter consent remains pending.';
 result.textContent=message;
 });
+})();
+</script>
+<script>
+(() => {
+  'use strict';
+  // Inert fictional UI logic. Zero fetch, storage, cookies, provider SDKs or outbound requests.
+  const $ = id => document.getElementById(id);
+  const line = (target,description) => {
+    const li=document.createElement('li');li.textContent=description;
+    $(target).appendChild(li);
+  };
+  let admission='not_requested',checkedIn=false;
+  function ntcRender(){
+    const labels={
+      not_requested:'Not requested · no ticket or entitlement',
+      pending_payment:'Pending payment · no Zeffy stock held and no admission',
+      registered:'Simulated verified paid admission · example seat confirmed',
+      paid_review:'Refund or dispute review · admission suspended'
+    };
+    $('ntc-status').textContent=labels[admission]+(checkedIn?' · sample staff check-in recorded':'');
+    $('ntc-request').disabled=admission!=='not_requested';
+    $('ntc-verify').disabled=admission!=='pending_payment';
+    $('ntc-checkin').disabled=admission!=='registered'||checkedIn;
+    $('ntc-refund').disabled=admission!=='registered';
+  }
+  $('ntc-request').addEventListener('click',()=>{
+    admission='pending_payment';line('ntc-timeline','Simulated application: pending_payment; zero seats held.');ntcRender();
+  });
+  $('ntc-verify').addEventListener('click',()=>{
+    admission='registered';line('ntc-timeline','Simulated independent verified payment: one fictional admission confirmed.');ntcRender();
+  });
+  $('ntc-checkin').addEventListener('click',()=>{
+    checkedIn=true;line('ntc-timeline','Simulated authorized staff QR check-in; duplicate check-in disabled.');ntcRender();
+  });
+  $('ntc-refund').addEventListener('click',()=>{
+    admission='paid_review';checkedIn=false;
+    line('ntc-timeline','Simulated refund/dispute: admission suspended; manual review required.');ntcRender();
+  });
+  $('ntc-reset').addEventListener('click',()=>{
+    admission='not_requested';checkedIn=false;$('ntc-timeline').replaceChildren();
+    line('ntc-timeline','Choose an action to explore the paid-admission boundary.');ntcRender();
+  });
+  $('staff-load').addEventListener('click',()=>{
+    $('staff-record').hidden=false;$('staff-load').disabled=true;
+    $('staff-status').textContent='Fictional record opened locally; no server authentication occurred.';
+  });
+  $('staff-note-form').addEventListener('submit',event=>{
+    event.preventDefault();const note=$('staff-note').value.trim();if(!note)return;
+    line('staff-activity','Synthetic follow-up: '+note);
+    $('staff-note').value='';$('staff-status').textContent='Simulated activity added only in browser memory.';
+  });
+  let optedIn=true,previewed=false,queued=false;
+  function newsRender(){
+    $('news-eligible').textContent=optedIn?'1':'0';
+    $('news-confirm').disabled=!previewed||queued||!optedIn;
+    $('news-queue').disabled=!previewed||queued||!optedIn||!$('news-confirm').checked;
+    $('news-optout').disabled=!optedIn;
+    $('news-preview').disabled=queued;
+  }
+  $('news-preview').addEventListener('click',()=>{
+    previewed=true;$('news-confirm').checked=false;
+    $('news-status').textContent=optedIn?'Preview: 1 explicit opt-in, 1 pending excluded.':
+      'Preview: 0 eligible recipients; consent removed.';
+    newsRender();
+  });
+  $('news-confirm').addEventListener('change',newsRender);
+  $('news-queue').addEventListener('click',()=>{
+    if(!previewed||!optedIn||queued||!$('news-confirm').checked)return;
+    queued=true;$('news-status').textContent='One fictional delivery queued for a consenting address; no email sent.';
+    newsRender();
+  });
+  $('news-optout').addEventListener('click',()=>{
+    optedIn=false;$('news-confirm').checked=false;
+    $('news-status').textContent=queued?'Unsubscribe: queued sample delivery suppressed. Nothing sent.':
+      'Unsubscribe: consent revoked. No delivery may be queued.';
+    newsRender();
+  });
+  $('news-reset').addEventListener('click',()=>{
+    optedIn=true;previewed=false;queued=false;$('news-confirm').checked=false;
+    $('news-status').textContent='Draft · no campaign approved';newsRender();
+  });
+  ntcRender();newsRender();
 })();
 </script>
 </body></html>

@@ -4,8 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'demo/offline.html'
-      - 'demo/offline.test.cjs'
+      - 'demo/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -34,14 +35,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test offline demo
+      - name: Install locked test dependencies
+        run: npm ci --ignore-scripts
+      - name: Install Chromium with Linux dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Test offline demo JavaScript and prohibited network usage
         run: node --test demo/offline.test.cjs
+      - name: Test actual offline journeys and automated accessibility in Chromium
+        run: npx playwright test -c demo/playwright.config.mjs
       - name: Build static site from demo only
         run: |
           mkdir -p _site
           cp demo/offline.html _site/index.html
           touch _site/.nojekyll
           test -s _site/index.html
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 2
+          ! grep -Eq '<script[^>]+src=|fetch\(|XMLHttpRequest|localStorage|sessionStorage' _site/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:

@@ -1,0 +1,33 @@
+name: Offline demo review gate
+on:
+  pull_request:
+    paths:
+      - 'demo/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/pages.yml'
+      - '.github/workflows/demo-validation.yml'
+permissions:
+  contents: read
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Offline-only contract and synthetic state tests
+        run: node --test demo/offline.test.cjs
+      - name: Browser walkthroughs and automated accessibility
+        run: npx playwright test -c demo/playwright.config.mjs
+      - name: Assert only offline HTML is publishable
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp demo/offline.html _site/index.html
+          touch _site/.nojekyll
+          test "$(find _site -maxdepth 1 -type f | wc -l)" -eq 2
+          ! grep -Eq '<script[^>]+src=|fetch\(|XMLHttpRequest|localStorage|sessionStorage' _site/index.html

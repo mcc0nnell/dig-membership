@@ -1,6 +1,6 @@
 # DIG Nexus runtime integration
 
-> **Runtime transition:** Docker Compose + Caddy + Neon is now the target. See [DOCKER.md](DOCKER.md) for deployment, and [CLOUD-RUN.md](CLOUD-RUN.md) for the portable Node runtime adapter and hashed Neon session state. The Cloudflare Worker/Durable Object instructions below describe the earlier adapter and are **not prerequisites** for the Cloud Run container.
+> **Runtime transition:** Docker Compose + Caddy + Neon is now the target. See [DOCKER.md](DOCKER.md) for deployment, and [CLOUD-RUN.md](CLOUD-RUN.md) for the portable Node runtime adapter and hashed Neon session state. The Cloudflare Worker/Durable Object instructions below describe the earlier adapter and are **not prerequisites** for the selected Docker container. For current deployment, configure secret files, Caddy and isolated Neon using [DOCKER.md](DOCKER.md); do not execute the legacy Worker steps as the production checklist.
 
 **Status: implementation merged, no production launch.** Registration remains disabled. This is the operational overview; see [GOOGLE-OIDC.md](GOOGLE-OIDC.md) for login details and [REGISTRATION-DEPLOYMENT.md](REGISTRATION-DEPLOYMENT.md) for the separate registration authorization gate.
 
