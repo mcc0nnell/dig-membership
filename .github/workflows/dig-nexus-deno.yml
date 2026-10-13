@@ -19,4 +19,4 @@ jobs:
         with:
           deno-version: v2.x
       - name: Run Deno compatibility tests
-        run: deno test --no-check nexus/api/worker.deno.test.mjs
+        run: deno test --no-check --allow-net=127.0.0.1 nexus/api/*.deno.test.mjs
