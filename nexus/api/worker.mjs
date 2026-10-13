@@ -6,6 +6,7 @@ import {createNeonClient} from "./database.mjs";
 import {createMemberDb} from "./member-db.mjs";
 import {createAgendaDb} from "./agenda-db.mjs";
 import {renderAgendaPage} from "./agenda-page.mjs";
+import {organizerRequest} from "./organizer.mjs";
 import {startGoogleLogin,finishGoogleLogin,sessionIdentity,logoutGoogle,portalPage,portalClient,googleAuthConfigured} from "./google-auth.mjs";
 const headers={"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"};
 const json=(value,status)=>new Response(JSON.stringify(value),{status,headers});
@@ -40,6 +41,8 @@ export default {
     }});
    }catch{return json({error:"agenda_unavailable"},503);}
   }
+  const organizer=await organizerRequest(request,env,url.pathname);
+  if(organizer)return organizer;
   if(url.pathname==="/api/me") {
    if(request.method!=="GET")return json({error:"method_not_allowed"},405);
    if(!googleAuthConfigured(env)&&(!env.OIDC_ISSUER||!env.OIDC_AUDIENCE||!env.OIDC_JWKS_URL))return json({error:"authentication_not_configured"},503);

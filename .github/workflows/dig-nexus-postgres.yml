@@ -3,11 +3,13 @@ on:
   push:
     paths:
       - 'nexus/*.sql'
+      - 'nexus/tests/*.sql'
       - 'newsletter/*.sql'
       - '.github/workflows/dig-nexus-postgres.yml'
   pull_request:
     paths:
       - 'nexus/*.sql'
+      - 'nexus/tests/*.sql'
       - 'newsletter/*.sql'
       - '.github/workflows/dig-nexus-postgres.yml'
 permissions:
@@ -46,6 +48,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f nexus/schema-003-identities.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-004-registration.sql
           psql -v ON_ERROR_STOP=1 -f nexus/schema-005-conference.sql
+          psql -v ON_ERROR_STOP=1 -f nexus/schema-006-organizer.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema.sql
           psql -v ON_ERROR_STOP=1 -f newsletter/schema-002-unsubscribe.sql
       - name: Verify tables and constraints
@@ -70,6 +73,9 @@ jobs:
             echo "Expected invalid session time rejection" >&2
             exit 1
           fi
+
+      - name: Verify organizer authorization, scope and audit transactions
+        run: psql -v ON_ERROR_STOP=1 -f nexus/tests/organizer-integration.sql
 
       - name: Verify atomic identity registration and conflict isolation
         run: |

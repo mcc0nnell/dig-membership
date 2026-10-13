@@ -68,3 +68,11 @@ validates all ordered SQL schemas against PostgreSQL 17. Apply migration 005 onl
 in isolated staging after review; neither Neon production nor Cloudflare is
 modified by a PR. The current public API responds 503 until a safe DB binding
 exists, and draft data remains invisible until an organizer publishes it.
+
+## Organizer console milestone
+
+See [ORGANIZER-DEPLOYMENT.md](ORGANIZER-DEPLOYMENT.md). The restricted
+`/organizer/:slug` shell and `/api/organizer/:slug` snapshot/actions support
+editing sessions, room labels, speaker profiles and session assignments, with
+manager-approved publication and metadata-only audit. This requires a working
+Google session and explicit event staff provisioning. It is off by default.
