@@ -1,0 +1,48 @@
+name: DIG Nexus Cloud Run container
+on:
+  push:
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'nexus/cloud-run/**'
+      - 'nexus/api/**'
+      - 'nexus/schema-008-cloud-run-state.sql'
+      - 'package*.json'
+      - '.github/workflows/dig-nexus-cloud-run.yml'
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'nexus/cloud-run/**'
+      - 'nexus/api/**'
+      - 'nexus/schema-008-cloud-run-state.sql'
+      - 'package*.json'
+      - '.github/workflows/dig-nexus-cloud-run.yml'
+permissions:
+  contents: read
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - name: Test Cloud Run state and HTTP adapter
+        run: node --test nexus/cloud-run/*.test.mjs
+      - name: Build Cloud Run image (not deployed)
+        run: docker build -t dig-nexus-cloudrun:ci .
+      - name: Smoke-test the container with all write gates off
+        run: |
+          set -euo pipefail
+          docker run -d --name nexus-cloudrun-ci             -p 127.0.0.1:8778:8080             -e PORT=8080 -e PUBLIC_ORIGIN=https://127.0.0.1:8778             dig-nexus-cloudrun:ci
+          trap 'docker rm -f nexus-cloudrun-ci >/dev/null 2>&1 || true' EXIT
+          for i in {1..20}; do
+            if curl --fail --silent -o /dev/null http://127.0.0.1:8778/api/health; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8778/api/health | grep '"status":"ok"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8778/portal)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8778/api/enroll)" = 503
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8778/api/register)" = 503

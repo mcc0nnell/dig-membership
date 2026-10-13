@@ -1,0 +1,10 @@
+FROM node:22-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+COPY nexus/api/ ./nexus/api/
+COPY nexus/cloud-run/ ./nexus/cloud-run/
+ENV NODE_ENV=production
+USER node
+EXPOSE 8080
+CMD ["node","nexus/cloud-run/server.mjs"]
