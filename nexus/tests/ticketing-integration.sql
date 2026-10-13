@@ -1,5 +1,8 @@
 -- Transactional integration for payment accounting, replay, QR and outbox.
 BEGIN;
+-- Earlier CI concurrency fixtures may have queued unrelated notifications.
+-- Isolate the synthetic outbox within this rolled-back transaction.
+UPDATE nexus_conference_notifications SET state='review' WHERE state='pending';
 INSERT INTO nexus_events(id,slug,title,starts_at,ends_at,capacity,registration_open,
  publication_status,ticket_price_cents,zeffy_campaign_id,zeffy_ticket_rate_id,zeffy_form_url)
 VALUES('10000000-0000-4000-8000-000000000001','ticket-test','Synthetic NTC Ticketing',
