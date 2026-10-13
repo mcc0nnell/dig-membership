@@ -1,8 +1,8 @@
 # DIG Nexus
 
-**One platform for membership, communication, events, and governance at Deaf in Government.**
+**Neon-powered membership, events, and governance for Deaf in Government.**
 
-DIG Nexus is an open-source project to bring the day-to-day work of [Deaf in Government (DIG)](https://deafingov.org/) into one accessible, privacy-conscious experience. The goal is straightforward: make it easier for members to participate, for volunteers to serve, and for DIG to operate without stitching together disconnected systems.
+DIG Nexus is an open-source platform for [Deaf in Government (DIG)](https://deafingov.org/): a single home for member profiles, conference programs, committees, governance, and communications. The foundation is **Cloudflare Workers + Neon PostgreSQL**, with WordPress as the website-facing layer. DIG Nexus owns its membership data and does not depend on an external CRM.
 
 **Project status: active development — not a live membership service.** The repository contains working components, synthetic tests, database schemas, and an offline demo. It does **not** establish that Google sign-in, Neon-backed registration, newsletters, payments, or elections are available to real members. Production launch requires DIG policy approval, security and accessibility review, and a staged deployment.
 
@@ -24,7 +24,7 @@ DIG Nexus is an open-source project to bring the day-to-day work of [Deaf in Gov
 
 These are development milestones, not a claim that DIG has replaced its existing systems.
 
-## How it fits together
+## The platform architecture
 
 ```text
   WordPress experience / DIG website
@@ -40,16 +40,16 @@ These are development milestones, not a claim that DIG has replaced its existing
   (members, terms, events, governance, consent)
       |
       +-- Planned delivery integration --> MailerSend
-      +-- Optional CRM exploration -----> Twenty
+      +-- Optional staff CRM experiment -> Twenty (not required)
 ```
 
-- **WordPress** is the website-facing integration. The new `[dig_nexus_portal]` shortcode is a development candidate, separate from the older membership shortcodes.
+- **WordPress** is the website-facing integration. The `[dig_nexus_portal]` shortcode is a development candidate. It directs members to the Cloudflare Worker; no database credentials or authorization logic belong in WordPress.
 - **Cloudflare Workers** implements the API and Google OpenID Connect authorization-code flow with PKCE. The session design includes encrypted cookies, one-time OAuth state, and revocation through a Durable Object. Real provider and browser deployment tests are still required.
-- **Neon/PostgreSQL** is the proposed source of truth for the new Nexus domain. The `dig-nexus-dev` development project exists; versioned SQL and isolated PostgreSQL CI do **not** imply every migration has been applied to Neon or production.
+- **Neon/PostgreSQL** is the source-of-truth architecture for the Nexus domain. The `dig-nexus-dev` development project exists; versioned SQL and isolated PostgreSQL CI do **not** imply every migration has been applied to Neon or production.
 - **MailerSend** has an adapter, not an enabled mailing operation. Consent, one-click unsubscribe, suppression, signed webhooks, sender verification, and delivery controls remain release gates.
 - **Twenty** is an optional CRM experiment, **not** the member system of record and not a deployed dependency.
 
-The older WordPress/Salesforce membership candidate remains in this repository for compatibility and evaluation. **There is no approved Salesforce-to-Neon migration or production cutover.** See [Legacy enrollment path](#legacy-enrollment-path).
+**The architecture is Neon-first.** No parallel CRM, legacy membership gateway, or data migration is part of the DIG Nexus runtime. See [Historical artifacts](#historical-artifacts) for obsolete code still tracked in this repository.
 
 ## Repository map
 
@@ -58,11 +58,10 @@ The older WordPress/Salesforce membership candidate remains in this repository f
 | [`nexus/`](nexus/) | PostgreSQL schemas, domain policies, event lifecycle, authentication, member API, and WordPress Nexus shell |
 | [`newsletter/`](newsletter/) | Subscriber/campaign schemas, delivery adapter, unsubscribe tokens, and rollout rules |
 | [`demo/`](demo/) | Offline, synthetic member experience published to GitHub Pages |
-| [`wordpress/dig-membership/`](wordpress/dig-membership/) | Existing WordPress membership plugin candidate |
-| [`cf/membership-site/`](cf/membership-site/) | Existing Cloudflare gateway for the Salesforce-oriented enrollment path |
-| [`dig-src/`](dig-src/) and [`manifest/`](manifest/) | Salesforce overlay and scoped deployment manifest; **not** a standalone Salesforce project |
+| [`nexus/wordpress/`](nexus/wordpress/) | DIG Nexus WordPress portal integration |
+| [`nexus/NTC-CONFERENCE.md`](nexus/NTC-CONFERENCE.md) | NTC conference design and publish-only agenda release gate |
 | [`experiments/dig-nexus/`](experiments/dig-nexus/) | Read-only-by-default Twenty/Neon integration spike |
-| [`docs/`](docs/) | Architecture notes and operator runbooks |
+| [`nexus/RUNTIME-INTEGRATION.md`](nexus/RUNTIME-INTEGRATION.md) | Worker, session and Neon integration gates |
 
 ### Authentication and registration are different gates
 
@@ -106,7 +105,7 @@ node --test demo/offline.test.cjs
 npx wrangler deploy --dry-run --config nexus/wrangler.jsonc
 ```
 
-Additional checks run in GitHub Actions: Deno API compatibility, PostgreSQL 17 schema/constraint validation, and legacy WordPress/Cloudflare tests. For the WordPress PHP syntax check, use PHP 8.3 (see [membership CI](.github/workflows/ci.yml)).
+Additional checks run in GitHub Actions: Deno API compatibility and PostgreSQL 17 schema/constraint validation, including the conference migration. Older CI jobs still verify historical code but are not Nexus deployment gates.
 
 **Do not run schema files against a production database to “try it out.”** Follow the ordered migrations and disposable-branch guidance in [registration deployment](nexus/REGISTRATION-DEPLOYMENT.md).
 
@@ -121,17 +120,13 @@ DIG Nexus is for a Deaf-led organization. Accessibility and personal-data protec
 - **Financial and voting boundaries:** do not store card details; verify payment-provider receipts. Voter eligibility is **not** a secure secret-ballot system.
 - **No production secrets or personal data in Git:** use scoped runtime secrets and synthetic test identities. See [SECURITY.md](SECURITY.md).
 
-## Legacy enrollment path
+## Historical artifacts
 
-The [WordPress membership plugin](wordpress/dig-membership/README.md), [Salesforce gateway](cf/membership-site/README.md), and [Salesforce overlay](dig-src/) were built as a **separate development candidate** for enrollment through DIG's existing website and Salesforce environment. They require sandbox reconciliation, DIG policy approval, and WordPress staging tests before deployment.
-
-Identifiers such as `wordpress/dig-membership/`, `[dig_membership_join]`, `[dig_membership_verify]`, and the `dig-membership-site` Worker name are intentionally retained for compatibility. A repository rename is **not** a migration of these integration contracts.
-
-Operator references: [website cutover and rollback](docs/runbooks/website-membership-cutover.md), [Salesforce email](docs/runbooks/salesforce-email.md), and [legacy experience mapping](docs/architecture/experience-demo.md).
+Earlier experiments still appear under `wordpress/dig-membership/`, `cf/membership-site/`, `dig-src/`, and `manifest/`. Those components are **retired from the DIG Nexus design**. They are not a supported alternative backend, should not be wired into the new portal, and will be handled separately from active Nexus features. Their presence in the checkout is not an instruction to deploy them.
 
 ## Next milestones
 
-1. **Prove the identity-to-member read path:** deploy to a non-production Worker and isolated Neon branch, complete real Google OAuth and Durable Object tests, verify grants, and exercise `/api/me` end to end.
+1. **Prove the Neon-backed identity-to-member read path:** deploy to a non-production Worker and isolated Neon branch, complete real Google OAuth and Durable Object tests, verify grants, and exercise `/api/me` end to end.
 2. **Decide the registration contract:** document the verified-identity trust boundary, complete atomic/idempotent registration tests, and retain the default-off gate until reviewed.
 3. **Ship a usable accessible member experience:** test the WordPress flow on real browsers with Deaf members and assistive-technology users; establish privacy, incident response, and retention procedures.
 4. **Enable integrations one at a time:** MailerSend consent/suppression and verified delivery, payment-provider reconciliation, events, committees, and administrative reporting.
