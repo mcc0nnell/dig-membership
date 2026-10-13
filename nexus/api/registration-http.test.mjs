@@ -9,12 +9,12 @@ test("registration remains disabled without configured trusted services",async()
  assert.equal(r.status,503);
 });
 test("forged client headers cannot bypass identity verification",async()=>{
- const r=await worker.fetch(request({displayName:"Synthetic"},{"x-role":"admin","x-member-id":"123"}),{verifyIdentity:async()=>{throw Error("invalid token");},registrationDb:{}});
+ const r=await worker.fetch(request({displayName:"Synthetic"},{"x-role":"admin","x-member-id":"123"}),{REGISTRATION_ENABLED:true,verifyIdentity:async()=>{throw Error("invalid token");},registrationDb:{}});
  assert.equal(r.status,401);
 });
 test("verified identity reaches DB adapter without accepting roles or consent",async()=>{
  let received;
- const env={verifyIdentity:async()=>verified,registrationDb:{registerVerifiedIdentity:async data=>{received=data;return {kind:"created",memberId:"synthetic-id"};}}};
+ const env={REGISTRATION_ENABLED:true,verifyIdentity:async()=>verified,registrationDb:{registerVerifiedIdentity:async data=>{received=data;return {kind:"created",memberId:"synthetic-id"};}}};
  const r=await worker.fetch(request({displayName:"Synthetic"}),env);
  assert.equal(r.status,201);
  assert.equal((await r.json()).memberId,"synthetic-id");
