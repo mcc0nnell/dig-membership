@@ -1,0 +1,56 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "name": "DIG Nexus / DIG house.css source palette",
+  "source": "dig-salesforce-main 4(1).zip > portal/public/css/house.css",
+  "color": {
+    "navy900": {
+      "$type": "color",
+      "$value": "#0a1628"
+    },
+    "navy700": {
+      "$type": "color",
+      "$value": "#1a2d4d"
+    },
+    "slate600": {
+      "$type": "color",
+      "$value": "#475569"
+    },
+    "electric": {
+      "$type": "color",
+      "$value": "#3b82f6"
+    },
+    "brandRed": {
+      "$type": "color",
+      "$value": "#e63312"
+    },
+    "dangerRed": {
+      "$type": "color",
+      "$value": "#dc2626"
+    },
+    "success": {
+      "$type": "color",
+      "$value": "#16a34a"
+    },
+    "warning": {
+      "$type": "color",
+      "$value": "#d97706"
+    },
+    "white": {
+      "$type": "color",
+      "$value": "#ffffff"
+    }
+  },
+  "font": {
+    "sans": {
+      "$type": "fontFamily",
+      "$value": "Instrument Sans, ui-sans-serif, system-ui, sans-serif"
+    }
+  },
+  "demo": {
+    "focusRing": {
+      "$type": "color",
+      "$value": "#f9b13d"
+    },
+    "note": "Contrast-adjusted red highlight (#ff8d79) is only a derived UI role on dark backgrounds, not the DIG brand base color."
+  }
+}
