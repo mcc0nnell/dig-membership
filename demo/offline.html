@@ -196,6 +196,210 @@ footer{background:var(--dig-navy-900);border-top:5px solid var(--dig-brand-red);
  .stage-track{grid-template-columns:repeat(4,1fr)}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+
+/* DIG Nexus / Editorial system v1
+   Neo-Swiss composition with K-design editorial energy.
+   Inherits the original DIG palette and keeps the demo 100% offline. */
+:root{
+ --dig-paper:#f7f6f1;
+ --dig-paper-deep:#ece9e1;
+ --dig-ink:#101820;
+ --dig-graphic:#f03763;
+ --dig-royal:#245af5;
+ --dig-brand-red:#e63312;
+ --dig-grid:#d6d7d4;
+ --dig-rad:3px;
+ --dig-shadow:none;
+ --ink:#101820;
+ --blue:#173c6b;
+ --line:#d9ddd9;
+ --background:var(--dig-paper);
+}
+body{background:var(--dig-paper);color:var(--dig-ink)}
+header{
+ background:#101820;
+ border:0;
+ border-bottom:1px solid #34404b;
+ box-shadow:none;
+ padding:15px max(24px,calc((100vw - 1380px)/2));
+}
+.brand{letter-spacing:-.045em;font-size:1.2rem}
+.brand strong{
+ background:var(--dig-brand-red);
+ border-radius:0;min-width:65px;min-height:57px;
+ padding:10px 14px;
+ font-size:1.65rem;
+}
+.brand small{color:#d8dce6;font-size:.57rem;letter-spacing:.18em}
+.header-actions{gap:clamp(12px,2vw,28px)}
+.atlas-link{color:#f2f1ed;font-weight:750;letter-spacing:-.02em}
+.atlas-link:hover{color:#fcb2c7}
+.demo{background:#fff3be;color:#30220e;border-radius:0;font-size:.67rem}
+.notice{background:#eff0ed;border-bottom:1px solid #cccfc9;color:#26313d}
+.notice-marker{color:var(--dig-brand-red)}
+.notice a{color:#173c6b}
+main{max-width:1380px}
+.intro{
+ background:var(--dig-paper);
+ color:var(--dig-ink);
+ grid-template-columns:minmax(0,1.04fr) minmax(350px,.96fr);
+ margin-bottom:0;
+ padding:0 max(24px,calc((100vw - 1380px)/2));
+ min-height:650px;
+ border-bottom:1px solid #c9cdca;
+}
+.intro::before{
+ background:linear-gradient(90deg,transparent 0,transparent calc(50% - 1px),#1018200a 50%,transparent 50%),repeating-linear-gradient(0deg,#10182009 0 1px,transparent 1px 61px);
+}
+.hero-copy{padding:clamp(54px,8vw,104px) clamp(22px,4vw,62px) 50px 0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.intro .eyebrow{
+ color:#c12b16;
+ font:850 .69rem/1.5 ui-monospace,SFMono-Regular,monospace;
+ letter-spacing:.17em;
+}
+.intro h1{
+ color:#101820!important;
+ font-size:clamp(3.5rem,6.5vw,7.5rem);
+ line-height:.96;
+ letter-spacing:-.083em;
+ margin:20px 0 28px;
+ max-width:10.6ch;
+ font-weight:900;
+}
+.intro h1 em{color:var(--dig-brand-red);display:inline}
+.intro .hero-copy>p:not(.eyebrow):not(.hero-footnote){color:#374656;max-width:50ch;font-size:clamp(1rem,1.3vw,1.16rem);line-height:1.72}
+.hero-actions{margin:28px 0 30px;gap:10px}
+.hero-actions a{border-radius:0;padding:15px 20px;font-size:.85rem;min-height:52px}
+.hero-cta{background:#173c6b;border:2px solid #173c6b;color:#fff!important}
+.hero-cta:hover{background:#28518d;border-color:#28518d}
+.hero-secondary{border:2px solid #101820;color:#101820!important}
+.hero-secondary:hover{background:#e7e7df}
+.hero-footnote{color:#556372!important;letter-spacing:.13em}
+.hero-stage{
+ min-height:650px;
+ background:#f6c8d1;
+ padding:20px;
+ border-inline:0;
+ border-left:1px solid #101820;
+ border-right:1px solid #101820;
+}
+.hero-stage::before{
+ background:repeating-linear-gradient(90deg,transparent 0 78px,#1f242d13 79px 80px),repeating-linear-gradient(0deg,transparent 0 78px,#1f242d13 79px 80px);
+}
+.stage-top{color:#101820;font-size:.67rem;letter-spacing:.1em;z-index:3}
+.stage-art{flex:1;min-height:330px;position:relative;isolation:isolate;display:grid;place-items:center;overflow:hidden}
+.stage-art::before{
+ content:"";position:absolute;width:min(55%,300px);aspect-ratio:1;top:8%;left:2%;
+ border-radius:50%;background:#f03565;
+ box-shadow:0 0 0 45px #f0356516;z-index:-1;
+}
+.stage-art::after{
+ content:"";position:absolute;right:-9%;bottom:13%;
+ width:48%;aspect-ratio:1;
+ border:42px solid #101820;border-radius:50%;
+ opacity:.98;z-index:-1;
+}
+.stage-art svg{display:block;width:min(85%,410px);height:auto;filter:drop-shadow(14px 16px 0 #10182018)}
+.stage-art .art-index{
+ position:absolute;right:3%;top:13%;font-weight:950;
+ letter-spacing:-.075em;font-size:clamp(3rem,6vw,6.7rem);
+ line-height:.78;color:#101820;
+}
+.stage-art .art-sticker{
+ position:absolute;bottom:6%;left:3%;display:block;
+ background:#fbfaf4;border:2px solid #101820;
+ padding:.7rem .9rem;transform:rotate(-7deg);
+ font-size:.79rem;font-weight:950;line-height:1.05;
+ letter-spacing:.04em;color:#101820;
+}
+.stage-bottom p{color:#101820;font-weight:900;letter-spacing:-.06em}
+.stage-bottom strong{color:#c72e18}
+.stage-track{background:#101820;border-color:#101820}
+.stage-track span{background:#faf7f1;color:#101820;font-weight:850}
+.quick-links{margin:0 0 24px;padding:21px 0;border-bottom:1px solid #cbd0cd;gap:8px}
+.quick-links a{
+ color:#142538;background:transparent;
+ border:1px solid #aeb5b5;border-radius:0;box-shadow:none;
+ font-size:.81rem;text-transform:uppercase;letter-spacing:.025em;
+}
+.quick-links a:hover{background:#101820;color:#fff;border-color:#101820;text-decoration:none}
+.quick-links a::after{color:#d83621}
+.preview-strip{
+ margin-bottom:clamp(60px,7vw,105px);
+ border:1px solid #101820;border-radius:0;background:#101820;
+}
+.preview-strip div{background:#fafaf6;padding:25px 25px 28px}
+.preview-strip div:nth-child(2){background:#ecf2ff}
+.preview-strip div:nth-child(3){background:#f8ece8}
+.preview-strip div::before{width:34px;height:5px;background:#e63312;margin-bottom:28px}
+.preview-strip strong{font-size:clamp(1.15rem,1.8vw,1.55rem);letter-spacing:-.055em;line-height:1.1}
+.preview-strip span{color:#485460;margin-top:8px;font-size:.82rem}
+.tour-heading{max-width:960px}
+.tour-heading h2{font-size:clamp(2.65rem,4.8vw,5.7rem);max-width:900px;line-height:.98;letter-spacing:-.07em}
+.tour-heading>p:last-child{color:#46515e}
+.tour-grid{gap:12px;margin:36px 0 80px}
+.card{border:1px solid #bec7c4;background:#fff;border-radius:0;box-shadow:none}
+.tour-card{border-top:7px solid #173c6b}
+.tour-card:nth-child(2){background:#f3f5f8}
+.tour-card:nth-child(3){background:#fff3ed}
+.tour-card h2{font-size:clamp(1.6rem,2.2vw,2.35rem);letter-spacing:-.06em}
+.tour-card .status{border-radius:0}
+#ntc-tour{background:#10283e;border-color:#10283e;border-top:7px solid #f5a2b9}
+#ntc-tour .eyebrow{color:#ffc1bf}
+#ntc-tour .status{background:#213e59;color:#fff}
+button{
+ border-radius:0;min-height:48px;
+ background:#fff;border:2px solid #173c6b;color:#173c6b;
+ font-size:.9rem;box-shadow:none;transition:background .15s ease,transform .15s ease;
+}
+button.primary{background:#173c6b;color:#fff;border-color:#173c6b;border-radius:0}
+button.primary:hover{background:#28538c;border-color:#28538c}
+input,select{border-radius:0}
+input:focus,select:focus{outline-color:#f9b13d}
+.stats div{border-radius:0;background:#f4f5f1}
+#join{border-top:8px solid #e63312;background:#fbfaf5}
+#join h2{font-size:clamp(2.4rem,4vw,4.5rem);letter-spacing:-.07em}
+#dashboard>.card:first-child{background:#10283e;border-radius:0}
+#dashboard>.card:first-child .eyebrow{color:#ffc1bf}
+.tab-nav{border-radius:0;background:#e9edeb}
+.tab-nav button.current{border-radius:0;background:#173c6b;color:#fff}
+.sample{border-radius:0}
+.activity-timeline li::before{background:#e63312;border-radius:0}
+footer{background:#101820;border-top:6px solid #e63312}
+@media(min-width:801px){.intro{min-height:650px}.intro .hero-copy{align-self:stretch}}
+@media(max-width:1000px){
+ .intro{grid-template-columns:minmax(0,1fr) minmax(280px,.88fr)}
+ .hero-stage{min-height:560px}
+ .stage-art{min-height:240px}
+}
+@media(max-width:760px){
+ .intro{grid-template-columns:1fr;min-height:unset}
+ .hero-copy{padding:52px 0 28px}
+ .intro h1{font-size:clamp(3.4rem,11vw,5.4rem)}
+ .hero-stage{min-height:355px;border:1px solid #101820;border-bottom:0;grid-template-columns:1fr;display:flex;padding:18px}
+ .stage-top,.stage-bottom{grid-column:auto;grid-row:auto}
+ .stage-art{min-height:170px}
+ .stage-art::after{border-width:21px}
+ .stage-art svg{width:min(60%,260px)}
+ .stage-art .art-index{font-size:3.7rem}
+ .stage-bottom p{font-size:1.35rem}
+ .stage-track span{font-size:.53rem}
+ .hero-actions{margin-bottom:24px}
+ .preview-strip{grid-template-columns:1fr}
+}
+@media(max-width:440px){
+ header{padding-inline:18px}
+ .intro{padding-inline:18px}
+ .intro h1{font-size:clamp(3rem,12.3vw,4.4rem)}
+ .hero-stage{min-height:365px}
+ .stage-art{min-height:175px}
+ .stage-art svg{width:min(75%,290px)}
+ .stage-bottom{grid-column:auto}
+ .quick-links a{font-size:.74rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -203,7 +407,21 @@ footer{background:var(--dig-navy-900);border-top:5px solid var(--dig-brand-red);
 <header><div class="brand"><strong>DIG</strong><span>Deaf in Government<small>NEXUS / THE CIVIC MEMBER PLATFORM</small></span></div><div class="header-actions"><a href="./pulse.html" class="atlas-link">Nexus Pulse <span aria-hidden="true">↗</span></a><a href="./atlas.html" class="atlas-link">Systems atlas <span aria-hidden="true">↗</span></a><div class="demo">OFFLINE DEMO · SYNTHETIC DATA</div></div></header>
 <details class="notice"><summary><span class="notice-marker" aria-hidden="true">●</span> Independent interactive prototype <strong>· No live member data</strong><span class="notice-more">Read demo boundaries</span></summary><div class="notice-details"><a href="./atlas.html">Explore the visual systems atlas (online; uses third-party visualization libraries)</a> · <strong>DIG Nexus interactive prototype, not a live membership service.</strong> No backend calls, real emails, real sign-in, Neon connection, payments, ticket issuance, or persistent records. Use invented names and example.test addresses only.</div></details>
 <main id="main">
-<section class="intro" aria-labelledby="hero-title"><div class="hero-copy"><p class="eyebrow">Deaf in Government / Introducing DIG Nexus</p><h1 id="hero-title">Built for people.<br><em>Designed for access.</em></h1><p>One civic home for membership, DC27 conference operations, staff relationships, and consent-first communications. Explore every journey with fictional data. Nothing leaves this browser tab.</p><div class="hero-actions"><a class="hero-cta" href="#join">Explore member journey <span aria-hidden="true">↗</span></a><a class="hero-secondary" href="#ntc-tour">Explore NTC / DC27 <span aria-hidden="true">→</span></a></div><p class="hero-footnote">01 / FOUR CONNECTED WORKSTREAMS · ONE INDEPENDENT PLATFORM</p></div><aside class="hero-stage" aria-label="The four DIG Nexus workstreams"><div class="stage-top"><span>01 / DIG NEXUS</span><span>CONCEPT / 2026</span></div><div class="stage-orbit" aria-hidden="true"><span class="orbit-center">DIG</span></div><div class="stage-bottom"><p>OUR COMMUNITY.<br>OUR GOVERNMENT.<br><strong>OUR FUTURE.</strong></p><div class="stage-track"><span>MEMBERS</span><span>NTC / DC27</span><span>OPERATIONS</span><span>COMMS</span></div></div></aside></section>
+<section class="intro" aria-labelledby="hero-title"><div class="hero-copy"><p class="eyebrow">Deaf in Government / Introducing DIG Nexus</p><h1 id="hero-title">One community.<br><em>Every possibility.</em></h1><p>The next chapter for Deaf in Government: one accessible home for membership, DC27, staff operations, and consent-first communication. Explore with fictional data; nothing leaves this browser tab.</p><div class="hero-actions"><a class="hero-cta" href="#join">Explore member journey <span aria-hidden="true">↗</span></a><a class="hero-secondary" href="#ntc-tour">Explore NTC / DC27 <span aria-hidden="true">→</span></a></div><p class="hero-footnote">01 / FOUR CONNECTED WORKSTREAMS · ONE INDEPENDENT PLATFORM</p></div><aside class="hero-stage" aria-label="The four DIG Nexus workstreams"><div class="stage-top"><span>01 / DIG NEXUS</span><span>THE NOW &amp; THE POSSIBLE</span></div><div class="stage-art" aria-hidden="true">
+  <svg viewBox="0 0 440 380" focusable="false">
+   <g fill="#101820"><path d="M66 327h305v18H66zM85 297h268v29H85zM107 155h225v17H107zM121 177h16v117h-16zM165 177h17v117h-17zM210 177h17v117h-17zM255 177h17v117h-17zM302 177h17v117h-17zM95 283h249v16H95z"/></g>
+   <path d="M111 151Q220 35 329 151Z" fill="#101820"/>
+   <path d="M144 146Q220 64 296 146Z" fill="#faf7ee"/>
+   <rect x="214" y="29" width="12" height="39" fill="#101820"/>
+   <path d="M206 29h28l-14-20z" fill="#101820"/>
+   <path d="M89 177h259v13H89z" fill="#101820"/>
+   <g stroke="#f4c8d1" stroke-width="4"><path d="M127 197v69M172 197v69M219 197v69M264 197v69M310 197v69"/></g>
+   <rect x="202" y="242" width="36" height="55" rx="18" fill="#f4c8d1"/>
+   <path d="M66 349h306" stroke="#101820" stroke-width="7"/>
+  </svg>
+  <span class="art-index">DC<br>27</span>
+  <span class="art-sticker">APR 28—30<br>WASHINGTON, DC</span>
+</div><div class="stage-bottom"><p>THE NOW.<br>AND THE<br><strong>POSSIBLE.</strong></p><div class="stage-track"><span>MEMBERS</span><span>NTC / DC27</span><span>OPERATIONS</span><span>COMMS</span></div></div></aside></section>
 <nav class="quick-links" aria-label="Explore DIG Nexus">
 <a href="#join">Member journey</a><a href="#ntc-tour">NTC / DC27</a>
 <a href="#association-tour">Association operations</a><a href="#newsletter-tour">Newsletters</a>
