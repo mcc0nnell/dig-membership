@@ -17,6 +17,19 @@ const env={NTC_TICKETING_ENABLED:true,NTC_TICKETS_ENABLED:true,NTC_CHECKIN_ENABL
  ticketingDb:{paymentLink:async()=>({provider:'zeffy',url:'https://www.zeffy.com/en-US/ticketing/synthetic',amountCents:2500}),
  issue:async()=>({status:'issued'}),checkin:async()=>({status:'checked_in',attendeeName:'Synthetic Attendee'}),
  reconcile:async()=>({status:'paid'})}};
+test('check-in page validates its own slug and cannot interpolate hostile HTML',async()=>{
+ const html=await checkinPage(slug);
+ assert.equal(html.status,200);
+ assert.match(await html.text(),/data-event="ntc-synthetic"/);
+ const hostile=['"/><img src=x onerror=alert(1)>','NTC-synthetic','a'.repeat(81),'a-'.repeat(10000)+'!'];
+ for(const value of hostile){
+  const page=checkinPage(value);
+  assert.equal(page.status,404);
+  assert.doesNotMatch(await page.text(),/<img|onerror/);
+ }
+ const invalid=await worker.fetch(new Request(origin+'/checkin/%22%3E%3Cimg%20src=x%20onerror=alert(1)%3E'));
+ assert.equal(invalid.status,404);
+});
 test('high entropy ticket is opaque and securely hashable',async()=>{
  const a=randomTicket(),b=randomTicket();assert.match(a,/^[A-Za-z0-9_-]{43}$/);
  assert.notEqual(a,b);assert.match(await ticketHash(a),/^[a-f0-9]{64}$/);
